@@ -19,25 +19,26 @@ Attacklab.wmdBase = function(){
 	wmd.Util.oldIE = (nav.userAgent.indexOf("MSIE 6.") != -1 || nav.userAgent.indexOf("MSIE 5.") != -1);
 	wmd.Util.newIE = !wmd.Util.oldIE&&(nav.userAgent.indexOf("MSIE") != -1);
 	
-	util.makeElement = function(_9, _a){
-		var _b=doc.createElement(_9);
-		if(!_a){
-		var _c=_b.style;
-		_c.margin="0";
-		_c.padding="0";
-		_c.clear="none";
-		_c.cssFloat="none";
-		_c.textAlign="left";
-		_c.position="relative";
-		_c.lineHeight="1em";
-		_c.border="none";
-		_c.color="black";
-		_c.backgroundRepeat="no-repeat";
-		_c.backgroundImage="none";
-		_c.minWidth=_c.minHeight="0";
-		_c.maxWidth=_c.maxHeight="90000px";
+	// DONE - jslint clean
+	util.makeElement = function(type, noStyle){
+		var elem = doc.createElement(type);
+		if(!noStyle){
+			var style = elem.style;
+			style.margin = "0";
+			style.padding = "0";
+			style.clear = "none";
+			style.cssFloat = "none";
+			style.textAlign = "left";
+			style.position = "relative";
+			style.lineHeight = "1em";
+			style.border = "none";
+			style.color = "black";
+			style.backgroundRepeat = "no-repeat";
+			style.backgroundImage = "none";
+			style.minWidth = style.minHeight = "0";
+			style.maxWidth = style.maxHeight = "90000px";		// kinda arbitrary but ok
 		}
-		return _b;
+		return elem;
 	};
 	
 	// UNFINISHED - cleaned up - jslint clean
@@ -439,41 +440,29 @@ Attacklab.wmdBase = function(){
 		},0);
 	};
 	
-	
-	// UNFINISHED
-	// jslint is quiet about this function but I want to see more
-	// how it's used to make sure I don't need to test for equality
-	// more deeply before I write this one off as done.
+	// UNFINISHED - almost a direct copy of original function
+	// except that I use !== and flip a and b in the second test block.
 	util.objectsEqual = function(a, b){
-		
-		for(var key in a){
-			if(a[key] !== b[key]){
-				return false;
-			}
-		}
-		
-		for(key in b){
-			if(b[key] !== a[key]){
-				return false;
-			}
-		}
-		return true;
+        for (var key in a) {
+            if (a[key] !== b[key]) {
+                return false;
+            }
+        }
+        for (key in b) {
+            if (b[key] !== a[key]) {
+                return false;
+            }
+        }
+        return true;
 	};
 	
-	// DONE - cleaned up - jslint clean
-	// Recursively deep copies the object.
+	// UNFINISHED - direct copy of the original function
 	util.cloneObject = function(obj){
-		var clone = {};
-		
-		for(var key in obj){		
-			if (typeof obj[key] === 'object') {
-				clone[key] = new cloneObject(obj[key]);
-			}
-			else {
-				clone[key] = obj[key];
-			}
-		}
-		return clone;
+        var result = {};
+        for (var key in obj) {
+            result[key] = obj[key];
+        }
+        return result;
 	};
 	
 	// UNFINISHED
@@ -587,8 +576,7 @@ Attacklab.wmdBase = function(){
 		var offset = position.getLeft(elem, isInner) - curLeft;
 		elem.style.left = (newLeft - offset)+"px";
 	};
-	
-	
+		
 	position.getHeight = function(_7c){
 		var _7d=_7c.offsetHeight;
 		if(!_7d){
@@ -1425,6 +1413,7 @@ Attacklab.wmdBase = function(){
 		this.init();
 	};
 	
+	// DONE - empty
 	wmd.Chunks = function(){
 	};
 	
@@ -1709,7 +1698,7 @@ Attacklab.wmdBase = function(){
 		_15c.redo();
 	};
 	
-	// UNIFINISHED - wtf with that return value?
+//	// UNIFINISHED - what's passed in?
 	util.findPanes = function(_15d){
 		
 		// Any div with a class of "wmd-preview" is sent the translated HTML for previewing.
@@ -1736,9 +1725,8 @@ Attacklab.wmdBase = function(){
 				}
 			}
 		}
-		
-		// This doesn't seem like a very useful return value.  And it's ignored anyway.
-		return _15d;
+
+		return;
 	};
 	
 	// DONE - jslint clean
