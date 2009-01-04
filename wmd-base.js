@@ -40,78 +40,102 @@ Attacklab.wmdBase = function(){
 		return _b;
 	};
 	
-	util.getStyle = function(_d, _e){
-		var _f=function(_10){
-		return _10.replace(/-(\S)/g,function(_11,_12){
-		return _12.toUpperCase();
-		});
+	// UNFINISHED - cleaned up - jslint clean
+	// This is always used to see if "display" is set to "none".
+	// Might want to rename it checkVisible() or something.
+	// Might want to return null instead of "" on style search failure.
+	util.getStyleProperty = function(elem, property){
+		
+		// IE styles use camel case so we have to convert the first letter of
+		// a word following a dash to uppercase.
+		var convertToIEForm = function(str){
+			return str.replace(/-(\S)/g,
+				function(_, m1){
+					return m1.toUpperCase();
+				});
 		};
-		if(_d.currentStyle){
-		_e=_f(_e);
-		return _d.currentStyle[_e];
-		}else{
+		
+		// currentStyle is IE only.  Everything else uses getComputedStyle().
 		if(self.getComputedStyle){
-		return doc.defaultView.getComputedStyle(_d,null).getPropertyValue(_e);
+			return self.getComputedStyle(elem, null).getPropertyValue(property);
 		}
+		else if(elem.currentStyle){
+			property = convertToIEForm(property);
+			return elem.currentStyle[property];			
 		}
+		
 		return "";
 	};
 	
-	util.getElementsByClass = function(_13, _14, _15){
-		var _16=[];
-		if(_14==null){
-		_14=doc;
+	// DONE - cleaned up - jslint clean
+	// Like getElementsByTagName() but searches for a class.
+	util.getElementsByClass = function(searchClass, searchTag){
+		
+		var results = [];
+		
+		if(searchTag === null){
+			searchTag = "*";
 		}
-		if(_15==null){
-		_15="*";
+		
+		var elements = doc.getElementsByTagName(searchTag);
+		var regex = new re("(^|\\s)" + searchClass + "(\\s|$)");
+		
+		for(var i = 0; i < elements.length; i++){
+			if(regex.test(elements[i].className.toLowerCase())){
+				results.push(elements[i]);
+			}
 		}
-		var _17=_14.getElementsByTagName(_15);
-		var _18=_17.length;
-		var _19=new re("(^|\\s)"+_13+"(\\s|$)");
-		for(var i=0,j=0;i<_18;i++){
-		if(_19.test(_17[i].className.toLowerCase())){
-		_16[j]=_17[i];
-		j++;
-		}
-		}
-		return _16;
+		
+		return results;
 	};
 	
-	util.addEvent = function(_1c, _1d, _1e){
-		if(_1c.attachEvent){
-		_1c.attachEvent("on"+_1d,_1e);
-		}else{
-		_1c.addEventListener(_1d,_1e,false);
+	// DONE - jslint clean
+	util.addEvent = function(elem, event, listener){	
+		if(elem.attachEvent){
+			// IE only.  The "on" is mandatory.
+			elem.attachEvent("on" + event, listener);
+		}
+		else{
+			// Other browsers.
+			elem.addEventListener(event, listener, false);
 		}
 	};
 	
-	util.removeEvent = function(_1f, _20, _21){
-		if(_1f.detachEvent){
-		_1f.detachEvent("on"+_20,_21);
-		}else{
-		_1f.removeEventListener(_20,_21,false);
+	// DONE - jslint clean
+	util.removeEvent = function(elem, event, listener){
+		if(elem.detachEvent){
+			// IE only.  The "on" is mandatory.
+			elem.detachEvent("on" + event, listener);
+		}
+		else{
+			// Other browsers.
+			elem.removeEventListener(event, listener, false);
 		}
 	};
 	
-	util.regexToString = function(_22){
-		var _23={};
-		var _24=_22.toString();
-		_23.expression=_24.replace(/\/([gim]*)$/,"");
-		_23.flags=re.$1;
-		_23.expression=_23.expression.replace(/(^\/|\/$)/g,"");
-		return _23;
+	// UNFINISHED
+	// Um, this doesn't look like it really makes a string...
+	util.regexToString = function(regex){
+		var result = {};
+		var str = regex.toString();
+		result.expression = str.replace(/\/([gim]*)$/, "");
+		result.flags = re.$1;
+		result.expression = result.expression.replace(/(^\/|\/$)/g, "");
+		return result;
 	};
 	
-	util.stringToRegex = function(_25){
-		return new re(_25.expression,_25.flags);
+	// UNFINISHED
+	// Um, this doesn't look like it really takes a string...
+	util.stringToRegex = function(str){
+		return new re(str.expression, str.flags);
 	};
 	
-	util.elementOk = function(_26){
-		if(!_26||!_26.parentNode){
-		return false;
+	util.elementOk = function(elem){
+		if(!elem || !elem.parentNode){
+			return false;
 		}
-		if(util.getStyle(_26,"display")=="none"){
-		return false;
+		if(util.getStyleProperty(elem, "display") === "none"){
+			return false;
 		}
 		return true;
 	};
@@ -606,7 +630,7 @@ Attacklab.wmdBase = function(){
 		return false;
 		};
 		var _92=function(){
-		if(util.getStyle(_88,"display")=="none"){
+		if(util.getStyleProperty(_88,"display")=="none"){
 		return;
 		}
 		if(_8b.tick()){
@@ -1252,7 +1276,7 @@ Attacklab.wmdBase = function(){
 	wmd.textareaState = function(_108){
 		var _109=this;
 		var _10a=function(_10b){
-		if(util.getStyle(_108,"display")=="none"){
+		if(util.getStyleProperty(_108,"display")=="none"){
 		return;
 		}
 		var _10c=nav.userAgent.indexOf("Opera")!=-1;
@@ -1280,7 +1304,7 @@ Attacklab.wmdBase = function(){
 		if(_10e){
 		_108=_10e;
 		}
-		if(util.getStyle(_108,"display")=="none"){
+		if(util.getStyleProperty(_108,"display")=="none"){
 		return;
 		}
 		_10f(_108);
@@ -1624,23 +1648,34 @@ Attacklab.wmdBase = function(){
 	};
 	
 	util.findPanes = function(_15d){
-		_15d.preview=_15d.preview||util.getElementsByClass("wmd-preview",null,"div")[0];
-		_15d.output=_15d.output||util.getElementsByClass("wmd-output",null,"textarea")[0];
-		_15d.output=_15d.output||util.getElementsByClass("wmd-output",null,"div")[0];
+		
+		// Any div with a class of "wmd-preview" is sent the translated HTML for previewing.
+		// Ditto for "wmd-output" --> HTML output.  The first element is selected, as per
+		// the WMD documentation.
+		_15d.preview = _15d.preview || util.getElementsByClass("wmd-preview", "div")[0];
+		_15d.output = _15d.output || util.getElementsByClass("wmd-output", "textarea")[0];
+		_15d.output = _15d.output || util.getElementsByClass("wmd-output", "div")[0];
+		
 		if(!_15d.input){
-		var _15e=-1;
-		var _15f=doc.getElementsByTagName("textarea");
-		for(var _160=0;_160<_15f.length;_160++){
-		var _161=_15f[_160];
-		if(_161!=_15d.output&&!/wmd-ignore/.test(_161.className.toLowerCase())){
-		_15d.input=_161;
-		break;
+			
+			var _15e = -1;
+			var _15f = doc.getElementsByTagName("textarea");
+			
+			for(var _160 = 0; _160 < _15f.length; _160++){
+				
+				var _161 = _15f[_160];
+				
+				if(_161 != _15d.output && !/wmd-ignore/.test(_161.className.toLowerCase())){
+					_15d.input = _161;
+					break;
+				}
+			}
 		}
-		}
-		}
+		
 		return _15d;
 	};
 	
+	// DONE - jslint clean
 	util.makeAPI = function(){
 		wmd.wmd = {};
 		wmd.wmd.editor = wmd.editor;
@@ -1648,202 +1683,223 @@ Attacklab.wmdBase = function(){
 	};
 	
 	util.startEditor = function(){
-		if(wmd.wmd_env.autostart==false){
-		wmd.editorInit();
-		util.makeAPI();
-		return;
+		
+		if(wmd.wmd_env.autostart === false){
+			wmd.editorInit();
+			util.makeAPI();
+			return;
 		}
-		var _162={};
-		var _163,_164;
-		var _165=function(){
-		try{
-		var _166=util.cloneObject(_162);
-		util.findPanes(_162);
-		if(!util.objectsEqual(_166,_162)&&_162.input){
-		if(!_163){
-		wmd.editorInit();
-		var _167;
-		if(wmd.previewManager!=undefined){
-		_164=new wmd.previewManager(_162);
-		_167=_164.refresh;
-		}
-		_163=new wmd.editor(_162.input,_167);
-		}else{
-		if(_164){
-		_164.refresh(true);
-		}
-		}
-		}
-		}
-		catch(e){
-		}
+		
+		var _162 = {};
+		var _163, _164;
+		
+		var _165 = function(){
+			try{
+				var _166 = util.cloneObject(_162);
+				util.findPanes(_162);
+				if(!util.objectsEqual(_166, _162 ) && _162.input){
+					if(!_163){
+						wmd.editorInit();
+						var _167;
+						if(wmd.previewManager !== undefined){
+							_164 = new wmd.previewManager(_162);
+							_167 = _164.refresh;
+						}
+						_163 = new wmd.editor(_162.input,_167);
+					}else{
+						if(_164){
+							_164.refresh(true);
+						}
+					}
+				}
+			}
+			catch(e){
+			}
 		};
-		util.addEvent(self,"load",_165);
-		var _168=self.setInterval(_165,100);
+		
+		util.addEvent(self, "load", _165);
+		var _168 = self.setInterval(_165, 100);
 	};
 	
 	wmd.previewManager = function(_169){
-		var _16a=this;
-		var _16b,_16c;
-		var _16d,_16e;
-		var _16f,_170;
-		var _171=3000;
-		var _172="delayed";
-		var _173=function(_174,_175){
-		util.addEvent(_174,"input",_175);
-		_174.onpaste=_175;
-		_174.ondrop=_175;
-		util.addEvent(self,"keypress",_175);
-		util.addEvent(_174,"keypress",_175);
-		util.addEvent(_174,"keydown",_175);
-		_16c=new wmd.inputPoller(_174,_175);
+		
+		var _16a = this;
+		var _16b, _16c;
+		var _16d, _16e;
+		var _16f, _170;
+		var _171 = 3000;
+		var _172 = "delayed";
+		
+		var _173 = function(_174, _175){
+			util.addEvent(_174, "input", _175);
+			_174.onpaste = _175;
+			_174.ondrop = _175;
+			util.addEvent(self, "keypress", _175);
+			util.addEvent(_174, "keypress", _175);
+			util.addEvent(_174, "keydown", _175);
+			_16c = new wmd.inputPoller(_174, _175);
 		};
-		var _176=function(){
-		var _177=0;
-		if(self.innerHeight){
-		_177=self.pageYOffset;
-		}else{
-		if(doc.documentElement&&doc.documentElement.scrollTop){
-		_177=doc.documentElement.scrollTop;
-		}else{
-		if(doc.body){
-		_177=doc.body.scrollTop;
-		}
-		}
-		}
-		return _177;
+			
+		var _176 = function(){
+			var _177 = 0;
+			if(self.innerHeight){
+				_177 = self.pageYOffset;
+			}else{
+				if(doc.documentElement && doc.documentElement.scrollTop){
+					_177 = doc.documentElement.scrollTop;
+				}else{
+					if(doc.body){
+						_177 = doc.body.scrollTop;
+					}
+				}
+			}
+			return _177;
 		};
-		var _178=function(){
-		if(!_169.preview&&!_169.output){
-		return;
-		}
-		var text=_169.input.value;
-		if(text&&text==_16f){
-		return;
-		}else{
-		_16f=text;
-		}
-		var _17a=new Date().getTime();
-		if(!_16b&&wmd.showdown){
-		_16b=new wmd.showdown.converter();
-		}
-		text=util.escapeUnderscores(text);
-		if(_16b){
-		text=_16b.makeHtml(text);
-		}
-		var _17b=new Date().getTime();
-		_16e=_17b-_17a;
-		_17c(text);
-		_170=text;
+			
+		var _178 = function(){
+			if(!_169.preview && !_169.output){
+				return;
+			}
+			var text = _169.input.value;
+			if(text && text == _16f){
+				return;
+			}else{
+				_16f=text;
+			}
+			var _17a = new Date().getTime();
+			if(!_16b && wmd.showdown){
+				_16b = new wmd.showdown.converter();
+			}
+			text = util.escapeUnderscores(text);
+			if(_16b){
+				text = _16b.makeHtml(text);
+			}
+			var _17b = new Date().getTime();
+			_16e = _17b - _17a;
+			_17c(text);
+			_170 = text;
 		};
-		var _17d=function(){
-		if(_16d){
-		self.clearTimeout(_16d);
-		_16d=undefined;
-		}
-		if(_172!="manual"){
-		var _17e=0;
-		if(_172=="delayed"){
-		_17e=_16e;
-		}
-		if(_17e>_171){
-		_17e=_171;
-		}
-		_16d=self.setTimeout(_178,_17e);
-		}
+			
+		var _17d = function(){
+			if(_16d){
+				self.clearTimeout(_16d);
+				_16d = undefined;
+			}
+			if(_172 != "manual"){
+				var _17e = 0;
+				if(_172 == "delayed"){
+					_17e=_16e;
+				}
+				if(_17e > _171){
+					_17e=_171;
+				}
+				_16d = self.setTimeout(_178, _17e);
+			}
 		};
+			
 		var _17f;
 		var _180;
-		var _181=function(_182){
-		if(_182.scrollHeight<=_182.clientHeight){
-		return 1;
-		}
-		return _182.scrollTop/(_182.scrollHeight-_182.clientHeight);
+		
+		var _181 = function(_182){
+			if(_182.scrollHeight <= _182.clientHeight){
+				return 1;
+			}
+			return _182.scrollTop / (_182.scrollHeight - _182.clientHeight);
 		};
-		var _183=function(_184,_185){
-		_184.scrollTop=(_184.scrollHeight-_184.clientHeight)*_185;
+			
+		var _183 = function(_184,_185){
+			_184.scrollTop = (_184.scrollHeight - _184.clientHeight) * _185;
 		};
-		var _186=function(){
-		if(_169.preview){
-		_17f=_181(_169.preview);
-		}
-		if(_169.output){
-		_180=_181(_169.output);
-		}
+			
+		var _186 = function(){
+			if(_169.preview){
+				_17f = _181(_169.preview);
+			}
+			if(_169.output){
+				_180 = _181(_169.output);
+			}
 		};
-		var _187=function(){
-		if(_169.preview){
-		_169.preview.scrollTop=_169.preview.scrollTop;
-		_183(_169.preview,_17f);
-		}
-		if(_169.output){
-		_183(_169.output,_180);
-		}
+		
+		var _187 = function(){
+			if(_169.preview){
+				_169.preview.scrollTop = _169.preview.scrollTop;
+				_183(_169.preview, _17f);
+			}
+			if(_169.output){
+				_183(_169.output, _180);
+			}
 		};
-		this.refresh=function(_188){
-		if(_188){
-		_16f="";
-		_178();
-		}else{
-		_17d();
-		}
+		
+		this.refresh = function(_188){
+			if(_188){
+				_16f = "";
+				_178();
+			}else{
+				_17d();
+			}
 		};
-		this.processingTime=function(){
-		return _16e;
+		
+		this.processingTime = function(){
+			return _16e;
 		};
-		this.output=function(){
-		return _170;
+		
+		this.output = function(){
+			return _170;
 		};
-		this.setUpdateMode=function(_189){
-		_172=_189;
-		_16a.refresh();
+		
+		this.setUpdateMode = function(_189){
+			_172 = _189;
+			_16a.refresh();
 		};
-		var _18a=true;
-		var _17c=function(text){
-		_186();
-		var _18c=position.getTop(_169.input)-_176();
-		if(_169.output){
-		if(_169.output.value!=undefined){
-		_169.output.value=text;
-		_169.output.readOnly=true;
-		}else{
-		var _18d=text.replace(/&/g,"&amp;");
-		_18d=_18d.replace(/</g,"&lt;");
-		_169.output.innerHTML="<pre><code>"+_18d+"</code></pre>";
-		}
-		}
-		if(_169.preview){
-		_169.preview.innerHTML=text;
-		}
-		_187();
-		if(_18a){
-		_18a=false;
-		return;
-		}
-		var _18e=position.getTop(_169.input)-_176();
-		if(nav.userAgent.indexOf("MSIE")!=-1){
-		self.setTimeout(function(){
-		self.scrollBy(0,_18e-_18c);
-		},0);
-		}else{
-		self.scrollBy(0,_18e-_18c);
-		}
+		
+		var _18a = true;
+		
+		var _17c = function(text){
+			_186();
+			var _18c = position.getTop(_169.input) - _176();
+			if(_169.output){
+				if(_169.output.value != undefined){
+					_169.output.value = text;
+					_169.output.readOnly = true;
+				}else{
+					var _18d = text.replace(/&/g,"&amp;");
+					_18d = _18d.replace(/</g, "&lt;");
+					_169.output.innerHTML = "<pre><code>" + _18d + "</code></pre>";
+				}
+			}
+			if(_169.preview){
+				_169.preview.innerHTML=text;
+			}
+			_187();
+			if(_18a){
+				_18a = false;
+				return;
+			}
+			var _18e = position.getTop(_169.input) - _176();
+			if(nav.userAgent.indexOf("MSIE")!=-1){
+				self.setTimeout(function(){self.scrollBy(0,_18e-_18c);}, 0);
+			}else{
+				self.scrollBy(0,_18e-_18c);
+			}
 		};
-		var init=function(){
-		_173(_169.input,_17d);
-		_178();
-		if(_169.preview){
-		_169.preview.scrollTop=0;
-		}
-		if(_169.output){
-		_169.output.scrollTop=0;
-		}
+		
+		var init = function(){
+			_173(_169.input,_17d);
+			_178();
+			if(_169.preview){
+				_169.preview.scrollTop=0;
+			}
+			if(_169.output){
+				_169.output.scrollTop=0;
+			}
 		};
-		this.destroy=function(){
-		if(_16c){
-		_16c.destroy();
-		}
+		
+		this.destroy = function(){
+			if(_16c){
+				_16c.destroy();
+			}
 		};
+		
 		init();
 	};
 };
