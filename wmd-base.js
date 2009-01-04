@@ -115,6 +115,7 @@ Attacklab.wmdBase = function(){
 	
 	// UNFINISHED
 	// Um, this doesn't look like it really makes a string...
+	// Maybe strings (plural)?
 	util.regexToString = function(regex){
 		var result = {};
 		var str = regex.toString();
@@ -126,10 +127,13 @@ Attacklab.wmdBase = function(){
 	
 	// UNFINISHED
 	// Um, this doesn't look like it really takes a string...
+	// Maybe strings (plural)?
 	util.stringToRegex = function(str){
 		return new re(str.expression, str.flags);
 	};
 	
+	// DONE - jslint clean
+	// Check to see if a node is not a parent and not hidden.
 	util.elementOk = function(elem){
 		if(!elem || !elem.parentNode){
 			return false;
@@ -242,16 +246,24 @@ Attacklab.wmdBase = function(){
 		_27.appendChild(_31(false));
 	};
 	
-	util.setImage = function(_35, _36, _37, _38){
-		_36=wmd.basePath+_36;
-		if(nav.userAgent.indexOf("MSIE")!=-1){
-		var _39=_35.firstChild;
-		var _3a=_39.style;
-		_3a.filter="progid:DXImageTransform.Microsoft."+"AlphaImageLoader(src='"+_36+"')";
-		}else{
-		_35.src=_36;
+	// DONE - cleaned up - jslint clean
+	// I'm pretty sure this sets the image for a "button" on the WMD editor.
+	util.setImage = function(elem, imgPath){
+		
+		imgPath = wmd.basePath + imgPath;
+		
+		if(nav.userAgent.indexOf("MSIE") != -1){
+			// Internet Explorer
+			var child = elem.firstChild;
+			var style = child.style;
+			style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + imgPath + "')";
 		}
-		return _35;
+		else{
+			// Regular browser
+			elem.src = imgPath;
+		}
+		
+		return elem;
 	};
 	
 	util.createImage = function(_3b, _3c, _3d){
@@ -427,29 +439,48 @@ Attacklab.wmdBase = function(){
 		},0);
 	};
 	
-	util.objectsEqual = function(_59, _5a){
-		for(var _5b in _59){
-		if(_59[_5b]!=_5a[_5b]){
-		return false;
+	
+	// UNFINISHED
+	// jslint is quiet about this function but I want to see more
+	// how it's used to make sure I don't need to test for equality
+	// more deeply before I write this one off as done.
+	util.objectsEqual = function(a, b){
+		
+		for(var key in a){
+			if(a[key] !== b[key]){
+				return false;
+			}
 		}
-		}
-		for(_5b in _5a){
-		if(_59[_5b]!=_5a[_5b]){
-		return false;
-		}
+		
+		for(key in b){
+			if(b[key] !== a[key]){
+				return false;
+			}
 		}
 		return true;
 	};
 	
-	util.cloneObject = function(_5c){
-		var _5d={};
-		for(var _5e in _5c){
-		_5d[_5e]=_5c[_5e];
+	// DONE - cleaned up - jslint clean
+	// Recursively deep copies the object.
+	util.cloneObject = function(obj){
+		var clone = {};
+		
+		for(var key in obj){		
+			if (typeof obj[key] === 'object') {
+				clone[key] = new cloneObject(obj[key]);
+			}
+			else {
+				clone[key] = obj[key];
+			}
 		}
-		return _5d;
+		return clone;
 	};
 	
+	// UNFINISHED
 	// CAUSES PROBLEMS IN SHOWDOWN.JS
+	// This function turns some underscores into escaped characters.
+	// This messes up the processing in showdown.js so I've commented
+	// the code out.  I'll eventually remove the function.
 	util.escapeUnderscores = function(_5f){
 		//_5f=_5f.replace(/(\S)(_+)(\S)/g,
 			//function(_60,_61,_62,_63){
@@ -459,96 +490,104 @@ Attacklab.wmdBase = function(){
 		return _5f;
 	};
 	
+	// DONE - updated - jslint clean
 	position.getPageSize = function(){
-		var _64,_65;
-		var _66,_67;
-		if(self.innerHeight&&self.scrollMaxY){
-		_64=doc.body.scrollWidth;
-		_65=self.innerHeight+self.scrollMaxY;
-		}else{
-		if(doc.body.scrollHeight>doc.body.offsetHeight){
-		_64=doc.body.scrollWidth;
-		_65=doc.body.scrollHeight;
-		}else{
-		_64=doc.body.offsetWidth;
-		_65=doc.body.offsetHeight;
+		
+		var scrollWidth, scrollHeight;
+		var innerWidth, innerHeight;
+		
+		// It's not very clear which blocks work with which browsers.
+		if(self.innerHeight && self.scrollMaxY){
+			scrollWidth = doc.body.scrollWidth;
+			scrollHeight = self.innerHeight + self.scrollMaxY;
 		}
+		else if(doc.body.scrollHeight > doc.body.offsetHeight){
+			scrollWidth = doc.body.scrollWidth;
+			scrollHeight = doc.body.scrollHeight;
 		}
-		var _68,_69;
+		else{
+			scrollWidth = doc.body.offsetWidth;
+			scrollHeight = doc.body.offsetHeight;
+		}
+		
 		if(self.innerHeight){
-		_68=self.innerWidth;
-		_69=self.innerHeight;
-		}else{
-		if(doc.documentElement&&doc.documentElement.clientHeight){
-		_68=doc.documentElement.clientWidth;
-		_69=doc.documentElement.clientHeight;
-		}else{
-		if(doc.body){
-		_68=doc.body.clientWidth;
-		_69=doc.body.clientHeight;
+			// Non-IE browser
+			innerWidth = self.innerWidth;
+			innerHeight = self.innerHeight;
 		}
+		else if(doc.documentElement && doc.documentElement.clientHeight){
+			// Some versions of IE (IE 6 w/ a DOCTYPE declaration)
+			innerWidth = doc.documentElement.clientWidth;
+			innerHeight = doc.documentElement.clientHeight;
 		}
+		else if(doc.body){
+			// Other versions of IE
+			innerWidth = doc.body.clientWidth;
+			innerHeight = doc.body.clientHeight;
 		}
-		if(_65<_69){
-		_67=_69;
-		}else{
-		_67=_65;
-		}
-		if(_64<_68){
-		_66=_68;
-		}else{
-		_66=_64;
-		}
-		var _6a=[_66,_67,_68,_69];
-		return _6a;
+		
+        var maxWidth = Math.max(scrollWidth, innerWidth);
+        var maxHeight = Math.max(scrollHeight, innerHeight);
+        return [maxWidth, maxHeight, innerWidth, innerHeight];
 	};
 	
-	position.getPixelVal = function(_6b){
-		if(_6b&&/^(-?\d+(\.\d*)?)px$/.test(_6b)){
-		return re.$1;
+	// DONE - jslint clean
+	position.getPixelVal = function(val){
+		if(val && /^(-?\d+(\.\d*)?)px$/.test(val)){
+			return re.$1;
 		}
 		return undefined;
 	};
 	
-	position.getTop = function(_6c, _6d){
-		var _6e=_6c.offsetTop;
-		if(!_6d){
-		while(_6c=_6c.offsetParent){
-		_6e+=_6c.offsetTop;
+	// UNFINISHED
+	// The assignment in the while loop makes jslint cranky.
+	// I'll change it to a for loop later.
+	position.getTop = function(elem, isInner){
+		var result = elem.offsetTop;
+		if(!isInner){
+			while(elem = elem.offsetParent){
+				result += elem.offsetTop;
+			}
 		}
-		}
-		return _6e;
+		return result;
 	};
 	
-	position.setTop = function(_6f, _70, _71){
-		var _72=position.getPixelVal(_6f.style.top);
-		if(_72==undefined){
-		_6f.style.top=_70+"px";
-		_72=_70;
+	// DONE - updated
+	position.setTop = function(elem, newTop, isInner){
+		var curTop = position.getPixelVal(elem.style.top);
+		if(curTop === undefined){
+			elem.style.top = newTop + "px";
+			curTop = newTop;
 		}
-		var _73=position.getTop(_6f,_71)-_72;
-		_6f.style.top=(_70-_73)+"px";
+		
+		var offset = position.getTop(elem, isInner) - curTop;
+		elem.style.top = (newTop - offset) + "px";
 	};
 	
-	position.getLeft = function(_74, _75){
-		var _76=_74.offsetLeft;
-		if(!_75){
-		while(_74=_74.offsetParent){
-		_76+=_74.offsetLeft;
+	// UNFINISHED
+	// The assignment in the while loop makes jslint cranky.
+	// I'll change it to a for loop later.
+	position.getLeft = function(elem, isInner){
+		var result = elem.offsetLeft;
+		if(!isInner){
+			while(elem = elem.offsetParent){
+				result += elem.offsetLeft;
+			}
 		}
-		}
-		return _76;
+		return result;
 	};
 	
-	position.setLeft = function(_77, _78, _79){
-		var _7a=position.getPixelVal(_77.style.left);
-		if(_7a==undefined){
-		_77.style.left=_78+"px";
-		_7a=_78;
+	// DONE - updated
+	position.setLeft = function(elem, newLeft, isInner){
+		var curLeft = position.getPixelVal(elem.style.left);
+		if(curLeft === undefined){
+			elem.style.left = newLeft + "px";
+			curLeft = newLeft;
 		}
-		var _7b=position.getLeft(_77,_79)-_7a;
-		_77.style.left=(_78-_7b)+"px";
+		var offset = position.getLeft(elem, isInner) - curLeft;
+		elem.style.left = (newLeft - offset)+"px";
 	};
+	
 	
 	position.getHeight = function(_7c){
 		var _7d=_7c.offsetHeight;
@@ -1390,106 +1429,129 @@ Attacklab.wmdBase = function(){
 	};
 	
 	wmd.Chunks.prototype.findTags = function(_11c, _11d){
-		var _11e,_11f;
-		var _120=this;
+		
+		var _11e, _11f;
+		var chunkObj = this;
+		
 		if(_11c){
-		_11f=util.regexToString(_11c);
-		_11e=new re(_11f.expression+"$",_11f.flags);
-		this.before=this.before.replace(_11e,function(_121){
-		_120.startTag=_120.startTag+_121;
-		return "";
-		});
-		_11e=new re("^"+_11f.expression,_11f.flags);
-		this.selection=this.selection.replace(_11e,function(_122){
-		_120.startTag=_120.startTag+_122;
-		return "";
-		});
+			_11f = util.regexToString(_11c);
+			_11e = new re(_11f.expression + "$", _11f.flags);
+			
+		this.before = this.before.replace(_11e,
+			function(_121){
+				chunkObj.startTag = chunkObj.startTag + _121;
+				return "";
+			});
+			
+		_11e = new re("^" + _11f.expression, _11f.flags);
+		
+		this.selection = this.selection.replace(_11e,
+			function(_122){
+				chunkObj.startTag = chunkObj.startTag + _122;
+				return "";
+			});
 		}
+		
 		if(_11d){
-		_11f=util.regexToString(_11d);
-		_11e=new re(_11f.expression+"$",_11f.flags);
-		this.selection=this.selection.replace(_11e,function(_123){
-		_120.endTag=_123+_120.endTag;
-		return "";
-		});
-		_11e=new re("^"+_11f.expression,_11f.flags);
-		this.after=this.after.replace(_11e,function(_124){
-		_120.endTag=_124+_120.endTag;
-		return "";
-		});
+			_11f = util.regexToString(_11d);
+			_11e = new re(_11f.expression + "$", _11f.flags);
+			this.selection=this.selection.replace(_11e,
+				function(_123){
+					chunkObj.endTag = _123 + chunkObj.endTag;
+					return "";
+				});
+			_11e = new re("^" + _11f.expression, _11f.flags);
+			this.after = this.after.replace(_11e,
+				function(_124){
+					chunkObj.endTag = _124 + chunkObj.endTag;
+					return "";
+				});
 		}
 	};
 	
 	wmd.Chunks.prototype.trimWhitespace = function(_125){
-		this.selection=this.selection.replace(/^(\s*)/,"");
+		this.selection = this.selection.replace(/^(\s*)/, "");
 		if(!_125){
-		this.before+=re.$1;
+			this.before += re.$1;
 		}
-		this.selection=this.selection.replace(/(\s*)$/,"");
+		this.selection = this.selection.replace(/(\s*)$/, "");
 		if(!_125){
-		this.after=re.$1+this.after;
+			this.after = re.$1 + this.after;
 		}
 	};
 	
 	wmd.Chunks.prototype.skipLines = function(_126, _127, _128){
-		if(_126==undefined){
-		_126=1;
+		
+		if(_126 ===undefined){
+			_126 = 1;
 		}
-		if(_127==undefined){
-		_127=1;
+		
+		if(_127 === undefined){
+			_127 = 1;
 		}
+		
 		_126++;
 		_127++;
-		var _129,_12a;
-		this.selection=this.selection.replace(/(^\n*)/,"");
-		this.startTag=this.startTag+re.$1;
-		this.selection=this.selection.replace(/(\n*$)/,"");
-		this.endTag=this.endTag+re.$1;
-		this.startTag=this.startTag.replace(/(^\n*)/,"");
-		this.before=this.before+re.$1;
-		this.endTag=this.endTag.replace(/(\n*$)/,"");
-		this.after=this.after+re.$1;
+		
+		var _129, _12a;
+		
+		this.selection = this.selection.replace(/(^\n*)/, "");
+		this.startTag = this.startTag + re.$1;
+		this.selection = this.selection.replace(/(\n*$)/, "");
+		this.endTag = this.endTag + re.$1;
+		this.startTag = this.startTag.replace(/(^\n*)/, "");
+		this.before = this.before + re.$1;
+		this.endTag = this.endTag.replace(/(\n*$)/, "");
+		this.after = this.after + re.$1;
+		
 		if(this.before){
-		_129=_12a="";
-		while(_126--){
-		_129+="\\n?";
-		_12a+="\n";
+			
+			_129 = _12a = "";
+			
+			while(_126--){
+				_129 += "\\n?";
+				_12a += "\n";
+			}
+			
+			if(_128){
+				_129 = "\\n*";
+			}
+			this.before = this.before.replace(new re(_129 + "$", ""), _12a);
 		}
-		if(_128){
-		_129="\\n*";
-		}
-		this.before=this.before.replace(new re(_129+"$",""),_12a);
-		}
+		
 		if(this.after){
-		_129=_12a="";
-		while(_127--){
-		_129+="\\n?";
-		_12a+="\n";
-		}
-		if(_128){
-		_129="\\n*";
-		}
-		this.after=this.after.replace(new re(_129,""),_12a);
+			_129 = _12a = "";
+			while(_127--){
+				_129 += "\\n?";
+				_12a += "\n";
+			}
+			if(_128){
+				_129 = "\\n*";
+			}
+			this.after = this.after.replace(new re(_129, ""), _12a);
 		}
 	};
 	
 	command.prefixes="(?:\\s{4,}|\\s*>|\\s*-\\s+|\\s*\\d+\\.|=|\\+|-|_|\\*|#|\\s*\\[[^\n]]+\\]:)";
 	
-	command.unwrap = function(_12b){
-		var _12c=new re("([^\\n])\\n(?!(\\n|"+command.prefixes+"))","g");
-		_12b.selection=_12b.selection.replace(_12c,"$1 $2");
+	command.unwrap = function(chnks){
+		var txt = new re("([^\\n])\\n(?!(\\n|" + command.prefixes + "))","g");
+		chnks.selection = chnks.selection.replace(txt, "$1 $2");
 	};
 	
-	command.wrap = function(_12d, len){
-		command.unwrap(_12d);
-		var _12f=new re("(.{1,"+len+"})( +|$\\n?)","gm");
-		_12d.selection=_12d.selection.replace(_12f,function(_130,line){
-		if(new re("^"+command.prefixes,"").test(_130)){
-		return _130;
-		}
-		return line+"\n";
-		});
-		_12d.selection=_12d.selection.replace(/\s+$/,"");
+	command.wrap = function(chnks, len){
+		command.unwrap(chnks);
+		var _12f = new re("(.{1," + len + "})( +|$\\n?)", "gm");
+		
+		chnks.selection = chnks.selection.replace(_12f,
+			function(_130, line){
+				if(new re("^" + command.prefixes, "").test(_130)){
+					return _130;
+				}
+				return line + "\n";
+			});
+			
+		chnks.selection = chnks.selection.replace(/\s+$/, "");
 	};
 	
 	command.doBold = function(_132){
@@ -1617,36 +1679,37 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	command.bold={};
-	command.bold.description="Strong <strong>";
-	command.bold.image="images/bold.png";
-	command.bold.key="b";
-	command.bold.textOp=command.doBold;
-	command.italic={};
-	command.italic.description="Emphasis <em>";
-	command.italic.image="images/italic.png";
-	command.italic.key="i";
-	command.italic.textOp=command.doItalic;
-	command.link={};
-	command.link.description="Hyperlink <a>";
-	command.link.image="images/link.png";
-	command.link.key="l";
+	command.bold = {};
+	command.bold.description = "Strong <strong>";
+	command.bold.image = "images/bold.png";
+	command.bold.key = "b";
+	command.bold.textOp = command.doBold;
+	command.italic = {};
+	command.italic.description = "Emphasis <em>";
+	command.italic.image = "images/italic.png";
+	command.italic.key = "i";
+	command.italic.textOp = command.doItalic;
+	command.link = {};
+	command.link.description = "Hyperlink <a>";
+	command.link.image = "images/link.png";
+	command.link.key = "l";
 	command.link.textOp = function(_159, _15a){
-		return command.doLinkOrImage(_159,false,_15a);
+		return command.doLinkOrImage(_159, false, _15a);
 	};
-	command.undo={};
-	command.undo.description="Undo";
-	command.undo.image="images/undo.png";
+	command.undo = {};
+	command.undo.description = "Undo";
+	command.undo.image = "images/undo.png";
 	command.undo.execute = function(_15b){
 		_15b.undo();
 	};
-	command.redo={};
-	command.redo.description="Redo";
-	command.redo.image="images/redo.png";
+	command.redo = {};
+	command.redo.description = "Redo";
+	command.redo.image = "images/redo.png";
 	command.redo.execute = function(_15c){
 		_15c.redo();
 	};
 	
+	// UNIFINISHED - wtf with that return value?
 	util.findPanes = function(_15d){
 		
 		// Any div with a class of "wmd-preview" is sent the translated HTML for previewing.
@@ -1658,20 +1721,23 @@ Attacklab.wmdBase = function(){
 		
 		if(!_15d.input){
 			
-			var _15e = -1;
-			var _15f = doc.getElementsByTagName("textarea");
+			var inputAreas = doc.getElementsByTagName("textarea");
 			
-			for(var _160 = 0; _160 < _15f.length; _160++){
+			for(var i = 0; i < inputAreas.length; i++){
 				
-				var _161 = _15f[_160];
+				var area = inputAreas[i];
 				
-				if(_161 != _15d.output && !/wmd-ignore/.test(_161.className.toLowerCase())){
-					_15d.input = _161;
+				// Make sure it's not the output area or selected to ignore.
+				if(area != _15d.output && !/wmd-ignore/.test(area.className.toLowerCase())){
+					
+					// As per the documentation, the first one is the correct one.
+					_15d.input = area;
 					break;
 				}
 			}
 		}
 		
+		// This doesn't seem like a very useful return value.  And it's ignored anyway.
 		return _15d;
 	};
 	
@@ -1682,43 +1748,54 @@ Attacklab.wmdBase = function(){
 		wmd.wmd.previewManager = wmd.previewManager;
 	};
 	
-	util.startEditor = function(){
-		
-		if(wmd.wmd_env.autostart === false){
+	// UNFINISHED
+	// There's something magical going on that sets the empty _162 variable
+	// to something other than an empty object.  How does that happen?
+	util.startEditor=function(){
+	
+		if(wmd.wmd_env.autostart==false){
 			wmd.editorInit();
 			util.makeAPI();
 			return;
 		}
 		
 		var _162 = {};
-		var _163, _164;
+		var edit, preview;
 		
-		var _165 = function(){
+		// Fired after the page has fully loaded.
+		var loadListener = function(){
+			
 			try{
 				var _166 = util.cloneObject(_162);
 				util.findPanes(_162);
-				if(!util.objectsEqual(_166, _162 ) && _162.input){
-					if(!_163){
+				
+				if(!util.objectsEqual(_166, _162) && _162.input){
+					
+					if(!edit){
+						
 						wmd.editorInit();
-						var _167;
+						var previewRefreshFxn;
+						
 						if(wmd.previewManager !== undefined){
-							_164 = new wmd.previewManager(_162);
-							_167 = _164.refresh;
+							preview = new wmd.previewManager(_162);
+							previewRefreshFxn = preview.refresh;
 						}
-						_163 = new wmd.editor(_162.input,_167);
-					}else{
-						if(_164){
-							_164.refresh(true);
-						}
+						
+						edit = new wmd.editor(_162.input, previewRefreshFxn);
+					}
+					else if(preview){
+							
+							preview.refresh(true);
 					}
 				}
 			}
 			catch(e){
+				// Useful!
 			}
 		};
 		
-		util.addEvent(self, "load", _165);
-		var _168 = self.setInterval(_165, 100);
+		util.addEvent(self, "load", loadListener);
+		var ignored = self.setInterval(loadListener, 100);
 	};
 	
 	wmd.previewManager = function(_169){
@@ -1834,7 +1911,8 @@ Attacklab.wmdBase = function(){
 			if(_188){
 				_16f = "";
 				_178();
-			}else{
+			}
+			else{
 				_17d();
 			}
 		};
