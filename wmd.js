@@ -52,7 +52,7 @@ if(!Attacklab.wmd)
 				
 				if(Attacklab.wmd_env.delayLoad)
 				{
-					// This is bs since the delay is 0 ms.
+					// This is bs since the delay is 0.
 					window.setTimeout(go, 0);
 				}
 				else
@@ -67,6 +67,7 @@ if(!Attacklab.wmd)
 			Attacklab.wmdPlus();
 		};
 		
+		// Adds the wmd script tags to the <head> of the page.
 		var addScript = function(name, noCache)
 		{
 			var url = Attacklab.basePath + name;
@@ -88,17 +89,12 @@ if(!Attacklab.wmd)
 			{
 				if(re.test(elements[i].src))
 				{
-					var match = RegExp.$1;
-					if(/wmd-editor.com/.test(elements[i].src))
-					{
-						return null;
-					}
-					return match;
+					return RegExp.$1;
 				}
 			}
 		};
 		
-		Attacklab.basePath = getPrefix("wmd.js") || "http://static.wmd-editor.com/v2/";
+		Attacklab.basePath = getPrefix("wmd.js");
 		
 		for(var file, i = 0; file = codeFiles[i]; i++)
 		{
