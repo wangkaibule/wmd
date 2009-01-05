@@ -663,14 +663,23 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
+	// DONE - slightly improved - jslint clean
+	//
+	// Watches the input textarea, polling at an interval and runs
+	// a callback function if anything has changed.
 	wmd.inputPoller = function(inputArea, callback, interval){
 		
 		var pollerObj = this;
-		var _8c;
-		var _8d;
-		var markdown;
-		var ignored;
 		
+		// Stored start, end and text.  Used to see if there are changes to the input.
+		var lastStart;
+		var lastEnd;
+		var markdown;
+		
+		var killHandle;	// Used to cancel monitoring on destruction.
+		
+		// Checks to see if anything has changed in the textarea.
+		// If so, it runs the callback.
 		this.tick = function(){
 			
 			// Silently die if the input area is hidden, etc.
@@ -678,12 +687,13 @@ Attacklab.wmdBase = function(){
 				return;
 			}
 			
+			// Update the selection start and end, text.
 			if(inputArea.selectionStart || inputArea.selectionStart === 0){
 				var start = inputArea.selectionStart;
 				var end = inputArea.selectionEnd;
-				if(start != _8c || end != _8d){
-					_8c = start;
-					_8d = end;
+				if(start != lastStart || end != lastEnd){
+					lastStart = start;
+					lastEnd = end;
 					
 					if(markdown != inputArea.value){
 						markdown = inputArea.value;
@@ -694,27 +704,29 @@ Attacklab.wmdBase = function(){
 			return false;
 		};
 		
-		var _92 = function(){
+		
+		var doTickCallback = function(){
 			
 			if(util.getStyleProperty(inputArea, "display") === "none"){
-				// It's hidden
 				return;
 			}
 			
+			// If anything has changed, call the function.
 			if(pollerObj.tick()){
 				callback();
 			}
 		};
 		
+		// Set how often we poll the textarea for changes.
 		var assignInterval = function(){
 			if(interval === undefined){
 				interval = 500;
 			}
-			ignored = self.setInterval(_92, interval);
+			killHandle = self.setInterval(doTickCallback, interval);
 		};
 		
 		this.destroy = function(){
-			self.clearInterval(_8f);
+			self.clearInterval(killHandle);
 		};
 		
 		assignInterval();
@@ -1391,115 +1403,137 @@ Attacklab.wmdBase = function(){
 	};
 	
 	wmd.textareaState = function(_108){
-		var _109=this;
-		var _10a=function(_10b){
-		if(util.getStyleProperty(_108,"display")=="none"){
-		return;
-		}
-		var _10c=nav.userAgent.indexOf("Opera")!=-1;
-		if(_10b.selectionStart!=undefined&&!_10c){
-		_10b.focus();
-		_10b.selectionStart=_109.start;
-		_10b.selectionEnd=_109.end;
-		_10b.scrollTop=_109.scrollTop;
-		}else{
-		if(doc.selection){
-		if(doc.activeElement&&doc.activeElement!=_108){
-		return;
-		}
-		_10b.focus();
-		var _10d=_10b.createTextRange();
-		_10d.moveStart("character",-_10b.value.length);
-		_10d.moveEnd("character",-_10b.value.length);
-		_10d.moveEnd("character",_109.end);
-		_10d.moveStart("character",_109.start);
-		_10d.select();
-		}
-		}
+		
+		var _109 = this;
+		var _10a = function(_10b){
+		
+			// If it's hidden we just return.
+			if(util.getStyleProperty(_108, "display") === "none"){
+				return;
+			}
+			
+			var _10c = nav.userAgent.indexOf("Opera") != -1;
+			if(_10b.selectionStart != undefined && !_10c){
+				_10b.focus();
+				_10b.selectionStart=_109.start;
+				_10b.selectionEnd=_109.end;
+				_10b.scrollTop=_109.scrollTop;
+			}
+			else{
+				if(doc.selection){
+					if(doc.activeElement && doc.activeElement != _108){
+						return;
+					}
+					_10b.focus();
+					var _10d=_10b.createTextRange();
+					_10d.moveStart("character", -_10b.value.length);
+					_10d.moveEnd("character", -_10b.value.length);
+					_10d.moveEnd("character", _109.end);
+					_10d.moveStart("character", _109.start);
+					_10d.select();
+				}
+			}
 		};
-		this.init=function(_10e){
-		if(_10e){
-		_108=_10e;
-		}
-		if(util.getStyleProperty(_108,"display")=="none"){
-		return;
-		}
-		_10f(_108);
-		_109.scrollTop=_108.scrollTop;
-		if(!_109.text&&_108.selectionStart||_108.selectionStart=="0"){
-		_109.text=_108.value;
-		}
+		
+		this.init = function(_10e){
+			
+			if(_10e){
+				_108 = _10e;
+			}
+			
+			if(util.getStyleProperty(_108,"display")=="none"){
+				return;
+			}
+			
+			_10f(_108);
+			_109.scrollTop = _108.scrollTop;
+			if(!_109.text && _108.selectionStart || _108.selectionStart === "0"){
+			_109.text = _108.value;
+			}
 		};
-		var _110=function(_111){
-		_111=_111.replace(/\r\n/g,"\n");
-		_111=_111.replace(/\r/g,"\n");
-		return _111;
+		
+		var _110 = function(_111){
+			_111 = _111.replace(/\r\n/g, "\n");
+			_111 = _111.replace(/\r/g, "\n");
+			return _111;
 		};
-		var _10f=function(){
-		if(_108.selectionStart||_108.selectionStart=="0"){
-		_109.start=_108.selectionStart;
-		_109.end=_108.selectionEnd;
-		}else{
-		if(doc.selection){
-		_109.text=_110(_108.value);
-		var _112=doc.selection.createRange();
-		var _113=_110(_112.text);
-		var _114="\x07";
-		var _115=_114+_113+_114;
-		_112.text=_115;
-		var _116=_110(_108.value);
-		_112.moveStart("character",-_115.length);
-		_112.text=_113;
-		_109.start=_116.indexOf(_114);
-		_109.end=_116.lastIndexOf(_114)-_114.length;
-		var _117=_109.text.length-_110(_108.value).length;
-		if(_117){
-		_112.moveStart("character",-_113.length);
-		while(_117--){
-		_113+="\n";
-		_109.end+=1;
-		}
-		_112.text=_113;
-		}
-		_10a(_108);
-		}
-		}
-		return _109;
+		
+		var _10f = function(){
+			
+			if(_108.selectionStart || _108.selectionStart === "0"){
+				_109.start = _108.selectionStart;
+				_109.end = _108.selectionEnd;
+			}
+			else{
+				if(doc.selection){
+					_109.text = _110(_108.value);
+					var _112 = doc.selection.createRange();
+					var _113 = _110(_112.text);
+					var _114 = "\x07";
+					var _115 = _114 + _113 + _114;
+					_112.text = _115;
+					var _116 = _110(_108.value);
+					_112.moveStart("character", -_115.length);
+					_112.text = _113;
+					_109.start = _116.indexOf(_114);
+					_109.end = _116.lastIndexOf(_114) - _114.length;
+					
+					var _117 = _109.text.length - _110(_108.value).length;
+					if(_117){
+						_112.moveStart("character", -_113.length);
+						while(_117--){
+							_113 += "\n";
+							_109.end += 1;
+						}
+						_112.text=_113;
+					}
+					
+					_10a(_108);
+				}
+			}
+			return _109;
 		};
-		this.restore=function(_118){
-		if(!_118){
-		_118=_108;
-		}
-		if(_109.text!=undefined&&_109.text!=_118.value){
-		_118.value=_109.text;
-		}
-		_10a(_118,_109);
-		_118.scrollTop=_109.scrollTop;
+		
+		this.restore = function(_118){
+			if(!_118){
+				_118 = _108;
+			}
+			if(_109.text != undefined && _109.text != _118.value){
+				_118.value = _109.text;
+			}
+			_10a(_118, _109);
+			_118.scrollTop = _109.scrollTop;
 		};
-		this.getChunks=function(){
-		var _119=new wmd.Chunks();
-		_119.before=_110(_109.text.substring(0,_109.start));
-		_119.startTag="";
-		_119.selection=_110(_109.text.substring(_109.start,_109.end));
-		_119.endTag="";
-		_119.after=_110(_109.text.substring(_109.end));
-		_119.scrollTop=_109.scrollTop;
-		return _119;
+		
+		this.getChunks = function(){
+			var _119 = new wmd.Chunks();
+			_119.before = _110(_109.text.substring(0, _109.start));
+			_119.startTag = "";
+			_119.selection = _110(_109.text.substring(_109.start, _109.end));
+			_119.endTag = "";
+			_119.after = _110(_109.text.substring(_109.end));
+			_119.scrollTop = _109.scrollTop;
+			return _119;
 		};
-		this.setChunks=function(_11a){
-		_11a.before=_11a.before+_11a.startTag;
-		_11a.after=_11a.endTag+_11a.after;
-		var _11b=nav.userAgent.indexOf("Opera")!=-1;
-		if(_11b){
-		_11a.before=_11a.before.replace(/\n/g,"\r\n");
-		_11a.selection=_11a.selection.replace(/\n/g,"\r\n");
-		_11a.after=_11a.after.replace(/\n/g,"\r\n");
-		}
-		_109.start=_11a.before.length;
-		_109.end=_11a.before.length+_11a.selection.length;
-		_109.text=_11a.before+_11a.selection+_11a.after;
-		_109.scrollTop=_11a.scrollTop;
+		
+		this.setChunks = function(_11a){
+			
+			_11a.before = _11a.before + _11a.startTag;
+			_11a.after = _11a.endTag + _11a.after;
+			
+			var _11b = nav.userAgent.indexOf("Opera") !== -1;
+			if(_11b){
+				_11a.before = _11a.before.replace(/\n/g,"\r\n");
+				_11a.selection = _11a.selection.replace(/\n/g,"\r\n");
+				_11a.after = _11a.after.replace(/\n/g,"\r\n");
+			}
+			
+			_109.start = _11a.before.length;
+			_109.end = _11a.before.length + _11a.selection.length;
+			_109.text = _11a.before + _11a.selection + _11a.after;
+			_109.scrollTop = _11a.scrollTop;
 		};
+		
 		this.init();
 	};
 	
@@ -1507,13 +1541,16 @@ Attacklab.wmdBase = function(){
 	wmd.Chunks = function(){
 	};
 	
-	wmd.Chunks.prototype.findTags = function(_11c, _11d){
+	// startRegex: a regular expression to find the start tag
+	// endRegex: a regular expresssion to find the end tag
+	wmd.Chunks.prototype.findTags = function(startRegex, endRegex){
 		
-		var _11e, _11f;
+		var _11e;
+		var _11f;
 		var chunkObj = this;
 		
-		if(_11c){
-			_11f = util.regexToString(_11c);
+		if(start){
+			_11f = util.regexToString(startRegex);
 			_11e = new re(_11f.expression + "$", _11f.flags);
 			
 		this.before = this.before.replace(_11e,
@@ -1531,10 +1568,10 @@ Attacklab.wmdBase = function(){
 			});
 		}
 		
-		if(_11d){
-			_11f = util.regexToString(_11d);
+		if(endRegex){
+			_11f = util.regexToString(endRegex);
 			_11e = new re(_11f.expression + "$", _11f.flags);
-			this.selection=this.selection.replace(_11e,
+			this.selection = this.selection.replace(_11e,
 				function(_123){
 					chunkObj.endTag = _123 + chunkObj.endTag;
 					return "";
