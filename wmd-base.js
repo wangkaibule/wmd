@@ -465,20 +465,6 @@ Attacklab.wmdBase = function(){
         return result;
 	};
 	
-	// UNFINISHED
-	// CAUSES PROBLEMS IN SHOWDOWN.JS
-	// This function turns some underscores into escaped characters.
-	// This messes up the processing in showdown.js so I've commented
-	// the code out.  I'll eventually remove the function.
-	util.escapeUnderscores = function(_5f){
-		//_5f=_5f.replace(/(\S)(_+)(\S)/g,
-			//function(_60,_61,_62,_63){
-				//_62=_62.replace(/_/g,"&#95;");
-				//return _61+_62+_63;
-			//});
-		return _5f;
-	};
-	
 	// DONE - updated - jslint clean
 	position.getPageSize = function(){
 		
@@ -860,443 +846,489 @@ Attacklab.wmdBase = function(){
 	};
 	
 	wmd.editor = function(_b0, _b1){
+		
 		if(!_b1){
-		_b1=function(){
+			_b1 = function(){};
+		}
+		
+		var _b2 = 28;
+		var _b3 = 4076;
+		var _b4 = 0;
+		var _b5, _b6;
+		var _b7 = this;
+		var _b8, _b9;
+		var _ba, _bb, _bc;
+		var _bd, _be, _bf;
+		var _c0 = [];
+		
+		var _c1 = function(_c2){
+			if(_bd){
+				_bd.setCommandMode();
+			}
+			var _c3=new wmd.textareaState(_b0);
+			if(!_c3){
+				return;
+			}
+			var _c4 = _c3.getChunks();
+			var _c5=function(){
+				_b0.focus();
+				if(_c4){
+					_c3.setChunks(_c4);
+				}
+				_c3.restore();
+				_b1();
+			};
+			var _c6 = _c2(_c4, _c5);
+			if(!_c6){
+				_c5();
+			}
 		};
-		}
-		var _b2=28;
-		var _b3=4076;
-		var _b4=0;
-		var _b5,_b6;
-		var _b7=this;
-		var _b8,_b9;
-		var _ba,_bb,_bc;
-		var _bd,_be,_bf;
-		var _c0=[];
-		var _c1=function(_c2){
-		if(_bd){
-		_bd.setCommandMode();
-		}
-		var _c3=new wmd.textareaState(_b0);
-		if(!_c3){
-		return;
-		}
-		var _c4=_c3.getChunks();
-		var _c5=function(){
-		_b0.focus();
-		if(_c4){
-		_c3.setChunks(_c4);
-		}
-		_c3.restore();
-		_b1();
+		
+		var _c7 = function(_c8){
+			_b0.focus();
+			if(_c8.textOp){
+				_c1(_c8.textOp);
+			}
+			if(_c8.execute){
+				_c8.execute(_b7);
+			}
 		};
-		var _c6=_c2(_c4,_c5);
-		if(!_c6){
-		_c5();
-		}
+		
+		var _c9 = function(_ca,_cb){
+			var _cc = _ca.style;
+			if(_cb){
+				_cc.opacity = "1.0";
+				_cc.KHTMLOpacity = "1.0";
+				if(wmd.Util.newIE){
+					_cc.filter = "";
+				}
+				if(wmd.Util.oldIE){
+					_cc.filter = "chroma(color=fuchsia)";
+				}
+				_cc.cursor = "pointer";
+				
+				_ca.onmouseover = function(){
+					_cc.backgroundColor="lightblue";
+					_cc.border="1px solid blue";
+				};
+				
+				_ca.onmouseout = function(){
+					_cc.backgroundColor = "";
+					_cc.border = "1px solid transparent";
+					if(wmd.Util.oldIE){
+						_cc.borderColor = "fuchsia";
+						_cc.filter = "chroma(color=fuchsia)"+_cc.filter;
+					}
+				};
+			}
+			else{
+				_cc.opacity = "0.4";
+				_cc.KHTMLOpacity = "0.4";
+				if(wmd.Util.oldIE){
+					_cc.filter = "chroma(color=fuchsia) alpha(opacity=40)";
+				}
+				if(wmd.Util.newIE){
+					_cc.filter = "alpha(opacity=40)";
+				}
+				_cc.cursor = "";
+				_cc.backgroundColor = "";
+				if(_ca.onmouseout){
+					_ca.onmouseout();
+				}
+				_ca.onmouseover=_ca.onmouseout=null;
+			}
 		};
-		var _c7=function(_c8){
-		_b0.focus();
-		if(_c8.textOp){
-		_c1(_c8.textOp);
-		}
-		if(_c8.execute){
-		_c8.execute(_b7);
-		}
+		
+		var _cd = function(_ce){
+			_ce && _c0.push(_ce);
 		};
-		var _c9=function(_ca,_cb){
-		var _cc=_ca.style;
-		if(_cb){
-		_cc.opacity="1.0";
-		_cc.KHTMLOpacity="1.0";
-		if(wmd.Util.newIE){
-		_cc.filter="";
-		}
-		if(wmd.Util.oldIE){
-		_cc.filter="chroma(color=fuchsia)";
-		}
-		_cc.cursor="pointer";
-		_ca.onmouseover=function(){
-		_cc.backgroundColor="lightblue";
-		_cc.border="1px solid blue";
+		
+		var _cf = function(){
+			_c0.push("|");
 		};
-		_ca.onmouseout=function(){
-		_cc.backgroundColor="";
-		_cc.border="1px solid transparent";
-		if(wmd.Util.oldIE){
-		_cc.borderColor="fuchsia";
-		_cc.filter="chroma(color=fuchsia)"+_cc.filter;
-		}
+		
+		var _d0 = function(){
+			var _d1 = util.createImage("images/separator.png", 20, 20);
+			_d1.style.padding = "4px";
+			_d1.style.paddingTop = "0px";
+			_b9.appendChild(_d1);
 		};
-		}else{
-		_cc.opacity="0.4";
-		_cc.KHTMLOpacity="0.4";
-		if(wmd.Util.oldIE){
-		_cc.filter="chroma(color=fuchsia) alpha(opacity=40)";
-		}
-		if(wmd.Util.newIE){
-		_cc.filter="alpha(opacity=40)";
-		}
-		_cc.cursor="";
-		_cc.backgroundColor="";
-		if(_ca.onmouseout){
-		_ca.onmouseout();
-		}
-		_ca.onmouseover=_ca.onmouseout=null;
-		}
+		
+		var _d2 = function(_d3){
+			if(_d3.image){
+				var _d4 = util.createImage(_d3.image, 16, 16);
+				_d4.border = 0;
+				if(_d3.description){
+					var _d5 = _d3.description;
+					if(_d3.key){
+						var _d6 = " Ctrl+";
+						_d5 += _d6 + _d3.key.toUpperCase();
+					}
+					_d4.title = _d5;
+				}
+				_c9(_d4, true);
+				var _d7 = _d4.style;
+				_d7.margin = "0px";
+				_d7.padding = "1px";
+				_d7.marginTop = "7px";
+				_d7.marginBottom = "5px";
+				_d4.onmouseout();
+				var _d8 = _d4;
+				
+				_d8.onclick = function(){
+					if(_d8.onmouseout){
+						_d8.onmouseout();
+					}
+					_c7(_d3);
+					return false;
+				};
+				_b9.appendChild(_d8);
+				return _d8;
+			}
+			return;
 		};
-		var _cd=function(_ce){
-		_ce&&_c0.push(_ce);
+		
+		var _d9 = function(){
+			for(var _da in _c0){
+				if(_c0[_da] == "|"){
+					_d0();
+				}
+				else{
+					_d2(_c0[_da]);
+				}
+			}
 		};
-		var _cf=function(){
-		_c0.push("|");
+		
+		var _db = function(){
+			if(_bd){
+				_c9(_be, _bd.canUndo());
+				_c9(_bf, _bd.canRedo());
+			}
 		};
-		var _d0=function(){
-		var _d1=util.createImage("images/separator.png",20,20);
-		_d1.style.padding="4px";
-		_d1.style.paddingTop="0px";
-		_b9.appendChild(_d1);
+		
+		var _dc = function(){
+			if(_b0.offsetParent){
+				_ba = util.makeElement("div");
+				var _dd = _ba.style;
+				_dd.visibility = "hidden";
+				_dd.top = _dd.left = _dd.width = "0px";
+				_dd.display = "inline";
+				_dd.cssFloat = "left";
+				_dd.overflow = "visible";
+				_dd.opacity = "0.999";
+				_b8.style.position = "absolute";
+				_ba.appendChild(_b8);
+				_b0.style.marginTop = "";
+				var _de = position.getTop(_b0);
+				_b0.style.marginTop = "0";
+				var _df = position.getTop(_b0);
+				_b4 = _de - _df;
+				_e0();
+				_b0.parentNode.insertBefore(_ba, _b0);
+				_e1();
+				util.skin(_b8, wmd.basePath + "images/bg.png", _b2, _b3);
+				_dd.visibility = "visible";
+				return true;
+			}
+			return false;
 		};
-		var _d2=function(_d3){
-		if(_d3.image){
-		var _d4=util.createImage(_d3.image,16,16);
-		_d4.border=0;
-		if(_d3.description){
-		var _d5=_d3.description;
-		if(_d3.key){
-		var _d6=" Ctrl+";
-		_d5+=_d6+_d3.key.toUpperCase();
-		}
-		_d4.title=_d5;
-		}
-		_c9(_d4,true);
-		var _d7=_d4.style;
-		_d7.margin="0px";
-		_d7.padding="1px";
-		_d7.marginTop="7px";
-		_d7.marginBottom="5px";
-		_d4.onmouseout();
-		var _d8=_d4;
-		_d8.onclick=function(){
-		if(_d8.onmouseout){
-		_d8.onmouseout();
-		}
-		_c7(_d3);
-		return false;
-		};
-		_b9.appendChild(_d8);
-		return _d8;
-		}
-		return;
-		};
-		var _d9=function(){
-		for(var _da in _c0){
-		if(_c0[_da]=="|"){
-		_d0();
-		}else{
-		_d2(_c0[_da]);
-		}
-		}
-		};
-		var _db=function(){
-		if(_bd){
-		_c9(_be,_bd.canUndo());
-		_c9(_bf,_bd.canRedo());
-		}
-		};
-		var _dc=function(){
-		if(_b0.offsetParent){
-		_ba=util.makeElement("div");
-		var _dd=_ba.style;
-		_dd.visibility="hidden";
-		_dd.top=_dd.left=_dd.width="0px";
-		_dd.display="inline";
-		_dd.cssFloat="left";
-		_dd.overflow="visible";
-		_dd.opacity="0.999";
-		_b8.style.position="absolute";
-		_ba.appendChild(_b8);
-		_b0.style.marginTop="";
-		var _de=position.getTop(_b0);
-		_b0.style.marginTop="0";
-		var _df=position.getTop(_b0);
-		_b4=_de-_df;
-		_e0();
-		_b0.parentNode.insertBefore(_ba,_b0);
-		_e1();
-		util.skin(_b8,wmd.basePath+"images/bg.png",_b2,_b3);
-		_dd.visibility="visible";
-		return true;
-		}
-		return false;
-		};
+		
 		var _e2=function(){
-		var _e3=wmd.wmd_env.buttons.split(/\s+/);
-		for(var _e4 in _e3){
-		switch(_e3[_e4]){
-		case "|":
-		_cf();
-		break;
-		case "bold":
-		_cd(command.bold);
-		break;
-		case "italic":
-		_cd(command.italic);
-		break;
-		case "link":
-		_cd(command.link);
-		break;
-		}
-		if(wmd.full){
-		switch(_e3[_e4]){
-		case "blockquote":
-		_cd(command.blockquote);
-		break;
-		case "code":
-		_cd(command.code);
-		break;
-		case "image":
-		_cd(command.img);
-		break;
-		case "ol":
-		_cd(command.ol);
-		break;
-		case "ul":
-		_cd(command.ul);
-		break;
-		case "heading":
-		_cd(command.h1);
-		break;
-		case "hr":
-		_cd(command.hr);
-		break;
-		}
-		}
-		}
-		return;
+			var _e3 = wmd.wmd_env.buttons.split(/\s+/);
+			for(var _e4 in _e3){
+				switch(_e3[_e4]){
+					case "|":
+						_cf();
+						break;
+					case "bold":
+						_cd(command.bold);
+						break;
+					case "italic":
+						_cd(command.italic);
+						break;
+					case "link":
+						_cd(command.link);
+						break;
+				}
+				if(wmd.full){
+					switch(_e3[_e4]){
+						case "blockquote":
+							_cd(command.blockquote);
+							break;
+						case "code":
+							_cd(command.code);
+							break;
+						case "image":
+							_cd(command.img);
+							break;
+						case "ol":
+							_cd(command.ol);
+							break;
+						case "ul":
+							_cd(command.ul);
+							break;
+						case "heading":
+							_cd(command.h1);
+							break;
+						case "hr":
+							_cd(command.hr);
+							break;
+					}
+				}
+			}
+			return;
 		};
-		var _e5=function(){
-		if(/\?noundo/.test(doc.location.href)){
-		wmd.nativeUndo=true;
-		}
-		if(!wmd.nativeUndo){
-		_bd=new wmd.undoManager(_b0,function(){
-		_b1();
-		_db();
-		});
-		}
-		var _e6=_b0.parentNode;
-		_b8=util.makeElement("div");
-		_b8.style.display="block";
-		_b8.style.zIndex=100;
-		if(!wmd.full){
-		_b8.title+="\n(Free Version)";
-		}
-		_b8.unselectable="on";
-		_b8.onclick=function(){
-		_b0.focus();
+		
+		var _e5 = function(){
+			
+			if(/\?noundo/.test(doc.location.href)){
+				wmd.nativeUndo=true;
+			}
+			
+			if(!wmd.nativeUndo){
+				_bd = new wmd.undoManager(_b0,function(){
+					_b1();
+					_db();
+				});
+			}
+			
+			var _e6 = _b0.parentNode;
+			_b8 = util.makeElement("div");
+			_b8.style.display = "block";
+			_b8.style.zIndex = 100;
+			if(!wmd.full){
+				_b8.title += "\n(Free Version)";
+			}
+			_b8.unselectable="on";
+			
+			_b8.onclick = function(){
+				_b0.focus();
+			};
+			
+			_b9 = util.makeElement("span");
+			var _e7 = _b9.style;
+			_e7.height = "auto";
+			_e7.paddingBottom = "2px";
+			_e7.lineHeight = "0";
+			_e7.paddingLeft = "15px";
+			_e7.paddingRight = "65px";
+			_e7.display = "block";
+			_e7.position = "absolute";
+			_b9.unselectable = "on";
+			_b8.appendChild(_b9);
+			_cd(command.autoindent);
+			var _e8 = util.createImage("images/bg.png");
+			var _e9 = util.createImage("images/bg-fill.png");
+			_e2();
+			_d9();
+			
+			if(_bd){
+				_d0();
+				_be = _d2(command.undo);
+				_bf = _d2(command.redo);
+				var _ea = nav.platform.toLowerCase();
+				
+				if(/win/.test(_ea)){
+					_be.title+=" - Ctrl+Z";
+					_bf.title+=" - Ctrl+Y";
+				}
+				else{
+					if(/mac/.test(_ea)){
+						_be.title+=" - Ctrl+Z";
+						_bf.title+=" - Ctrl+Shift+Z";
+					}
+					else{
+						_be.title+=" - Ctrl+Z";
+						_bf.title+=" - Ctrl+Shift+Z";
+					}
+				}
+			}
+			
+			var _eb = "keydown";
+			if(nav.userAgent.indexOf("Opera") != -1){
+				_eb = "keypress";
+			}
+			
+			util.addEvent(_b0, _eb, 
+				function(_ec){
+					var _ed = false;
+					if(_ec.ctrlKey||_ec.metaKey){
+						var _ee = (_ec.charCode || _ec.keyCode);
+						var _ef = String.fromCharCode(_ee).toLowerCase();
+						for(var _f0 in _c0){
+							var _f1 = _c0[_f0];
+							if(_f1.key && _ef == _f1.key || _f1.keyCode && _ec.keyCode == _f1.keyCode){
+								_c7(_f1);
+								_ed = true;
+							}
+						}
+					}
+					if(_ed){
+						if(_ec.preventDefault){
+							_ec.preventDefault();
+						}
+						if(self.event){
+							self.event.returnValue = false;
+						}
+					}
+				});
+			
+			util.addEvent(_b0, "keyup", 
+				function(_f2){
+					if(_f2.shiftKey && !_f2.ctrlKey && !_f2.metaKey){
+						var _f3 = (_f2.charCode || _f2.keyCode);
+						switch(_f3){
+							case 13:
+								_c7(command.autoindent);
+								break;
+						}
+					}
+				});
+			
+			if(!_dc()){
+				_bc = self.setInterval(function(){
+					if(_dc()){
+						self.clearInterval(_bc);
+					}
+				}, 100);
+			}
+			
+			util.addEvent(self, "resize", _e1);
+			_bb = self.setInterval(_e1, 100);
+			if(_b0.form){
+				var _f4 = _b0.form.onsubmit;
+				_b0.form.onsubmit=function(){
+					_f5();
+					if(_f4){
+						return _f4.apply(this, arguments);
+					}
+				};
+			}
+			_db();
 		};
-		_b9=util.makeElement("span");
-		var _e7=_b9.style;
-		_e7.height="auto";
-		_e7.paddingBottom="2px";
-		_e7.lineHeight="0";
-		_e7.paddingLeft="15px";
-		_e7.paddingRight="65px";
-		_e7.display="block";
-		_e7.position="absolute";
-		_b9.unselectable="on";
-		_b8.appendChild(_b9);
-		_cd(command.autoindent);
-		var _e8=util.createImage("images/bg.png");
-		var _e9=util.createImage("images/bg-fill.png");
-		_e2();
-		_d9();
-		if(_bd){
-		_d0();
-		_be=_d2(command.undo);
-		_bf=_d2(command.redo);
-		var _ea=nav.platform.toLowerCase();
-		if(/win/.test(_ea)){
-		_be.title+=" - Ctrl+Z";
-		_bf.title+=" - Ctrl+Y";
-		}else{
-		if(/mac/.test(_ea)){
-		_be.title+=" - Ctrl+Z";
-		_bf.title+=" - Ctrl+Shift+Z";
-		}else{
-		_be.title+=" - Ctrl+Z";
-		_bf.title+=" - Ctrl+Shift+Z";
-		}
-		}
-		}
-		var _eb="keydown";
-		if(nav.userAgent.indexOf("Opera")!=-1){
-		_eb="keypress";
-		}
-		util.addEvent(_b0,_eb,function(_ec){
-		var _ed=false;
-		if(_ec.ctrlKey||_ec.metaKey){
-		var _ee=(_ec.charCode||_ec.keyCode);
-		var _ef=String.fromCharCode(_ee).toLowerCase();
-		for(var _f0 in _c0){
-		var _f1=_c0[_f0];
-		if(_f1.key&&_ef==_f1.key||_f1.keyCode&&_ec.keyCode==_f1.keyCode){
-		_c7(_f1);
-		_ed=true;
-		}
-		}
-		}
-		if(_ed){
-		if(_ec.preventDefault){
-		_ec.preventDefault();
-		}
-		if(self.event){
-		self.event.returnValue=false;
-		}
-		}
-		});
-		util.addEvent(_b0,"keyup",function(_f2){
-		if(_f2.shiftKey&&!_f2.ctrlKey&&!_f2.metaKey){
-		var _f3=(_f2.charCode||_f2.keyCode);
-		switch(_f3){
-		case 13:
-		_c7(command.autoindent);
-		break;
-		}
-		}
-		});
-		if(!_dc()){
-		_bc=self.setInterval(function(){
-		if(_dc()){
-		self.clearInterval(_bc);
-		}
-		},100);
-		}
-		util.addEvent(self,"resize",_e1);
-		_bb=self.setInterval(_e1,100);
-		if(_b0.form){
-		var _f4=_b0.form.onsubmit;
-		_b0.form.onsubmit=function(){
-		_f5();
-		if(_f4){
-		return _f4.apply(this,arguments);
-		}
+		
+		var _f5 = function(){
+			if(wmd.showdown){
+				var _f6 = new wmd.showdown.converter();
+			}
+			var _f7 = _b0.value;
+			
+			var _f8 = function(){
+				_b0.value = _f7;
+			};
+			
+			if(!/markdown/.test(wmd.wmd_env.output.toLowerCase())){
+				if(_f6){
+					_b0.value = _f6.makeHtml(_f7);
+					self.setTimeout(_f8, 0);
+				}
+			}
+			return true;
 		};
-		}
-		_db();
+		
+		var _e0 = function(){
+			var _f9 = util.makeElement("div");
+			var _fa = _f9.style;
+			_fa.paddingRight = "15px";
+			_fa.height = "100%";
+			_fa.display = "block";
+			_fa.position = "absolute";
+			_fa.right = "0";
+			_f9.unselectable = "on";
+			var _fb = util.makeElement("a");
+			_fa = _fb.style;
+			_fa.position = "absolute";
+			_fa.right = "10px";
+			_fa.top = "5px";
+			_fa.display = "inline";
+			_fa.width = "50px";
+			_fa.height = "25px";
+			_fb.href = "http://www.wmd-editor.com/";
+			_fb.target = "_blank";
+			_fb.title = "WMD: The Wysiwym Markdown Editor";
+			var _fc = util.createImage("images/wmd.png");
+			var _fd = util.createImage("images/wmd-on.png");
+			_fb.appendChild(_fc);
+			_fb.onmouseover = function(){
+				util.setImage(_fc, "images/wmd-on.png");
+				_fb.style.cursor = "pointer";
+			};
+			_fb.onmouseout=function(){
+				util.setImage(_fc, "images/wmd.png");
+			};
+			_b8.appendChild(_fb);
 		};
-		var _f5=function(){
-		if(wmd.showdown){
-		var _f6=new wmd.showdown.converter();
-		}
-		var _f7=_b0.value;
-		var _f8=function(){
-		_b0.value=_f7;
+		
+		var _e1 = function(){
+			
+			if(!util.elementOk(_b0)){
+				_b8.style.display = "none";
+				return;
+			}
+			
+			if(_b8.style.display == "none"){
+				_b8.style.display = "block";
+			}
+			
+			var _fe = position.getWidth(_b0);
+			var _ff = position.getHeight(_b0);
+			var _100 = position.getLeft(_b0);
+			if(_b8.style.width == _fe + "px" && _b5 == _ff && _b6 == _100){
+				if(position.getTop(_b8) < position.getTop(_b0)){
+					return;
+				}
+			}
+			_b5 = _ff;
+			_b6 = _100;
+			var _101 = 100;
+			_b8.style.width = Math.max(_fe, _101) + "px";
+			var root = _b8.offsetParent;
+			var _103 = position.getHeight(_b9);
+			var _104 = _103 - _b2 + "px";
+			_b8.style.height = _104;
+			if(util.fillers){
+				util.fillers[0].style.height = util.fillers[1].style.height = _104;
+			}
+			var _105 = 3;
+			_b0.style.marginTop = _103 + _105 + _b4 + "px";
+			var _106 = position.getTop(_b0);
+			var _100 = position.getLeft(_b0);
+			position.setTop(root, _106 - _103 - _105);
+			position.setLeft(root, _100);
+			_b8.style.opacity = _b8.style.opacity || 0.999;
+			return;
 		};
-		_f7=util.escapeUnderscores(_f7);
-		if(!/markdown/.test(wmd.wmd_env.output.toLowerCase())){
-		if(_f6){
-		_b0.value=_f6.makeHtml(_f7);
-		self.setTimeout(_f8,0);
-		}
-		}
-		return true;
+		
+		this.undo = function(){
+			if(_bd){
+				_bd.undo();
+			}
 		};
-		var _e0=function(){
-		var _f9=util.makeElement("div");
-		var _fa=_f9.style;
-		_fa.paddingRight="15px";
-		_fa.height="100%";
-		_fa.display="block";
-		_fa.position="absolute";
-		_fa.right="0";
-		_f9.unselectable="on";
-		var _fb=util.makeElement("a");
-		_fa=_fb.style;
-		_fa.position="absolute";
-		_fa.right="10px";
-		_fa.top="5px";
-		_fa.display="inline";
-		_fa.width="50px";
-		_fa.height="25px";
-		_fb.href="http://www.wmd-editor.com/";
-		_fb.target="_blank";
-		_fb.title="WMD: The Wysiwym Markdown Editor";
-		var _fc=util.createImage("images/wmd.png");
-		var _fd=util.createImage("images/wmd-on.png");
-		_fb.appendChild(_fc);
-		_fb.onmouseover=function(){
-		util.setImage(_fc,"images/wmd-on.png");
-		_fb.style.cursor="pointer";
+		
+		this.redo = function(){
+			if(_bd){
+				_bd.redo();
+			}
 		};
-		_fb.onmouseout=function(){
-		util.setImage(_fc,"images/wmd.png");
+		
+		var init = function(){
+			_e5();
 		};
-		_b8.appendChild(_fb);
+		
+		this.destroy = function(){
+			if(_bd){
+				_bd.destroy();
+			}
+			if(_ba.parentNode){
+				_ba.parentNode.removeChild(_ba);
+			}
+			if(_b0){
+				_b0.style.marginTop="";
+			}
+			self.clearInterval(_bb);
+			self.clearInterval(_bc);
 		};
-		var _e1=function(){
-		if(!util.elementOk(_b0)){
-		_b8.style.display="none";
-		return;
-		}
-		if(_b8.style.display=="none"){
-		_b8.style.display="block";
-		}
-		var _fe=position.getWidth(_b0);
-		var _ff=position.getHeight(_b0);
-		var _100=position.getLeft(_b0);
-		if(_b8.style.width==_fe+"px"&&_b5==_ff&&_b6==_100){
-		if(position.getTop(_b8)<position.getTop(_b0)){
-		return;
-		}
-		}
-		_b5=_ff;
-		_b6=_100;
-		var _101=100;
-		_b8.style.width=Math.max(_fe,_101)+"px";
-		var root=_b8.offsetParent;
-		var _103=position.getHeight(_b9);
-		var _104=_103-_b2+"px";
-		_b8.style.height=_104;
-		if(util.fillers){
-		util.fillers[0].style.height=util.fillers[1].style.height=_104;
-		}
-		var _105=3;
-		_b0.style.marginTop=_103+_105+_b4+"px";
-		var _106=position.getTop(_b0);
-		var _100=position.getLeft(_b0);
-		position.setTop(root,_106-_103-_105);
-		position.setLeft(root,_100);
-		_b8.style.opacity=_b8.style.opacity||0.999;
-		return;
-		};
-		this.undo=function(){
-		if(_bd){
-		_bd.undo();
-		}
-		};
-		this.redo=function(){
-		if(_bd){
-		_bd.redo();
-		}
-		};
-		var init=function(){
-		_e5();
-		};
-		this.destroy=function(){
-		if(_bd){
-		_bd.destroy();
-		}
-		if(_ba.parentNode){
-		_ba.parentNode.removeChild(_ba);
-		}
-		if(_b0){
-		_b0.style.marginTop="";
-		}
-		self.clearInterval(_bb);
-		self.clearInterval(_bc);
-		};
+		
 		init();
 	};
 	
@@ -1698,17 +1730,21 @@ Attacklab.wmdBase = function(){
 		_15c.redo();
 	};
 	
-//	// UNIFINISHED - what's passed in?
-	util.findPanes = function(_15d){
+
+	// DONE - jslint clean
+	util.findPanes = function(wmdStuff){
 		
+		// wmdStuff is just a non-special object that keeps our important references in
+		// one place.
+		//
 		// Any div with a class of "wmd-preview" is sent the translated HTML for previewing.
 		// Ditto for "wmd-output" --> HTML output.  The first element is selected, as per
 		// the WMD documentation.
-		_15d.preview = _15d.preview || util.getElementsByClass("wmd-preview", "div")[0];
-		_15d.output = _15d.output || util.getElementsByClass("wmd-output", "textarea")[0];
-		_15d.output = _15d.output || util.getElementsByClass("wmd-output", "div")[0];
+		wmdStuff.preview = wmdStuff.preview || util.getElementsByClass("wmd-preview", "div")[0];
+		wmdStuff.output = wmdStuff.output || util.getElementsByClass("wmd-output", "textarea")[0];
+		wmdStuff.output = wmdStuff.output || util.getElementsByClass("wmd-output", "div")[0];
 		
-		if(!_15d.input){
+		if(!wmdStuff.input){
 			
 			var inputAreas = doc.getElementsByTagName("textarea");
 			
@@ -1717,10 +1753,10 @@ Attacklab.wmdBase = function(){
 				var area = inputAreas[i];
 				
 				// Make sure it's not the output area or selected to ignore.
-				if(area != _15d.output && !/wmd-ignore/.test(area.className.toLowerCase())){
+				if(area != wmdStuff.output && !/wmd-ignore/.test(area.className.toLowerCase())){
 					
-					// As per the documentation, the first one is the correct one.
-					_15d.input = area;
+					// As per the documentation, the first one is the one we use.
+					wmdStuff.input = area;
 					break;
 				}
 			}
@@ -1736,28 +1772,31 @@ Attacklab.wmdBase = function(){
 		wmd.wmd.previewManager = wmd.previewManager;
 	};
 	
-	// UNFINISHED
-	// There's something magical going on that sets the empty _162 variable
-	// to something other than an empty object.  How does that happen?
-	util.startEditor=function(){
+	// DONE - fixed up and jslint clean
+	util.startEditor = function(){
 	
-		if(wmd.wmd_env.autostart==false){
+		if(wmd.wmd_env.autostart === false){
 			wmd.editorInit();
 			util.makeAPI();
 			return;
 		}
 		
-		var _162 = {};
+		// wmdStuff is just an empty object that we'll fill with references
+		// to the various important parts of the library.  e.g. the 
+		// input and output textareas/divs.
+		var wmdStuff = {};
 		var edit, preview;
 		
 		// Fired after the page has fully loaded.
 		var loadListener = function(){
 			
 			try{
-				var _166 = util.cloneObject(_162);
-				util.findPanes(_162);
+				// I think the clone equality test is just a strange way to see
+				// if the panes got set/reset in findPanes().
+				var clone = util.cloneObject(wmdStuff);
+				util.findPanes(wmdStuff);
 				
-				if(!util.objectsEqual(_166, _162) && _162.input){
+				if(!util.objectsEqual(clone, wmdStuff) && wmdStuff.input){
 					
 					if(!edit){
 						
@@ -1765,11 +1804,11 @@ Attacklab.wmdBase = function(){
 						var previewRefreshFxn;
 						
 						if(wmd.previewManager !== undefined){
-							preview = new wmd.previewManager(_162);
+							preview = new wmd.previewManager(wmdStuff);
 							previewRefreshFxn = preview.refresh;
 						}
 						
-						edit = new wmd.editor(_162.input, previewRefreshFxn);
+						edit = new wmd.editor(wmdStuff.input, previewRefreshFxn);
 					}
 					else if(preview){
 							
@@ -1786,33 +1825,45 @@ Attacklab.wmdBase = function(){
 		var ignored = self.setInterval(loadListener, 100);
 	};
 	
-	wmd.previewManager = function(_169){
+	wmd.previewManager = function(wmdStuff){
 		
-		var _16a = this;
-		var _16b, _16c;
-		var _16d, _16e;
-		var _16f, _170;
-		var _171 = 3000;
-		var _172 = "delayed";
+		// wmdStuff stores random things we need to keep track of, like
+		// the input textarea.	
+			
+		var managerObj = this;
+		var converter;
+		var poller;
+		var timeout;
+		var elapsedTime;
+		var oldInputText;
+		var htmlOut;
+		var maxDelay = 3000;
+		var startType = "delayed";  // The other legal value is "manual"
 		
-		var _173 = function(_174, _175){
-			util.addEvent(_174, "input", _175);
-			_174.onpaste = _175;
-			_174.ondrop = _175;
-			util.addEvent(self, "keypress", _175);
-			util.addEvent(_174, "keypress", _175);
-			util.addEvent(_174, "keydown", _175);
-			_16c = new wmd.inputPoller(_174, _175);
+		// Adds event listeners to elements and creates the input poller.
+		var setupEvents = function(inputElem, listener){
+			
+			util.addEvent(inputElem, "input", listener);
+			inputElem.onpaste = listener;
+			inputElem.ondrop = listener;
+			
+			util.addEvent(self, "keypress", listener);		// Why is this one self?
+			
+			util.addEvent(inputElem, "keypress", listener);
+			util.addEvent(inputElem, "keydown", listener);
+			poller = new wmd.inputPoller(inputElem, listener);
 		};
 			
 		var _176 = function(){
 			var _177 = 0;
 			if(self.innerHeight){
 				_177 = self.pageYOffset;
-			}else{
+			}
+			else{
 				if(doc.documentElement && doc.documentElement.scrollTop){
 					_177 = doc.documentElement.scrollTop;
-				}else{
+				}
+				else{
 					if(doc.body){
 						_177 = doc.body.scrollTop;
 					}
@@ -1821,44 +1872,61 @@ Attacklab.wmdBase = function(){
 			return _177;
 		};
 			
-		var _178 = function(){
-			if(!_169.preview && !_169.output){
+		var makePreviewHtml = function(){
+			
+			// If there are no registered preview and output panels
+			// there is nothing to do.
+			if(!wmdStuff.preview && !wmdStuff.output){
 				return;
 			}
-			var text = _169.input.value;
-			if(text && text == _16f){
-				return;
-			}else{
-				_16f=text;
+			
+			var text = wmdStuff.input.value;
+			if(text && text == oldInputText){
+				return;	// Input text hasn't changed.
 			}
-			var _17a = new Date().getTime();
-			if(!_16b && wmd.showdown){
-				_16b = new wmd.showdown.converter();
+			else{
+				oldInputText = text;
 			}
-			text = util.escapeUnderscores(text);
-			if(_16b){
-				text = _16b.makeHtml(text);
+			
+			var prevTime = new Date().getTime();
+			
+			if(!converter && wmd.showdown){
+				converter = new wmd.showdown.converter();
 			}
-			var _17b = new Date().getTime();
-			_16e = _17b - _17a;
-			_17c(text);
-			_170 = text;
+			
+			if(converter){
+				text = converter.makeHtml(text);
+			}
+			
+			// Calculate the processing time of the HTML creation.
+			// It's used as the delay time in the event listener.
+			var currTime = new Date().getTime();
+			elapsedTime = currTime - prevTime;
+			
+			pushPreviewHtml(text);
+			htmlOut = text;
 		};
 			
-		var _17d = function(){
-			if(_16d){
-				self.clearTimeout(_16d);
-				_16d = undefined;
+		// setTimeout is already used.  Used as an event listener.
+		var applyTimeout = function(){
+			
+			if(timeout){
+				self.clearTimeout(timeout);
+				timeout = undefined;
 			}
-			if(_172 != "manual"){
-				var _17e = 0;
-				if(_172 == "delayed"){
-					_17e=_16e;
+			
+			if(startType !== "manual"){
+				
+				var delay = 0;
+				
+				if(startType === "delayed"){
+					delay = elapsedTime;
 				}
-				if(_17e > _171){
-					_17e=_171;
+				
+				if(delay > maxDelay){
+					delay = maxDelay;
 				}
-				_16d = self.setTimeout(_178, _17e);
+				timeout = self.setTimeout(makePreviewHtml, delay);
 			}
 		};
 			
@@ -1877,92 +1945,111 @@ Attacklab.wmdBase = function(){
 		};
 			
 		var _186 = function(){
-			if(_169.preview){
-				_17f = _181(_169.preview);
+			if(wmdStuff.preview){
+				_17f = _181(wmdStuff.preview);
 			}
-			if(_169.output){
-				_180 = _181(_169.output);
+			
+			if(wmdStuff.output){
+				_180 = _181(wmdStuff.output);
 			}
 		};
 		
 		var _187 = function(){
-			if(_169.preview){
-				_169.preview.scrollTop = _169.preview.scrollTop;
-				_183(_169.preview, _17f);
+			if(wmdStuff.preview){
+				wmdStuff.preview.scrollTop = wmdStuff.preview.scrollTop;
+				_183(wmdStuff.preview, _17f);
 			}
-			if(_169.output){
-				_183(_169.output, _180);
+			if(wmdStuff.output){
+				_183(wmdStuff.output, _180);
 			}
 		};
 		
 		this.refresh = function(_188){
 			if(_188){
-				_16f = "";
-				_178();
+				oldInputText = "";
+				makePreviewHtml();
 			}
 			else{
-				_17d();
+				applyTimeout();
 			}
 		};
 		
 		this.processingTime = function(){
-			return _16e;
+			return elapsedTime;
 		};
 		
+		// The output HTML
 		this.output = function(){
-			return _170;
+			return htmlOut;
 		};
 		
-		this.setUpdateMode = function(_189){
-			_172 = _189;
-			_16a.refresh();
+		// The mode can be "manual" or "delayed"
+		this.setUpdateMode = function(mode){
+			startType = mode;
+			managerObj.refresh();
 		};
 		
 		var _18a = true;
 		
-		var _17c = function(text){
+		var pushPreviewHtml = function(text){
+			
 			_186();
-			var _18c = position.getTop(_169.input) - _176();
-			if(_169.output){
-				if(_169.output.value != undefined){
-					_169.output.value = text;
-					_169.output.readOnly = true;
-				}else{
-					var _18d = text.replace(/&/g,"&amp;");
-					_18d = _18d.replace(/</g, "&lt;");
-					_169.output.innerHTML = "<pre><code>" + _18d + "</code></pre>";
+			var _18c = position.getTop(wmdStuff.input) - _176();
+			
+			// Send the encoded HTML to the output textarea/div.
+			if(wmdStuff.output){
+				// The value property is only defined if the output is a textarea.
+				if(wmdStuff.output.value !== undefined){
+					wmdStuff.output.value = text;
+					wmdStuff.output.readOnly = true;
+				}
+				// Otherwise we are just replacing the text in a div.
+				// Send the HTML wrapped in <pre><code>
+				else{
+					var newText = text.replace(/&/g, "&amp;");
+					newText = newText.replace(/</g, "&lt;");
+					wmdStuff.output.innerHTML = "<pre><code>" + newText + "</code></pre>";
 				}
 			}
-			if(_169.preview){
-				_169.preview.innerHTML=text;
+			
+			if(wmdStuff.preview){
+				// The preview is just raw HTML
+				wmdStuff.preview.innerHTML = text;
 			}
+			
 			_187();
+			
 			if(_18a){
 				_18a = false;
 				return;
 			}
-			var _18e = position.getTop(_169.input) - _176();
+			
+			var _18e = position.getTop(wmdStuff.input) - _176();
+			
 			if(nav.userAgent.indexOf("MSIE")!=-1){
-				self.setTimeout(function(){self.scrollBy(0,_18e-_18c);}, 0);
-			}else{
-				self.scrollBy(0,_18e-_18c);
+				self.setTimeout(function(){self.scrollBy(0, _18e - _18c);}, 0);
+			}
+			else{
+				self.scrollBy(0, _18e - _18c);
 			}
 		};
 		
 		var init = function(){
-			_173(_169.input,_17d);
-			_178();
-			if(_169.preview){
-				_169.preview.scrollTop=0;
+			
+			setupEvents(wmdStuff.input, applyTimeout);
+			makePreviewHtml();
+			
+			if(wmdStuff.preview){
+				wmdStuff.preview.scrollTop = 0;
 			}
-			if(_169.output){
-				_169.output.scrollTop=0;
+			if(wmdStuff.output){
+				wmdStuff.output.scrollTop = 0;
 			}
 		};
 		
 		this.destroy = function(){
-			if(_16c){
-				_16c.destroy();
+			if(poller){
+				poller.destroy();
 			}
 		};
 		
