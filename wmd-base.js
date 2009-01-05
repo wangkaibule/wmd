@@ -146,103 +146,135 @@ Attacklab.wmdBase = function(){
 	};
 	
 	util.skin = function(_27, _28, _29, _2a){
+		
 		var _2b;
-		var _2c=(nav.userAgent.indexOf("MSIE")!=-1);
+		var _2c = (nav.userAgent.indexOf("MSIE") != -1);
+		
 		if(_2c){
-		util.fillers=[];
+			util.fillers = [];
 		}
-		var _2d=_29/2;
-		for(var _2e=0;_2e<4;_2e++){
-		var _2f=util.makeElement("div");
-		_2b=_2f.style;
-		_2b.overflow="hidden";
-		_2b.padding="0";
-		_2b.margin="0";
-		_2b.lineHeight="0px";
-		_2b.height=_2d+"px";
-		_2b.width="50%";
-		_2b.maxHeight=_2d+"px";
-		_2b.position="absolute";
-		if(_2e&1){
-		_2b.top="0";
-		}else{
-		_2b.bottom=-_29+"px";
+		var _2d = _29 / 2;
+		
+		for(var _2e = 0; _2e < 4; _2e++){
+			
+			var _2f = util.makeElement("div");
+			
+			_2b = _2f.style;
+			_2b.overflow = "hidden";
+			_2b.padding = "0";
+			_2b.margin = "0";
+			_2b.lineHeight = "0px";
+			_2b.height = _2d + "px";
+			_2b.width = "50%";
+			_2b.maxHeight = _2d+"px";
+			_2b.position = "absolute";
+			
+			if(_2e & 1){
+				_2b.top = "0";
+			}
+			else{
+				_2b.bottom = -_29 + "px";
+			}
+			
+			_2b.zIndex = "-1000";
+			
+			if(_2e & 2){
+				_2b.left = "0";
+			}
+			else{
+				_2b.marginLeft = "50%";
+			}
+			
+			if(_2c){
+				var _30 = util.makeElement("span");
+				
+				_2b = _30.style;
+				_2b.height = "100%";
+				_2b.width = _2a;
+				_2b.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + wmd.basePath + "images/bg.png')";
+				_2b.position = "absolute";
+				
+				if(_2e & 1){
+					_2b.top = "0";
+				}
+				else{
+					_2b.bottom = "0";
+				}
+				
+				if(_2e & 2){
+					_2b.left = "0";
+				}
+				else{
+					_2b.right = "0";
+				}
+				
+				_2f.appendChild(_30);
+			}
+			else{
+				_2b.backgroundImage = "url(" + _28 + ")";
+				_2b.backgroundPosition = (_2e & 2 ? "left" : "right") + " " + (_2e & 1 ? "top" : "bottom");
+			}
+			
+			_27.appendChild(_2f);
 		}
-		_2b.zIndex="-1000";
-		if(_2e&2){
-		_2b.left="0";
-		}else{
-		_2b.marginLeft="50%";
-		}
-		if(_2c){
-		var _30=util.makeElement("span");
-		_2b=_30.style;
-		_2b.height="100%";
-		_2b.width=_2a;
-		_2b.filter="progid:DXImageTransform.Microsoft."+"AlphaImageLoader(src='"+wmd.basePath+"images/bg.png')";
-		_2b.position="absolute";
-		if(_2e&1){
-		_2b.top="0";
-		}else{
-		_2b.bottom="0";
-		}
-		if(_2e&2){
-		_2b.left="0";
-		}else{
-		_2b.right="0";
-		}
-		_2f.appendChild(_30);
-		}else{
-		_2b.backgroundImage="url("+_28+")";
-		_2b.backgroundPosition=(_2e&2?"left":"right")+" "+(_2e&1?"top":"bottom");
-		}
-		_27.appendChild(_2f);
-		}
-		var _31=function(_32){
-		var _33=util.makeElement("div");
-		if(util.fillers){
-		util.fillers.push(_33);
-		}
-		_2b=_33.style;
-		_2b.overflow="hidden";
-		_2b.padding="0";
-		_2b.margin="0";
-		_2b.marginTop=_2d+"px";
-		_2b.lineHeight="0px";
-		_2b.height="100%";
-		_2b.width="50%";
-		_2b.position="absolute";
-		_2b.zIndex="-1000";
-		if(_2c){
-		var _34=util.makeElement("span");
-		_2b=_34.style;
-		_2b.height="100%";
-		_2b.width=_2a;
-		_2b.filter="progid:DXImageTransform.Microsoft."+"AlphaImageLoader(src='"+wmd.basePath+"images/bg-fill.png',sizingMethod='scale')";
-		_2b.position="absolute";
-		_33.appendChild(_34);
-		if(_32){
-		_2b.left="0";
-		}
-		if(!_32){
-		_2b.right="0";
-		}
-		}
-		if(!_2c){
-		_2b.backgroundImage="url("+wmd.basePath+"images/bg-fill.png)";
-		_2b.backgroundRepeat="repeat-y";
-		if(_32){
-		_2b.backgroundPosition="left top";
-		}
-		if(!_32){
-		_2b.backgroundPosition="right top";
-		}
-		}
-		if(!_32){
-		_33.style.marginLeft="50%";
-		}
-		return _33;
+		
+		var _31 = function(_32){
+			
+			var _33 = util.makeElement("div");
+			
+			if(util.fillers){
+				util.fillers.push(_33);
+			}
+			
+			_2b = _33.style;
+			_2b.overflow = "hidden";
+			_2b.padding = "0";
+			_2b.margin = "0";
+			_2b.marginTop = _2d + "px";
+			_2b.lineHeight = "0px";
+			_2b.height = "100%";
+			_2b.width = "50%";
+			_2b.position = "absolute";
+			_2b.zIndex = "-1000";
+			
+			if(_2c){
+				
+				var _34 = util.makeElement("span");
+				
+				_2b = _34.style;
+				_2b.height = "100%";
+				_2b.width = _2a;
+				_2b.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + wmd.basePath + "images/bg-fill.png',sizingMethod='scale')";
+				_2b.position = "absolute";
+				_33.appendChild(_34);
+				
+				if(_32){
+					_2b.left = "0";
+				}
+				if(!_32){
+					_2b.right = "0";
+				}
+			}
+			
+			if(!_2c){
+				
+				_2b.backgroundImage="url(" + wmd.basePath + "images/bg-fill.png)";
+				_2b.backgroundRepeat = "repeat-y";
+				if(_32){
+					_2b.backgroundPosition = "left top";
+				}
+				if(!_32){
+					_2b.backgroundPosition = "right top";
+				}
+			}
+			
+			if(!_32){
+				_33.style.marginLeft = "50%";
+			}
+			
+			return _33;
 		};
+		
 		_27.appendChild(_31(true));
 		_27.appendChild(_31(false));
 	};
@@ -267,35 +299,47 @@ Attacklab.wmdBase = function(){
 		return elem;
 	};
 	
-	util.createImage = function(_3b, _3c, _3d){
-		_3b=wmd.basePath+_3b;
-		if(nav.userAgent.indexOf("MSIE")!=-1){
-		var _3e=util.makeElement("span");
-		var _3f=_3e.style;
-		_3f.display="inline-block";
-		_3f.height="1px";
-		_3f.width="1px";
-		_3e.unselectable="on";
-		var _40=util.makeElement("span");
-		_3f=_40.style;
-		_3f.display="inline-block";
-		_3f.height="1px";
-		_3f.width="1px";
-		_3f.filter="progid:DXImageTransform.Microsoft."+"AlphaImageLoader(src='"+_3b+"')";
-		_40.unselectable="on";
-		_3e.appendChild(_40);
-		}else{
-		var _3e=util.makeElement("img");
-		_3e.style.display="inline";
-		_3e.src=_3b;
+	// DONE - reworked slightly and jslint clean
+	util.createImage = function(img, width, height){
+		
+		img = wmd.basePath + img;
+		var elem;
+		
+		if(nav.userAgent.indexOf("MSIE")!== -1){
+			
+			// IE-specific
+			elem = util.makeElement("span");
+			var style = elem.style;
+			style.display = "inline-block";
+			style.height = "1px";
+			style.width = "1px";
+			elem.unselectable = "on";
+			
+			var span = util.makeElement("span");
+			style = span.style;
+			style.display = "inline-block";
+			style.height = "1px";
+			style.width = "1px";
+			style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + img + "')";
+			span.unselectable = "on";
+			elem.appendChild(span);
 		}
-		_3e.style.border="none";
-		_3e.border="0";
-		if(_3c&&_3d){
-		_3e.style.width=_3c+"px";
-		_3e.style.height=_3d+"px";
+		else{
+			
+			// Rest of the world
+			elem = util.makeElement("img");
+			elem.style.display = "inline";
+			elem.src = img;
 		}
-		return _3e;
+		
+		elem.style.border = "none";
+		elem.border = "0";
+		
+		if(width && height){
+			elem.style.width = width + "px";
+			elem.style.height = height + "px";
+		}
+		return elem;
 	};
 	
 	util.prompt = function(_41, _42, _43){
@@ -619,47 +663,61 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	wmd.inputPoller = function(_88, _89, _8a){
-		var _8b=this;
+	wmd.inputPoller = function(inputArea, callback, interval){
+		
+		var pollerObj = this;
 		var _8c;
 		var _8d;
-		var _8e,_8f;
-		this.tick=function(){
-		if(!util.elementOk(_88)){
-		return;
-		}
-		if(_88.selectionStart||_88.selectionStart==0){
-		var _90=_88.selectionStart;
-		var _91=_88.selectionEnd;
-		if(_90!=_8c||_91!=_8d){
-		_8c=_90;
-		_8d=_91;
-		if(_8e!=_88.value){
-		_8e=_88.value;
-		return true;
-		}
-		}
-		}
-		return false;
+		var markdown;
+		var ignored;
+		
+		this.tick = function(){
+			
+			// Silently die if the input area is hidden, etc.
+			if(!util.elementOk(inputArea)){
+				return;
+			}
+			
+			if(inputArea.selectionStart || inputArea.selectionStart === 0){
+				var start = inputArea.selectionStart;
+				var end = inputArea.selectionEnd;
+				if(start != _8c || end != _8d){
+					_8c = start;
+					_8d = end;
+					
+					if(markdown != inputArea.value){
+						markdown = inputArea.value;
+						return true;
+					}
+				}
+			}
+			return false;
 		};
-		var _92=function(){
-		if(util.getStyleProperty(_88,"display")=="none"){
-		return;
-		}
-		if(_8b.tick()){
-		_89();
-		}
+		
+		var _92 = function(){
+			
+			if(util.getStyleProperty(inputArea, "display") === "none"){
+				// It's hidden
+				return;
+			}
+			
+			if(pollerObj.tick()){
+				callback();
+			}
 		};
-		var _93=function(){
-		if(_8a==undefined){
-		_8a=500;
-		}
-		_8f=self.setInterval(_92,_8a);
+		
+		var assignInterval = function(){
+			if(interval === undefined){
+				interval = 500;
+			}
+			ignored = self.setInterval(_92, interval);
 		};
-		this.destroy=function(){
-		self.clearInterval(_8f);
+		
+		this.destroy = function(){
+			self.clearInterval(_8f);
 		};
-		_93();
+		
+		assignInterval();
 	};
 	
 	wmd.undoManager = function(_94, _95){
@@ -1490,13 +1548,25 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	wmd.Chunks.prototype.trimWhitespace = function(_125){
+	// DONE - jslint clean
+	//
+	// If the argument is false, the whitespace is transferred
+	// to the before/after borders.
+	// If the argument is true, the whitespace disappears.
+	//
+	// The double negative sucks.  The paramater "sign" needs to be flipped
+	// or the variable eliminated.
+	wmd.Chunks.prototype.trimWhitespace = function(dontMove){
+		
 		this.selection = this.selection.replace(/^(\s*)/, "");
-		if(!_125){
+		
+		if(!dontMove){
 			this.before += re.$1;
 		}
+		
 		this.selection = this.selection.replace(/(\s*)$/, "");
-		if(!_125){
+		
+		if(!dontMove){
 			this.after = re.$1 + this.after;
 		}
 	};
@@ -1575,40 +1645,63 @@ Attacklab.wmdBase = function(){
 		chnks.selection = chnks.selection.replace(/\s+$/, "");
 	};
 	
-	command.doBold = function(_132){
-		return command.doBorI(_132, 2, "strong text");
+	command.doBold = function(chunk){
+		return command.doBorI(chunk, 2, "strong text");
 	};
 	
-	command.doItalic = function(_133){
-		return command.doBorI(_133, 1, "emphasized text");
+	command.doItalic = function(chunk){
+		return command.doBorI(chunk, 1, "emphasized text");
 	};
 	
-	command.doBorI = function(_134, _135, _136){
-		_134.trimWhitespace();
-		_134.selection=_134.selection.replace(/\n{2,}/g,"\n");
-		_134.before.search(/(\**$)/);
-		var _137=re.$1;
-		_134.after.search(/(^\**)/);
-		var _138=re.$1;
-		var _139=Math.min(_137.length,_138.length);
-		if((_139>=_135)&&(_139!=2||_135!=1)){
-		_134.before=_134.before.replace(re("[*]{"+_135+"}$",""),"");
-		_134.after=_134.after.replace(re("^[*]{"+_135+"}",""),"");
-		return;
+	// DONE - reworked a little and jslint clean
+	//
+	// chunk: The selected region that will be enclosed with */**
+	// nStars: 1 for italics, 2 for bold
+	// insertText: If you just click the button without highlighting text, this gets inserted
+	//
+	// This part of the control acts in some pretty weird ways.
+	command.doBorI = function(chunk, nStars, insertText){
+		
+		// Get rid of whitespace and fixup newlines.
+		chunk.trimWhitespace();
+		chunk.selection = chunk.selection.replace(/\n{2,}/g,"\n");
+		
+		// Look for stars before and after.  Is the chunk already marked up?
+		chunk.before.search(/(\**$)/);
+		var starsBefore = re.$1;
+		
+		chunk.after.search(/(^\**)/);
+		var starsAfter = re.$1;
+		
+		var prevStars = Math.min(starsBefore.length, starsAfter.length);
+		
+		// Remove stars if we have to since the button acts as a toggle.
+		if((prevStars >= nStars) && (prevStars != 2 || nStars != 1)){
+			chunk.before = chunk.before.replace(re("[*]{" + nStars + "}$", ""), "");
+			chunk.after = chunk.after.replace(re("^[*]{" + nStars + "}", ""), "");
+			return;
 		}
-		if(!_134.selection&&_138){
-		_134.after=_134.after.replace(/^([*_]*)/,"");
-		_134.before=_134.before.replace(/(\s?)$/,"");
-		var _13a=re.$1;
-		_134.before=_134.before+_138+_13a;
-		return;
+		
+		// It's not really clear why this code is necessary.  It just moves
+		// some arbitrary stuff around.
+		if(!chunk.selection && starsAfter){
+			chunk.after = chunk.after.replace(/^([*_]*)/, "");
+			chunk.before = chunk.before.replace(/(\s?)$/, "");
+			var whitespace = re.$1;
+			chunk.before = chunk.before + starsAfter + whitespace;
+			return;
 		}
-		if(!_134.selection&&!_138){
-		_134.selection=_136;
+		
+		// In most cases, if you don't have any selected text and click the button
+		// you'll get a selected, marked up region with the default text inserted.
+		if(!chunk.selection && !starsAfter){
+			chunk.selection = insertText;
 		}
-		var _13b=_135<=1?"*":"**";
-		_134.before=_134.before+_13b;
-		_134.after=_13b+_134.after;
+		
+		// Add the true markup.
+		var markup = nStars <= 1 ? "*" : "**";	// shouldn't the test be = ?
+		chunk.before = chunk.before + markup;
+		chunk.after = markup + chunk.after;
 	};
 	
 	command.stripLinkDefs = function(_13c, _13d){
@@ -1825,6 +1918,7 @@ Attacklab.wmdBase = function(){
 		var ignored = self.setInterval(loadListener, 100);
 	};
 	
+	// UNFINISHED - needs display stuff
 	wmd.previewManager = function(wmdStuff){
 		
 		// wmdStuff stores random things we need to keep track of, like
