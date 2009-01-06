@@ -50,7 +50,7 @@ Attacklab.wmdBase = function(){
 		return elem;
 	};
 	
-	// UNFINISHED - cleaned up - jslint clean
+	// UNFINISHED, but good enough for now - cleaned up - jslint clean
 	// This is always used to see if "display" is set to "none".
 	// Might want to rename it checkVisible() or something.
 	// Might want to return null instead of "" on style search failure.
@@ -156,7 +156,7 @@ Attacklab.wmdBase = function(){
 	
 	// DONE
 	// Adds a skin to the button "bar" at the top of the textarea.
-	util.skin = function(elem, imgPath, height, width){
+	util.skin = function(elem, backImagePath, height, width){
 		
 		var style;
 		var isIE = (nav.userAgent.indexOf("MSIE") != -1);
@@ -223,7 +223,7 @@ Attacklab.wmdBase = function(){
 				div.appendChild(span);
 			}
 			else{
-				style.backgroundImage = "url(" + imgPath + ")";
+				style.backgroundImage = "url(" + backImagePath + ")";
 				style.backgroundPosition = (corner & 2 ? "left" : "right") + " " + (corner & 1 ? "top" : "bottom");
 			}
 			
@@ -646,61 +646,54 @@ Attacklab.wmdBase = function(){
 		var offset = position.getLeft(elem, isInner) - curLeft;
 		elem.style.left = (newLeft - offset)+"px";
 	};
-		
-	position.getHeight = function(_7c){
-		var _7d=_7c.offsetHeight;
-		if(!_7d){
-		_7d=_7c.scrollHeight;
-		}
-		return _7d;
+	
+	// DONE - copied from cky (simplified)
+	position.getHeight = function(elem){
+		return elem.offsetHeight || elem.scrollHeight;
 	};
 	
-	position.setHeight = function(_7e, _7f){
-		var _80=position.getPixelVal(_7e.style.height);
-		if(_80==undefined){
-		_7e.style.height=_7f+"px";
-		_80=_7f;
-		}
-		var _81=position.getHeight(_7e)-_80;
-		if(_81>_7f){
-		_81=_7f;
-		}
-		_7e.style.height=(_7f-_81)+"px";
+	// DONE - copied from cky
+    position.setHeight = function (elem, newHeight) {
+        var curHeight = position.getPixelVal(elem.style.height);
+        if (curHeight == undefined) {
+            elem.style.height = newHeight + "px";
+            curHeight = newHeight;
+        }
+        var offset = position.getHeight(elem) - curHeight;
+        if (offset > newHeight) {
+            offset = newHeight;
+        }
+        elem.style.height = (newHeight - offset) + "px";
+    };
+	
+	// DONE - copied from cky (simplified)
+	position.getWidth = function(elem){
+		return elem.offsetWidth || elem.scrollWidth;
 	};
 	
-	position.getWidth = function(_82){
-		var _83=_82.offsetWidth;
-		if(!_83){
-		_83=_82.scrollWidth;
-		}
-		return _83;
-	};
+	// DONE - copied from cky
+    position.setWidth = function (elem, newWidth) {
+        var curWidth = position.getPixelVal(elem.style.width);
+        if (curWidth == undefined) {
+            elem.style.width = newWidth + "px";
+            curWidth = newWidth;
+        }
+        var offset = position.getWidth(elem) - curWidth;
+        if (offset > newWidth) {
+            offset = newWidth;
+        }
+        elem.style.width = (newWidth - offset) + "px";
+    };
 	
-	position.setWidth = function(_84, _85){
-		var _86=position.getPixelVal(_84.style.width);
-		if(_86==undefined){
-		_84.style.width=_85+"px";
-		_86=_85;
-		}
-		var _87=position.getWidth(_84)-_86;
-		if(_87>_85){
-		_87=_85;
-		}
-		_84.style.width=(_85-_87)+"px";
-	};
-	
+	// DONE - copied from cky
 	position.getWindowHeight = function(){
-		if(self.innerHeight){
-		return self.innerHeight;
-		}else{
-		if(doc.documentElement&&doc.documentElement.clientHeight){
-		return doc.documentElement.clientHeight;
-		}else{
-		if(doc.body){
-		return doc.body.clientHeight;
-		}
-		}
-		}
+        if (self.innerHeight) {
+            return self.innerHeight;
+        } else if (doc.documentElement && doc.documentElement.clientHeight) {
+            return doc.documentElement.clientHeight;
+        } else if (doc.body) {
+            return doc.body.clientHeight;
+        }
 	};
 	
 	// DONE - slightly improved - jslint clean
@@ -1008,8 +1001,11 @@ Attacklab.wmdBase = function(){
 			previewRefreshCallback = function(){};
 		}
 		
-		var _b2 = 28;
-		var _b3 = 4076;
+		// Width and height of the button bar for the util.skin function.
+		// Why are they hard-coded here?
+		var btnBarHeight = 28;
+		var btnBarWidth = 4076;
+		
 		var _b4 = 0;
 		var _b5;
 		var _b6;
@@ -1131,10 +1127,10 @@ Attacklab.wmdBase = function(){
 		// Creates a separator in the button row at the top of the input area.
 		var makeButtonSeparator = function(){
 			
-			var _d1 = util.createImage("images/separator.png", 20, 20);
-			_d1.style.padding = "4px";
-			_d1.style.paddingTop = "0px";
-			_b9.appendChild(_d1);
+			var sepImage = util.createImage("images/separator.png", 20, 20);
+			sepImage.style.padding = "4px";
+			sepImage.style.paddingTop = "0px";
+			_b9.appendChild(sepImage);
 			
 		};
 		
@@ -1213,7 +1209,7 @@ Attacklab.wmdBase = function(){
 				_e0();
 				inputBox.parentNode.insertBefore(_ba, inputBox);
 				_e1();
-				util.skin(_b8, wmd.basePath + "images/bg.png", _b2, _b3);
+				util.skin(_b8, wmd.basePath + "images/bg.png", btnBarHeight, btnBarWidth);
 				_dd.visibility = "visible";
 				return true;
 			}
@@ -1484,7 +1480,7 @@ Attacklab.wmdBase = function(){
 			_b8.style.width = Math.max(_fe, _101) + "px";
 			var root = _b8.offsetParent;
 			var _103 = position.getHeight(_b9);
-			var _104 = _103 - _b2 + "px";
+			var _104 = _103 - btnBarHeight + "px";
 			_b8.style.height = _104;
 			if(util.fillers){
 				util.fillers[0].style.height = util.fillers[1].style.height = _104;
