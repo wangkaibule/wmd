@@ -20,8 +20,16 @@ Attacklab.wmdBase = function(){
 	wmd.Util.newIE = !wmd.Util.oldIE&&(nav.userAgent.indexOf("MSIE") != -1);
 	
 	// DONE - jslint clean
+	//
+	// Creates and returns a new HtmlElement.
+	// If noStyle is false a default style is applied.
+	// This should be refactored to take a Style object or
+	// something instead of the weird noStyle argument.
 	util.makeElement = function(type, noStyle){
+		
 		var elem = doc.createElement(type);
+		
+		// I hate the double negative here.
 		if(!noStyle){
 			var style = elem.style;
 			style.margin = "0";
@@ -38,6 +46,7 @@ Attacklab.wmdBase = function(){
 			style.minWidth = style.minHeight = "0";
 			style.maxWidth = style.maxHeight = "90000px";		// kinda arbitrary but ok
 		}
+		
 		return elem;
 	};
 	
@@ -145,142 +154,146 @@ Attacklab.wmdBase = function(){
 		return true;
 	};
 	
-	util.skin = function(_27, _28, _29, _2a){
+	// DONE
+	// Adds a skin to the button "bar" at the top of the textarea.
+	util.skin = function(elem, imgPath, height, width){
 		
-		var _2b;
-		var _2c = (nav.userAgent.indexOf("MSIE") != -1);
+		var style;
+		var isIE = (nav.userAgent.indexOf("MSIE") != -1);
 		
-		if(_2c){
+		if(isIE){
 			util.fillers = [];
 		}
-		var _2d = _29 / 2;
 		
-		for(var _2e = 0; _2e < 4; _2e++){
+		var halfHeight = height / 2;
+		
+		for(var corner = 0; corner < 4; corner++){
 			
-			var _2f = util.makeElement("div");
+			var div = util.makeElement("div");
 			
-			_2b = _2f.style;
-			_2b.overflow = "hidden";
-			_2b.padding = "0";
-			_2b.margin = "0";
-			_2b.lineHeight = "0px";
-			_2b.height = _2d + "px";
-			_2b.width = "50%";
-			_2b.maxHeight = _2d+"px";
-			_2b.position = "absolute";
+			style = div.style;
+			style.overflow = "hidden";
+			style.padding = "0";
+			style.margin = "0";
+			style.lineHeight = "0px";
+			style.height = halfHeight + "px";
+			style.width = "50%";
+			style.maxHeight = halfHeight + "px";
+			style.position = "absolute";
 			
-			if(_2e & 1){
-				_2b.top = "0";
+			if(corner & 1){
+				style.top = "0";
 			}
 			else{
-				_2b.bottom = -_29 + "px";
+				style.bottom = -height + "px";
 			}
 			
-			_2b.zIndex = "-1000";
+			style.zIndex = "-1000";
 			
-			if(_2e & 2){
-				_2b.left = "0";
+			if(corner & 2){
+				style.left = "0";
 			}
 			else{
-				_2b.marginLeft = "50%";
+				style.marginLeft = "50%";
 			}
 			
-			if(_2c){
-				var _30 = util.makeElement("span");
+			if(isIE){
+				var span = util.makeElement("span");
 				
-				_2b = _30.style;
-				_2b.height = "100%";
-				_2b.width = _2a;
-				_2b.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + wmd.basePath + "images/bg.png')";
-				_2b.position = "absolute";
+				style = span.style;
+				style.height = "100%";
+				style.width = width;
+				style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + wmd.basePath + "images/bg.png')";
+				style.position = "absolute";
 				
-				if(_2e & 1){
-					_2b.top = "0";
+				if(corner & 1){
+					style.top = "0";
 				}
 				else{
-					_2b.bottom = "0";
+					style.bottom = "0";
 				}
 				
-				if(_2e & 2){
-					_2b.left = "0";
+				if(corner & 2){
+					style.left = "0";
 				}
 				else{
-					_2b.right = "0";
+					style.right = "0";
 				}
 				
-				_2f.appendChild(_30);
+				div.appendChild(span);
 			}
 			else{
-				_2b.backgroundImage = "url(" + _28 + ")";
-				_2b.backgroundPosition = (_2e & 2 ? "left" : "right") + " " + (_2e & 1 ? "top" : "bottom");
+				style.backgroundImage = "url(" + imgPath + ")";
+				style.backgroundPosition = (corner & 2 ? "left" : "right") + " " + (corner & 1 ? "top" : "bottom");
 			}
 			
-			_27.appendChild(_2f);
+			elem.appendChild(div);
 		}
 		
-		var _31 = function(_32){
+		// This is a terrible name for something that returns a div.
+		var fill = function(left){
 			
-			var _33 = util.makeElement("div");
+			var div = util.makeElement("div");
 			
 			if(util.fillers){
-				util.fillers.push(_33);
+				util.fillers.push(div);
 			}
 			
-			_2b = _33.style;
-			_2b.overflow = "hidden";
-			_2b.padding = "0";
-			_2b.margin = "0";
-			_2b.marginTop = _2d + "px";
-			_2b.lineHeight = "0px";
-			_2b.height = "100%";
-			_2b.width = "50%";
-			_2b.position = "absolute";
-			_2b.zIndex = "-1000";
+			style = div.style;
+			style.overflow = "hidden";
+			style.padding = "0";
+			style.margin = "0";
+			style.marginTop = halfHeight + "px";
+			style.lineHeight = "0px";
+			style.height = "100%";
+			style.width = "50%";
+			style.position = "absolute";
+			style.zIndex = "-1000";
 			
-			if(_2c){
+			if(isIE){
 				
-				var _34 = util.makeElement("span");
+				var span = util.makeElement("span");
 				
-				_2b = _34.style;
-				_2b.height = "100%";
-				_2b.width = _2a;
-				_2b.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + wmd.basePath + "images/bg-fill.png',sizingMethod='scale')";
-				_2b.position = "absolute";
-				_33.appendChild(_34);
+				style = span.style;
+				style.height = "100%";
+				style.width = width;
+				style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + wmd.basePath + "images/bg-fill.png',sizingMethod='scale')";
+				style.position = "absolute";
+				div.appendChild(span);
 				
-				if(_32){
-					_2b.left = "0";
+				if(left){
+					style.left = "0";
 				}
-				if(!_32){
-					_2b.right = "0";
-				}
-			}
-			
-			if(!_2c){
-				
-				_2b.backgroundImage="url(" + wmd.basePath + "images/bg-fill.png)";
-				_2b.backgroundRepeat = "repeat-y";
-				if(_32){
-					_2b.backgroundPosition = "left top";
-				}
-				if(!_32){
-					_2b.backgroundPosition = "right top";
+				if(!left){
+					style.right = "0";
 				}
 			}
 			
-			if(!_32){
-				_33.style.marginLeft = "50%";
+			if(!isIE){
+				
+				style.backgroundImage = "url(" + wmd.basePath + "images/bg-fill.png)";
+				style.backgroundRepeat = "repeat-y";
+				if(left){
+					style.backgroundPosition = "left top";
+				}
+				if(!left){
+					style.backgroundPosition = "right top";
+				}
 			}
 			
-			return _33;
+			if(!left){
+				div.style.marginLeft = "50%";
+			}
+			
+			return div;
 		};
 		
-		_27.appendChild(_31(true));
-		_27.appendChild(_31(false));
+		elem.appendChild(fill(true));
+		elem.appendChild(fill(false));
 	};
 	
 	// DONE - cleaned up - jslint clean
-	// I'm pretty sure this sets the image for a "button" on the WMD editor.
+	// Sets the image for a "button" on the WMD editor.
 	util.setImage = function(elem, imgPath){
 		
 		imgPath = wmd.basePath + imgPath;
@@ -342,146 +355,173 @@ Attacklab.wmdBase = function(){
 		return elem;
 	};
 	
-	util.prompt = function(_41, _42, _43){
-		var _44;
-		var _45,_46,_47;
-		var _48=function(_49){
-		var _4a=(_49.charCode||_49.keyCode);
-		if(_4a==27){
-		_4b(true);
+	util.prompt = function(text, _42, callback){
+		
+		var style;
+		var frame;
+		var background;
+		var input;
+		
+		var _48 = function(_49){
+			var _4a = (_49.charCode || _49.keyCode);
+			if(_4a == 27){
+				_4b(true);
+			}
+		};
+		
+		var _4b = function(_4c){
+			util.removeEvent(doc.body, "keydown", _48);
+			var _4d = input.value;
+			if(_4c){
+				_4d = null;
+			}
+			frame.parentNode.removeChild(frame);
+			background.parentNode.removeChild(background);
+			callback(_4d);
+			return false;
+		};
+		
+		if(_42 === undefined){
+			_42 = "";
 		}
+		
+		var showBackground = function(){
+			
+			background = util.makeElement("div");
+			style = background.style;
+			doc.body.appendChild(background);
+			style.position = "absolute";
+			style.top = "0";
+			style.left = "0";
+			style.backgroundColor = "#000";
+			style.zIndex = "1000";
+			var isKonqueror = /konqueror/.test(nav.userAgent.toLowerCase());
+			
+			if(isKonqueror){
+				style.backgroundColor = "transparent";
+			}
+			else{
+				style.opacity = "0.5";
+				style.filter = "alpha(opacity=50)";
+			}
+			
+			var _50 = position.getPageSize();
+			style.width = "100%";
+			style.height = _50[1] + "px";
 		};
-		var _4b=function(_4c){
-		util.removeEvent(doc.body,"keydown",_48);
-		var _4d=_47.value;
-		if(_4c){
-		_4d=null;
-		}
-		_45.parentNode.removeChild(_45);
-		_46.parentNode.removeChild(_46);
-		_43(_4d);
-		return false;
+		
+		var _51 = function(){
+			
+			frame = doc.createElement("div");
+			frame.style.border = "3px solid #333";
+			frame.style.backgroundColor = "#ccc";
+			frame.style.padding = "10px;";
+			frame.style.borderTop = "3px solid white";
+			frame.style.borderLeft = "3px solid white";
+			frame.style.position = "fixed";
+			frame.style.width = "400px";
+			frame.style.zIndex = "1001";
+			var _52 = util.makeElement("div");
+			style = _52.style;
+			style.fontSize = "14px";
+			style.fontFamily = "Helvetica, Arial, Verdana, sans-serif";
+			style.padding = "5px";
+			_52.innerHTML = text;
+			frame.appendChild(_52);
+			var _53 = util.makeElement("form");
+			
+			_53.onsubmit = function(){
+				return _4b();
+			};
+			
+			style = _53.style;
+			style.padding = "0";
+			style.margin = "0";
+			style.cssFloat = "left";
+			style.width = "100%";
+			style.textAlign = "center";
+			style.position = "relative";
+			frame.appendChild(_53);
+			input = doc.createElement("input");
+			input.value = _42;
+			style = input.style;
+			style.display = "block";
+			style.width = "80%";
+			style.marginLeft = style.marginRight = "auto";
+			style.backgroundColor = "white";
+			style.color = "black";
+			_53.appendChild(input);
+			var _54 = doc.createElement("input");
+			_54.type = "button";
+			
+			_54.onclick = function(){
+				return _4b();
+			};
+			
+			_54.value = "OK";
+			style = _54.style;
+			style.margin = "10px";
+			style.display = "inline";
+			style.width = "7em";
+			var _55 = doc.createElement("input");
+			_55.type = "button";
+			
+			_55.onclick = function(){
+				return _4b(true);
+			};
+			
+			_55.value = "Cancel";
+			style = _55.style;
+			style.margin = "10px";
+			style.display = "inline";
+			style.width = "7em";
+			
+			if(/mac/.test(nav.platform.toLowerCase())){
+				_53.appendChild(_55);
+				_53.appendChild(_54);
+			}
+			else{
+				_53.appendChild(_54);
+				_53.appendChild(_55);
+			}
+			
+			util.addEvent(doc.body, "keydown", _48);
+			frame.style.top = "50%";
+			frame.style.left = "50%";
+			frame.style.display = "block";
+			if(wmd.Util.oldIE){
+				var _56 = position.getPageSize();
+				frame.style.position = "absolute";
+				frame.style.top = doc.documentElement.scrollTop + 200 + "px";
+				frame.style.left = "50%";
+			}
+			doc.body.appendChild(frame);
+			frame.style.marginTop =- (position.getHeight(frame) / 2) + "px";
+			frame.style.marginLeft =- (position.getWidth(frame) / 2) + "px";
 		};
-		if(_42==undefined){
-		_42="";
-		}
-		var _4e=function(){
-		_46=util.makeElement("div");
-		_44=_46.style;
-		doc.body.appendChild(_46);
-		_44.position="absolute";
-		_44.top="0";
-		_44.left="0";
-		_44.backgroundColor="#000";
-		_44.zIndex="1000";
-		var _4f=/konqueror/.test(nav.userAgent.toLowerCase());
-		if(_4f){
-		_44.backgroundColor="transparent";
-		}else{
-		_44.opacity="0.5";
-		_44.filter="alpha(opacity=50)";
-		}
-		var _50=position.getPageSize();
-		_44.width="100%";
-		_44.height=_50[1]+"px";
-		};
-		var _51=function(){
-		_45=doc.createElement("div");
-		_45.style.border="3px solid #333";
-		_45.style.backgroundColor="#ccc";
-		_45.style.padding="10px;";
-		_45.style.borderTop="3px solid white";
-		_45.style.borderLeft="3px solid white";
-		_45.style.position="fixed";
-		_45.style.width="400px";
-		_45.style.zIndex="1001";
-		var _52=util.makeElement("div");
-		_44=_52.style;
-		_44.fontSize="14px";
-		_44.fontFamily="Helvetica, Arial, Verdana, sans-serif";
-		_44.padding="5px";
-		_52.innerHTML=_41;
-		_45.appendChild(_52);
-		var _53=util.makeElement("form");
-		_53.onsubmit=function(){
-		return _4b();
-		};
-		_44=_53.style;
-		_44.padding="0";
-		_44.margin="0";
-		_44.cssFloat="left";
-		_44.width="100%";
-		_44.textAlign="center";
-		_44.position="relative";
-		_45.appendChild(_53);
-		_47=doc.createElement("input");
-		_47.value=_42;
-		_44=_47.style;
-		_44.display="block";
-		_44.width="80%";
-		_44.marginLeft=_44.marginRight="auto";
-		_44.backgroundColor="white";
-		_44.color="black";
-		_53.appendChild(_47);
-		var _54=doc.createElement("input");
-		_54.type="button";
-		_54.onclick=function(){
-		return _4b();
-		};
-		_54.value="OK";
-		_44=_54.style;
-		_44.margin="10px";
-		_44.display="inline";
-		_44.width="7em";
-		var _55=doc.createElement("input");
-		_55.type="button";
-		_55.onclick=function(){
-		return _4b(true);
-		};
-		_55.value="Cancel";
-		_44=_55.style;
-		_44.margin="10px";
-		_44.display="inline";
-		_44.width="7em";
-		if(/mac/.test(nav.platform.toLowerCase())){
-		_53.appendChild(_55);
-		_53.appendChild(_54);
-		}else{
-		_53.appendChild(_54);
-		_53.appendChild(_55);
-		}
-		util.addEvent(doc.body,"keydown",_48);
-		_45.style.top="50%";
-		_45.style.left="50%";
-		_45.style.display="block";
-		if(wmd.Util.oldIE){
-		var _56=position.getPageSize();
-		_45.style.position="absolute";
-		_45.style.top=doc.documentElement.scrollTop+200+"px";
-		_45.style.left="50%";
-		}
-		doc.body.appendChild(_45);
-		_45.style.marginTop=-(position.getHeight(_45)/2)+"px";
-		_45.style.marginLeft=-(position.getWidth(_45)/2)+"px";
-		};
-		_4e();
+		
+		showBackground();
+		
 		self.setTimeout(function(){
-		_51();
-		var _57=_42.length;
-		if(_47.selectionStart!=undefined){
-		_47.selectionStart=0;
-		_47.selectionEnd=_57;
-		}else{
-		if(_47.createTextRange){
-		var _58=_47.createTextRange();
-		_58.collapse(false);
-		_58.moveStart("character",-_57);
-		_58.moveEnd("character",_57);
-		_58.select();
-		}
-		}
-		_47.focus();
-		},0);
+			
+			_51();
+			var _57 = _42.length;
+			
+			if(input.selectionStart !== undefined){
+				input.selectionStart = 0;
+				input.selectionEnd = _57;
+			}
+			else{
+				if(input.createTextRange){
+					var _58 = input.createTextRange();
+					_58.collapse(false);
+					_58.moveStart("character", -_57);
+					_58.moveEnd("character", _57);
+					_58.select();
+				}
+			}
+			input.focus();
+		}, 0);
 	};
 	
 	// UNFINISHED - almost a direct copy of original function
@@ -915,57 +955,81 @@ Attacklab.wmdBase = function(){
 		_af();
 	};
 	
-	wmd.editor = function(_b0, _b1){
+	wmd.editor = function(inputBox, previewRefreshCallback){
 		
-		if(!_b1){
-			_b1 = function(){};
+		if(!previewRefreshCallback){
+			previewRefreshCallback = function(){};
 		}
 		
 		var _b2 = 28;
 		var _b3 = 4076;
 		var _b4 = 0;
-		var _b5, _b6;
+		var _b5;
+		var _b6;
 		var _b7 = this;
-		var _b8, _b9;
-		var _ba, _bb, _bc;
-		var _bd, _be, _bf;
-		var _c0 = [];
+		var _b8;
+		var _b9;
+		var _ba;
+		var _bb;
+		var _bc;
+		var _bd;
+		var _be;
+		var _bf;
+		var buttonCallbacks = [];	// Callbacks for the buttons at the top of the input area
 		
-		var _c1 = function(_c2){
+		// Saves the input state at the time of button click and performs the button function.
+		// The parameter is the function performed when this function is called.
+		var saveStateDoButtonAction = function(callback){
+			
 			if(_bd){
 				_bd.setCommandMode();
 			}
-			var _c3=new wmd.textareaState(_b0);
-			if(!_c3){
+			
+			var state = new wmd.textareaState(inputBox);
+			
+			if(!state){
 				return;
 			}
-			var _c4 = _c3.getChunks();
-			var _c5=function(){
-				_b0.focus();
-				if(_c4){
-					_c3.setChunks(_c4);
+			
+			var chunks = state.getChunks();
+			
+			// This seems like a very convoluted way of performing the action.
+			var performAction = function(){
+				
+				inputBox.focus();
+				
+				if(chunks){
+					state.setChunks(chunks);
 				}
-				_c3.restore();
-				_b1();
+				
+				state.restore();
+				previewRefreshCallback();
 			};
-			var _c6 = _c2(_c4, _c5);
+			
+			var _c6 = callback(chunks, performAction);
+			
 			if(!_c6){
-				_c5();
+				performAction();
 			}
 		};
 		
 		var _c7 = function(_c8){
-			_b0.focus();
+			
+			inputBox.focus();
+			
 			if(_c8.textOp){
-				_c1(_c8.textOp);
+				saveStateDoButtonAction(_c8.textOp);
 			}
+			
 			if(_c8.execute){
 				_c8.execute(_b7);
 			}
 		};
 		
 		var _c9 = function(_ca,_cb){
+			
 			var _cc = _ca.style;
+			
 			if(_cb){
 				_cc.opacity = "1.0";
 				_cc.KHTMLOpacity = "1.0";
@@ -1009,22 +1073,25 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		var _cd = function(_ce){
-			_ce && _c0.push(_ce);
+		var addButtonCallback = function(callback){
+			callback && buttonCallbacks.push(callback);
 		};
 		
-		var _cf = function(){
-			_c0.push("|");
+		var addButtonSeparator = function(){
+			buttonCallbacks.push("|");
 		};
 		
-		var _d0 = function(){
+		// Creates a separator in the button row at the top of the input area.
+		var makeButtonSeparator = function(){
+			
 			var _d1 = util.createImage("images/separator.png", 20, 20);
 			_d1.style.padding = "4px";
 			_d1.style.paddingTop = "0px";
 			_b9.appendChild(_d1);
+			
 		};
 		
-		var _d2 = function(_d3){
+		var makeButtonImage = function(_d3){
 			if(_d3.image){
 				var _d4 = util.createImage(_d3.image, 16, 16);
 				_d4.border = 0;
@@ -1058,13 +1125,16 @@ Attacklab.wmdBase = function(){
 			return;
 		};
 		
-		var _d9 = function(){
-			for(var _da in _c0){
-				if(_c0[_da] == "|"){
-					_d0();
+		// Creates the button row above the input area.
+		var makeButtonRow = function(){
+			
+			for(var callback in buttonCallbacks){
+				
+				if(buttonCallbacks[callback] == "|"){
+					makeButtonSeparator();
 				}
 				else{
-					_d2(_c0[_da]);
+					makeButtonImage(buttonCallbacks[callback]);
 				}
 			}
 		};
@@ -1077,7 +1147,7 @@ Attacklab.wmdBase = function(){
 		};
 		
 		var _dc = function(){
-			if(_b0.offsetParent){
+			if(inputBox.offsetParent){
 				_ba = util.makeElement("div");
 				var _dd = _ba.style;
 				_dd.visibility = "hidden";
@@ -1088,13 +1158,13 @@ Attacklab.wmdBase = function(){
 				_dd.opacity = "0.999";
 				_b8.style.position = "absolute";
 				_ba.appendChild(_b8);
-				_b0.style.marginTop = "";
-				var _de = position.getTop(_b0);
-				_b0.style.marginTop = "0";
-				var _df = position.getTop(_b0);
+				inputBox.style.marginTop = "";
+				var _de = position.getTop(inputBox);
+				inputBox.style.marginTop = "0";
+				var _df = position.getTop(inputBox);
 				_b4 = _de - _df;
 				_e0();
-				_b0.parentNode.insertBefore(_ba, _b0);
+				inputBox.parentNode.insertBefore(_ba, inputBox);
 				_e1();
 				util.skin(_b8, wmd.basePath + "images/bg.png", _b2, _b3);
 				_dd.visibility = "visible";
@@ -1103,45 +1173,49 @@ Attacklab.wmdBase = function(){
 			return false;
 		};
 		
-		var _e2=function(){
-			var _e3 = wmd.wmd_env.buttons.split(/\s+/);
-			for(var _e4 in _e3){
-				switch(_e3[_e4]){
+		var setButtonCallbacks = function(){
+			
+			var buttons = wmd.wmd_env.buttons.split(/\s+/);
+			
+			for(var btn in buttons){
+				
+				switch(buttons[btn]){
 					case "|":
-						_cf();
+						addButtonSeparator();
 						break;
 					case "bold":
-						_cd(command.bold);
+						addButtonCallback(command.bold);
 						break;
 					case "italic":
-						_cd(command.italic);
+						addButtonCallback(command.italic);
 						break;
 					case "link":
-						_cd(command.link);
+						addButtonCallback(command.link);
 						break;
 				}
+				
 				if(wmd.full){
-					switch(_e3[_e4]){
+					switch(buttons[btn]){
 						case "blockquote":
-							_cd(command.blockquote);
+							addButtonCallback(command.blockquote);
 							break;
 						case "code":
-							_cd(command.code);
+							addButtonCallback(command.code);
 							break;
 						case "image":
-							_cd(command.img);
+							addButtonCallback(command.img);
 							break;
 						case "ol":
-							_cd(command.ol);
+							addButtonCallback(command.ol);
 							break;
 						case "ul":
-							_cd(command.ul);
+							addButtonCallback(command.ul);
 							break;
 						case "heading":
-							_cd(command.h1);
+							addButtonCallback(command.h1);
 							break;
 						case "hr":
-							_cd(command.hr);
+							addButtonCallback(command.hr);
 							break;
 					}
 				}
@@ -1156,13 +1230,13 @@ Attacklab.wmdBase = function(){
 			}
 			
 			if(!wmd.nativeUndo){
-				_bd = new wmd.undoManager(_b0,function(){
-					_b1();
+				_bd = new wmd.undoManager(inputBox,function(){
+					previewRefreshCallback();
 					_db();
 				});
 			}
 			
-			var _e6 = _b0.parentNode;
+			var _e6 = inputBox.parentNode;
 			_b8 = util.makeElement("div");
 			_b8.style.display = "block";
 			_b8.style.zIndex = 100;
@@ -1172,7 +1246,7 @@ Attacklab.wmdBase = function(){
 			_b8.unselectable="on";
 			
 			_b8.onclick = function(){
-				_b0.focus();
+				inputBox.focus();
 			};
 			
 			_b9 = util.makeElement("span");
@@ -1186,16 +1260,17 @@ Attacklab.wmdBase = function(){
 			_e7.position = "absolute";
 			_b9.unselectable = "on";
 			_b8.appendChild(_b9);
-			_cd(command.autoindent);
+			addButtonCallback(command.autoindent);
 			var _e8 = util.createImage("images/bg.png");
 			var _e9 = util.createImage("images/bg-fill.png");
-			_e2();
-			_d9();
+			
+			setButtonCallbacks();
+			makeButtonRow();
 			
 			if(_bd){
-				_d0();
-				_be = _d2(command.undo);
-				_bf = _d2(command.redo);
+				makeButtonSeparator();
+				_be = makeButtonImage(command.undo);
+				_bf = makeButtonImage(command.redo);
 				var _ea = nav.platform.toLowerCase();
 				
 				if(/win/.test(_ea)){
@@ -1219,31 +1294,39 @@ Attacklab.wmdBase = function(){
 				_eb = "keypress";
 			}
 			
-			util.addEvent(_b0, _eb, 
+			util.addEvent(inputBox, _eb, 
 				function(_ec){
+					
 					var _ed = false;
+					
 					if(_ec.ctrlKey||_ec.metaKey){
+						
 						var _ee = (_ec.charCode || _ec.keyCode);
 						var _ef = String.fromCharCode(_ee).toLowerCase();
-						for(var _f0 in _c0){
-							var _f1 = _c0[_f0];
+						for(var callback in buttonCallbacks){
+							
+							var _f1 = buttonCallbacks[callback];
+							
 							if(_f1.key && _ef == _f1.key || _f1.keyCode && _ec.keyCode == _f1.keyCode){
 								_c7(_f1);
 								_ed = true;
 							}
 						}
 					}
+					
 					if(_ed){
+						
 						if(_ec.preventDefault){
 							_ec.preventDefault();
 						}
+						
 						if(self.event){
 							self.event.returnValue = false;
 						}
 					}
 				});
 			
-			util.addEvent(_b0, "keyup", 
+			util.addEvent(inputBox, "keyup", 
 				function(_f2){
 					if(_f2.shiftKey && !_f2.ctrlKey && !_f2.metaKey){
 						var _f3 = (_f2.charCode || _f2.keyCode);
@@ -1265,9 +1348,9 @@ Attacklab.wmdBase = function(){
 			
 			util.addEvent(self, "resize", _e1);
 			_bb = self.setInterval(_e1, 100);
-			if(_b0.form){
-				var _f4 = _b0.form.onsubmit;
-				_b0.form.onsubmit=function(){
+			if(inputBox.form){
+				var _f4 = inputBox.form.onsubmit;
+				inputBox.form.onsubmit = function(){
 					_f5();
 					if(_f4){
 						return _f4.apply(this, arguments);
@@ -1281,15 +1364,15 @@ Attacklab.wmdBase = function(){
 			if(wmd.showdown){
 				var _f6 = new wmd.showdown.converter();
 			}
-			var _f7 = _b0.value;
+			var _f7 = inputBox.value;
 			
 			var _f8 = function(){
-				_b0.value = _f7;
+				inputBox.value = _f7;
 			};
 			
 			if(!/markdown/.test(wmd.wmd_env.output.toLowerCase())){
 				if(_f6){
-					_b0.value = _f6.makeHtml(_f7);
+					inputBox.value = _f6.makeHtml(_f7);
 					self.setTimeout(_f8, 0);
 				}
 			}
@@ -1331,7 +1414,7 @@ Attacklab.wmdBase = function(){
 		
 		var _e1 = function(){
 			
-			if(!util.elementOk(_b0)){
+			if(!util.elementOk(inputBox)){
 				_b8.style.display = "none";
 				return;
 			}
@@ -1340,11 +1423,11 @@ Attacklab.wmdBase = function(){
 				_b8.style.display = "block";
 			}
 			
-			var _fe = position.getWidth(_b0);
-			var _ff = position.getHeight(_b0);
-			var _100 = position.getLeft(_b0);
+			var _fe = position.getWidth(inputBox);
+			var _ff = position.getHeight(inputBox);
+			var _100 = position.getLeft(inputBox);
 			if(_b8.style.width == _fe + "px" && _b5 == _ff && _b6 == _100){
-				if(position.getTop(_b8) < position.getTop(_b0)){
+				if(position.getTop(_b8) < position.getTop(inputBox)){
 					return;
 				}
 			}
@@ -1360,9 +1443,9 @@ Attacklab.wmdBase = function(){
 				util.fillers[0].style.height = util.fillers[1].style.height = _104;
 			}
 			var _105 = 3;
-			_b0.style.marginTop = _103 + _105 + _b4 + "px";
-			var _106 = position.getTop(_b0);
-			var _100 = position.getLeft(_b0);
+			inputBox.style.marginTop = _103 + _105 + _b4 + "px";
+			var _106 = position.getTop(inputBox);
+			var _100 = position.getLeft(inputBox);
 			position.setTop(root, _106 - _103 - _105);
 			position.setLeft(root, _100);
 			_b8.style.opacity = _b8.style.opacity || 0.999;
@@ -1392,8 +1475,8 @@ Attacklab.wmdBase = function(){
 			if(_ba.parentNode){
 				_ba.parentNode.removeChild(_ba);
 			}
-			if(_b0){
-				_b0.style.marginTop="";
+			if(inputBox){
+				inputBox.style.marginTop = "";
 			}
 			self.clearInterval(_bb);
 			self.clearInterval(_bc);
@@ -1402,53 +1485,60 @@ Attacklab.wmdBase = function(){
 		init();
 	};
 	
-	wmd.textareaState = function(_108){
+	wmd.textareaState = function(inputArea){
 		
-		var _109 = this;
+		var stateObj = this;
+		
 		var _10a = function(_10b){
 		
 			// If it's hidden we just return.
-			if(util.getStyleProperty(_108, "display") === "none"){
+			if(util.getStyleProperty(inputArea, "display") === "none"){
 				return;
 			}
 			
-			var _10c = nav.userAgent.indexOf("Opera") != -1;
-			if(_10b.selectionStart != undefined && !_10c){
+			var isOpera = nav.userAgent.indexOf("Opera") != -1;
+			
+			if(_10b.selectionStart !== undefined && !isOpera){
+				
 				_10b.focus();
-				_10b.selectionStart=_109.start;
-				_10b.selectionEnd=_109.end;
-				_10b.scrollTop=_109.scrollTop;
+				_10b.selectionStart = stateObj.start;
+				_10b.selectionEnd = stateObj.end;
+				_10b.scrollTop = stateObj.scrollTop;
+			
 			}
-			else{
-				if(doc.selection){
-					if(doc.activeElement && doc.activeElement != _108){
-						return;
-					}
-					_10b.focus();
-					var _10d=_10b.createTextRange();
-					_10d.moveStart("character", -_10b.value.length);
-					_10d.moveEnd("character", -_10b.value.length);
-					_10d.moveEnd("character", _109.end);
-					_10d.moveStart("character", _109.start);
-					_10d.select();
+			else if(doc.selection){
+				
+				if(doc.activeElement && doc.activeElement !== inputArea){
+					return;
 				}
+				
+				_10b.focus();
+				var _10d=_10b.createTextRange();
+				_10d.moveStart("character", -_10b.value.length);
+				_10d.moveEnd("character", -_10b.value.length);
+				_10d.moveEnd("character", stateObj.end);
+				_10d.moveStart("character", stateObj.start);
+				_10d.select();
 			}
 		};
 		
-		this.init = function(_10e){
+		this.init = function(newArea){
 			
-			if(_10e){
-				_108 = _10e;
+			// Normally the argument is not passed so the arguemnt passed to constructor
+			// is used as the input area.
+			if(newArea){
+				inputArea = newArea;
 			}
 			
-			if(util.getStyleProperty(_108,"display")=="none"){
+			// If hidden, do nothing.
+			if(util.getStyleProperty(inputArea,"display") == "none"){
 				return;
 			}
 			
-			_10f(_108);
-			_109.scrollTop = _108.scrollTop;
-			if(!_109.text && _108.selectionStart || _108.selectionStart === "0"){
-			_109.text = _108.value;
+			_10f(inputArea);
+			stateObj.scrollTop = inputArea.scrollTop;
+			if(!stateObj.text && inputArea.selectionStart || inputArea.selectionStart === 0){
+				stateObj.text = inputArea.value;
 			}
 		};
 		
@@ -1460,59 +1550,61 @@ Attacklab.wmdBase = function(){
 		
 		var _10f = function(){
 			
-			if(_108.selectionStart || _108.selectionStart === "0"){
-				_109.start = _108.selectionStart;
-				_109.end = _108.selectionEnd;
+			if(inputArea.selectionStart || inputArea.selectionStart === 0){
+				
+				stateObj.start = inputArea.selectionStart;
+				stateObj.end = inputArea.selectionEnd;
 			}
-			else{
-				if(doc.selection){
-					_109.text = _110(_108.value);
-					var _112 = doc.selection.createRange();
-					var _113 = _110(_112.text);
-					var _114 = "\x07";
-					var _115 = _114 + _113 + _114;
-					_112.text = _115;
-					var _116 = _110(_108.value);
-					_112.moveStart("character", -_115.length);
-					_112.text = _113;
-					_109.start = _116.indexOf(_114);
-					_109.end = _116.lastIndexOf(_114) - _114.length;
+			else if(doc.selection){
+
+				stateObj.text = _110(inputArea.value);
+				var _112 = doc.selection.createRange();
+				var _113 = _110(_112.text);
+				var _114 = "\x07";
+				var _115 = _114 + _113 + _114;
+				_112.text = _115;
+				var _116 = _110(inputArea.value);
+				_112.moveStart("character", -_115.length);
+				_112.text = _113;
+				stateObj.start = _116.indexOf(_114);
+				stateObj.end = _116.lastIndexOf(_114) - _114.length;
 					
-					var _117 = _109.text.length - _110(_108.value).length;
-					if(_117){
-						_112.moveStart("character", -_113.length);
-						while(_117--){
-							_113 += "\n";
-							_109.end += 1;
-						}
-						_112.text=_113;
+				var _117 = stateObj.text.length - _110(inputArea.value).length;
+				if(_117){
+					_112.moveStart("character", -_113.length);
+					while(_117--){
+						_113 += "\n";
+						stateObj.end += 1;
 					}
-					
-					_10a(_108);
+					_112.text=_113;
 				}
+					
+				_10a(inputArea);
 			}
-			return _109;
+			
+			
+			return stateObj;
 		};
 		
 		this.restore = function(_118){
 			if(!_118){
-				_118 = _108;
+				_118 = inputArea;
 			}
-			if(_109.text != undefined && _109.text != _118.value){
-				_118.value = _109.text;
+			if(stateObj.text != undefined && stateObj.text != _118.value){
+				_118.value = stateObj.text;
 			}
-			_10a(_118, _109);
-			_118.scrollTop = _109.scrollTop;
+			_10a(_118, stateObj);
+			_118.scrollTop = stateObj.scrollTop;
 		};
 		
 		this.getChunks = function(){
 			var _119 = new wmd.Chunks();
-			_119.before = _110(_109.text.substring(0, _109.start));
+			_119.before = _110(stateObj.text.substring(0, stateObj.start));
 			_119.startTag = "";
-			_119.selection = _110(_109.text.substring(_109.start, _109.end));
+			_119.selection = _110(stateObj.text.substring(stateObj.start, stateObj.end));
 			_119.endTag = "";
-			_119.after = _110(_109.text.substring(_109.end));
-			_119.scrollTop = _109.scrollTop;
+			_119.after = _110(stateObj.text.substring(stateObj.end));
+			_119.scrollTop = stateObj.scrollTop;
 			return _119;
 		};
 		
@@ -1528,10 +1620,10 @@ Attacklab.wmdBase = function(){
 				_11a.after = _11a.after.replace(/\n/g,"\r\n");
 			}
 			
-			_109.start = _11a.before.length;
-			_109.end = _11a.before.length + _11a.selection.length;
-			_109.text = _11a.before + _11a.selection + _11a.after;
-			_109.scrollTop = _11a.scrollTop;
+			stateObj.start = _11a.before.length;
+			stateObj.end = _11a.before.length + _11a.selection.length;
+			stateObj.text = _11a.before + _11a.selection + _11a.after;
+			stateObj.scrollTop = _11a.scrollTop;
 		};
 		
 		this.init();
@@ -1549,7 +1641,7 @@ Attacklab.wmdBase = function(){
 		var _11f;
 		var chunkObj = this;
 		
-		if(start){
+		if(startRegex){
 			_11f = util.regexToString(startRegex);
 			_11e = new re(_11f.expression + "$", _11f.flags);
 			
@@ -1830,16 +1922,21 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
+	// Note that these commands either have a textOp callback which is executed on button
+	// click OR they have an execute function which performs non-text work.
+	
 	command.bold = {};
 	command.bold.description = "Strong <strong>";
 	command.bold.image = "images/bold.png";
 	command.bold.key = "b";
 	command.bold.textOp = command.doBold;
+	
 	command.italic = {};
 	command.italic.description = "Emphasis <em>";
 	command.italic.image = "images/italic.png";
 	command.italic.key = "i";
 	command.italic.textOp = command.doItalic;
+
 	command.link = {};
 	command.link.description = "Hyperlink <a>";
 	command.link.image = "images/link.png";
@@ -1847,12 +1944,14 @@ Attacklab.wmdBase = function(){
 	command.link.textOp = function(_159, _15a){
 		return command.doLinkOrImage(_159, false, _15a);
 	};
+
 	command.undo = {};
 	command.undo.description = "Undo";
 	command.undo.image = "images/undo.png";
 	command.undo.execute = function(_15b){
 		_15b.undo();
 	};
+
 	command.redo = {};
 	command.redo.description = "Redo";
 	command.redo.image = "images/redo.png";
@@ -1931,14 +2030,14 @@ Attacklab.wmdBase = function(){
 					if(!edit){
 						
 						wmd.editorInit();
-						var previewRefreshFxn;
+						var previewRefreshCallback;
 						
 						if(wmd.previewManager !== undefined){
 							preview = new wmd.previewManager(wmdStuff);
-							previewRefreshFxn = preview.refresh;
+							previewRefreshCallback = preview.refresh;
 						}
 						
-						edit = new wmd.editor(wmdStuff.input, previewRefreshFxn);
+						edit = new wmd.editor(wmdStuff.input, previewRefreshCallback);
 					}
 					else if(preview){
 							
