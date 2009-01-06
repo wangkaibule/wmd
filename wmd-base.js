@@ -355,6 +355,7 @@ Attacklab.wmdBase = function(){
 		return elem;
 	};
 	
+	// This is the thing that pops up and asks for the URL when you click the hyperlink button.
 	util.prompt = function(text, _42, callback){
 		
 		var style;
@@ -1877,92 +1878,113 @@ Attacklab.wmdBase = function(){
 	};
 	
 	command.stripLinkDefs = function(_13c, _13d){
-		_13c=_13c.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm,function(_13e,id,_140,_141,_142){
-		_13d[id]=_13e.replace(/\s*$/,"");
-		if(_141){
-		_13d[id]=_13e.replace(/["(](.+?)[")]$/,"");
-		return _141+_142;
-		}
-		return "";
-		});
+		
+		_13c = _13c.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm,
+			function(_13e, id, _140, _141, _142){
+				_13d[id] = _13e.replace(/\s*$/,"");
+				if(_141){
+					_13d[id] = _13e.replace(/["(](.+?)[")]$/,"");
+					return _141 + _142;
+				}
+				return "";
+			});
 		return _13c;
 	};
 	
 	command.addLinkDef = function(_143, _144){
-		var _145=0;
-		var _146={};
-		_143.before=command.stripLinkDefs(_143.before,_146);
-		_143.selection=command.stripLinkDefs(_143.selection,_146);
-		_143.after=command.stripLinkDefs(_143.after,_146);
-		var _147="";
-		var _148=/(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
-		var _149=function(def){
-		_145++;
-		def=def.replace(/^[ ]{0,3}\[(\d+)\]:/,"  ["+_145+"]:");
-		_147+="\n"+def;
+		
+		var _145 = 0;
+		var _146 = {};
+		
+		_143.before = command.stripLinkDefs(_143.before, _146);
+		_143.selection = command.stripLinkDefs(_143.selection, _146);
+		_143.after = command.stripLinkDefs(_143.after, _146);
+		
+		var _147 = "";
+		var _148 = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
+		
+		var _149 = function(def){
+			_145++;
+			def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+_145+"]:");
+			_147 += "\n" + def;
 		};
-		var _14b=function(_14c,_14d,id,end){
-		if(_146[id]){
-		_149(_146[id]);
-		return _14d+_145+end;
-		}
-		return _14c;
+		
+		var _14b = function(_14c, _14d, id, end){
+			if(_146[id]){
+				_149(_146[id]);
+				return _14d + _145 + end;
+			}
+			return _14c;
 		};
-		_143.before=_143.before.replace(_148,_14b);
+		
+		_143.before = _143.before.replace(_148, _14b);
+		
 		if(_144){
-		_149(_144);
-		}else{
-		_143.selection=_143.selection.replace(_148,_14b);
+			_149(_144);
 		}
-		var _150=_145;
-		_143.after=_143.after.replace(_148,_14b);
+		else{
+			_143.selection = _143.selection.replace(_148, _14b);
+		}
+		
+		var _150 = _145;
+		_143.after = _143.after.replace(_148, _14b);
+		
 		if(_143.after){
-		_143.after=_143.after.replace(/\n*$/,"");
+			_143.after = _143.after.replace(/\n*$/, "");
 		}
 		if(!_143.after){
-		_143.selection=_143.selection.replace(/\n*$/,"");
+			_143.selection = _143.selection.replace(/\n*$/, "");
 		}
-		_143.after+="\n\n"+_147;
+		
+		_143.after += "\n\n" + _147;
 		return _150;
 	};
 	
 	command.doLinkOrImage = function(_151, _152, _153){
+		
 		_151.trimWhitespace();
 		_151.findTags(/\s*!?\[/,/\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
-		if(_151.endTag.length>1){
-		_151.startTag=_151.startTag.replace(/!?\[/,"");
-		_151.endTag="";
-		command.addLinkDef(_151,null);
-		}else{
-		if(/\n\n/.test(_151.selection)){
-		command.addLinkDef(_151,null);
-		return;
-		}
-		var _154;
-		var _155=function(_156){
-		if(_156!=null){
-		_151.startTag=_151.endTag="";
-		var _157=" [999]: "+_156;
-		var num=command.addLinkDef(_151,_157);
-		_151.startTag=_152?"![":"[";
-		_151.endTag="]["+num+"]";
-		if(!_151.selection){
-		if(_152){
-		_151.selection="alt text";
+		
+		if(_151.endTag.length > 1){
+			_151.startTag = _151.startTag.replace(/!?\[/, "");
+			_151.endTag = "";
+			command.addLinkDef(_151, null);
 		}
 		else{
-		_151.selection="link text";
-		}
-		}
-		}
-		_153();
-		};
-		if(_152){
-		_154=util.prompt("<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>","http://",_155);
-		}else{
-		_154=util.prompt("<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>","http://",_155);
-		}
-		return true;
+			
+			if(/\n\n/.test(_151.selection)){
+				command.addLinkDef(_151, null);
+				return;
+			}
+			
+			var _154;
+			
+			var _155 = function(_156){
+				if(_156!=null){
+					_151.startTag = _151.endTag = "";
+					var _157 = " [999]: " + _156;
+					var num = command.addLinkDef(_151, _157);
+					_151.startTag = _152 ? "![" : "[";
+					_151.endTag = "][" + num + "]";
+					if(!_151.selection){
+						if(_152){
+							_151.selection = "alt text";
+						}
+						else{
+							_151.selection="link text";
+						}
+					}
+				}
+				_153();
+			};
+			
+			if(_152){
+				_154 = util.prompt("<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>","http://", _155);
+			}
+			else{
+				_154 = util.prompt("<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>","http://", _155);
+			}
+			return true;
 		}
 	};
 	
