@@ -772,187 +772,234 @@ Attacklab.wmdBase = function(){
 		assignInterval();
 	};
 	
-	wmd.undoManager = function(_94, _95){
-		var _96=this;
-		var _97=[];
-		var _98=0;
-		var _99="none";
-		var _9a;
-		var _9b;
-		var _9c;
-		var _9d;
-		var _9e=function(_9f,_a0){
-		if(_99!=_9f){
-		_99=_9f;
-		if(!_a0){
-		_a1();
-		}
-		}
-		if(!wmd.Util.IE||_99!="moving"){
-		_9c=self.setTimeout(_a2,1);
-		}else{
-		_9d=null;
-		}
+	// DONE
+	// Handles pushing and popping textareaStates for undo/redo commands.
+	// I should rename the stack variables to list.
+	wmd.undoManager = function(elem, callback){
+		
+		var undoObj = this;
+		var undoStack = [];		// A stack of undo states
+		var stackPtr = 0;		// The index of the current state
+		var mode = "none";
+		var lastState;			// The last state
+		var poller;
+		var timer;				// The setTimeout handle for cancelling the timer
+		var inputStateObj;
+		
+		// Set the mode for later logic steps.
+		var setMode = function(newMode, noSave){
+			
+			if(mode != newMode){
+				mode = newMode;
+				if(!noSave){
+					saveState();
+				}
+			}
+			
+			if(!wmd.Util.IE || mode != "moving"){
+				timer = self.setTimeout(refreshState, 1);
+			}
+			else{
+				inputStateObj = null;
+			}
 		};
-		var _a2=function(){
-		_9d=new wmd.textareaState(_94);
-		_9b.tick();
-		_9c=undefined;
+		
+		// Force a stack addition and the poller to process.
+		var refreshState = function(){
+			inputStateObj = new wmd.textareaState(elem);
+			poller.tick();
+			timer = undefined;
 		};
+		
 		this.setCommandMode=function(){
-		_99="command";
-		_a1();
-		_9c=self.setTimeout(_a2,0);
+			mode = "command";
+			saveState();
+			timer = self.setTimeout(refreshState, 0);
 		};
-		this.canUndo=function(){
-		return _98>1;
+		
+		this.canUndo = function(){
+			return stackPtr > 1;
 		};
-		this.canRedo=function(){
-		if(_97[_98+1]){
-		return true;
-		}
-		return false;
+		
+		this.canRedo = function(){
+			if(undoStack[stackPtr + 1]){
+				return true;
+			}
+			return false;
 		};
-		this.undo=function(){
-		if(_96.canUndo()){
-		if(_9a){
-		_9a.restore();
-		_9a=null;
-		}else{
-		_97[_98]=new wmd.textareaState(_94);
-		_97[--_98].restore();
-		if(_95){
-		_95();
-		}
-		}
-		}
-		_99="none";
-		_94.focus();
-		_a2();
+		
+		// Removes the last state and restores it.
+		this.undo = function(){
+			
+			if(undoObj.canUndo()){
+				if(lastState){
+					// What about setting state -1 to null or checking for undefined?
+					lastState.restore();
+					lastState = null;
+				}
+				else{
+					undoStack[stackPtr] = new wmd.textareaState(elem);
+					undoStack[--stackPtr].restore();
+					
+					if(callback){
+						callback();
+					}
+				}
+			}
+			
+			mode = "none";
+			elem.focus();
+			refreshState();
 		};
-		this.redo=function(){
-		if(_96.canRedo()){
-		_97[++_98].restore();
-		if(_95){
-		_95();
-		}
-		}
-		_99="none";
-		_94.focus();
-		_a2();
+		
+		// Undo an undo action.
+		this.redo = function(){
+			
+			if(undoObj.canRedo()){
+			
+				undoStack[++stackPtr].restore();
+			
+				if(callback){
+					callback();
+				}
+			}
+			
+			mode = "none";
+			elem.focus();
+			refreshState();
 		};
-		var _a1=function(){
-		var _a3=_9d||new wmd.textareaState(_94);
-		if(!_a3){
-		return false;
-		}
-		if(_99=="moving"){
-		if(!_9a){
-		_9a=_a3;
-		}
-		return;
-		}
-		if(_9a){
-		if(_97[_98-1].text!=_9a.text){
-		_97[_98++]=_9a;
-		}
-		_9a=null;
-		}
-		_97[_98++]=_a3;
-		_97[_98+1]=null;
-		if(_95){
-		_95();
-		}
+		
+		// Push the input area state to the stack.
+		var saveState = function(){
+			
+			var currState = inputStateObj || new wmd.textareaState(elem);
+			
+			if(!currState){
+				return false;
+			}
+			if(mode == "moving"){		
+				if(!lastState){
+					lastState = currState;
+				}
+				return;
+			}
+			if(lastState){
+				if(undoStack[stackPtr - 1].text != lastState.text){
+					undoStack[stackPtr++] = lastState;
+				}
+				lastState = null;
+			}
+			undoStack[stackPtr++] = currState;
+			undoStack[stackPtr + 1] = null;
+			if(callback){
+				callback();
+			}
 		};
-		var _a4=function(_a5){
-		var _a6=false;
-		if(_a5.ctrlKey||_a5.metaKey){
-		var _a7=(_a5.charCode||_a5.keyCode)|96;
-		var _a8=String.fromCharCode(_a7);
-		switch(_a8){
-		case "y":
-		_96.redo();
-		_a6=true;
-		break;
-		case "z":
-		if(!_a5.shiftKey){
-		_96.undo();
-		}else{
-		_96.redo();
-		}
-		_a6=true;
-		break;
-		}
-		}
-		if(_a6){
-		if(_a5.preventDefault){
-		_a5.preventDefault();
-		}
-		if(self.event){
-		self.event.returnValue=false;
-		}
-		return;
-		}
+		
+		var handleCtrlYZ = function(event){
+			
+			var handled = false;
+			
+			if(event.ctrlKey || event.metaKey){
+				
+				var keyCode = (event.charCode || event.keyCode) | 96;
+				var keyCodeChar = String.fromCharCode(keyCode);
+				
+				switch(keyCodeChar){
+					
+					case "y":
+						undoObj.redo();
+						handled = true;
+						break;
+					
+					case "z":
+						if(!event.shiftKey){
+							undoObj.undo();
+						}
+						else{
+							undoObj.redo();
+						}
+						handled = true;
+						break;
+				}
+			}
+			
+			if(handled){
+				if(event.preventDefault){
+					event.preventDefault();
+				}
+				if(self.event){
+					self.event.returnValue=false;
+				}
+				return;
+			}
 		};
-		var _a9=function(_aa){
-		if(!_aa.ctrlKey&&!_aa.metaKey){
-		var _ab=_aa.keyCode;
-		if((_ab>=33&&_ab<=40)||(_ab>=63232&&_ab<=63235)){
-		_9e("moving");
-		}else{
-		if(_ab==8||_ab==46||_ab==127){
-		_9e("deleting");
-		}else{
-		if(_ab==13){
-		_9e("newlines");
-		}else{
-		if(_ab==27){
-		_9e("escape");
-		}else{
-		if((_ab<16||_ab>20)&&_ab!=91){
-		_9e("typing");
-		}
-		}
-		}
-		}
-		}
-		}
+		
+		var handleModeChange = function(event){
+			
+			if(!event.ctrlKey && !event.metaKey){
+				
+				var _ab = event.keyCode;
+
+				if((_ab >= 33 && _ab <= 40) || (_ab >= 63232 && _ab <= 63235)){
+					setMode("moving");
+				}
+				else if(_ab == 8 || _ab == 46 || _ab == 127){
+					setMode("deleting");
+				}
+				else if(_ab == 13){
+					setMode("newlines");
+				}
+				else if(_ab == 27){
+					setMode("escape");
+				}
+				else if((_ab < 16||_ab > 20) && _ab != 91){
+					setMode("typing");
+				}
+			}
 		};
-		var _ac=function(){
-		util.addEvent(_94,"keypress",function(_ad){
-		if((_ad.ctrlKey||_ad.metaKey)&&(_ad.keyCode==89||_ad.keyCode==90)){
-		_ad.preventDefault();
-		}
-		});
-		var _ae=function(){
-		if(wmd.Util.IE||(_9d&&_9d.text!=_94.value)){
-		if(_9c==undefined){
-		_99="paste";
-		_a1();
-		_a2();
-		}
-		}
+		
+		var setEventHandlers = function(){
+			
+			util.addEvent(elem, "keypress", function(event){
+				if((event.ctrlKey || event.metaKey) && (event.keyCode == 89 || event.keyCode == 90)){
+					event.preventDefault();
+				}
+			});
+			
+			var handlePaste = function(){
+				if(wmd.Util.IE || (inputStateObj && inputStateObj.text != elem.value)){
+					if(timer == undefined){
+						mode = "paste";
+						saveState();
+						refreshState();
+					}
+				}
+			};
+			
+			poller = new wmd.inputPoller(elem, handlePaste, 100);
+			
+			util.addEvent(elem,"keydown", handleCtrlYZ);
+			util.addEvent(elem,"keydown", handleModeChange);
+			
+			util.addEvent(elem, "mousedown", function(){ setMode("moving"); });
+			elem.onpaste = handlePaste;
+			elem.ondrop = handlePaste;
 		};
-		_9b=new wmd.inputPoller(_94,_ae,100);
-		util.addEvent(_94,"keydown",_a4);
-		util.addEvent(_94,"keydown",_a9);
-		util.addEvent(_94,"mousedown",function(){
-		_9e("moving");
-		});
-		_94.onpaste=_ae;
-		_94.ondrop=_ae;
+		
+		var init = function(){
+			setEventHandlers();
+			refreshState();
+			saveState();
 		};
-		var _af=function(){
-		_ac();
-		_a2();
-		_a1();
+		
+		this.destroy = function(){
+			if(poller){
+				poller.destroy();
+			}
 		};
-		this.destroy=function(){
-		if(_9b){
-		_9b.destroy();
-		}
-		};
-		_af();
+		
+		init();
 	};
 	
 	wmd.editor = function(inputBox, previewRefreshCallback){
@@ -1906,7 +1953,8 @@ Attacklab.wmdBase = function(){
 		if(!_151.selection){
 		if(_152){
 		_151.selection="alt text";
-		}else{
+		}
+		else{
 		_151.selection="link text";
 		}
 		}
