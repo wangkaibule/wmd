@@ -818,7 +818,7 @@ Attacklab.wmdBase = function(){
 			timer = undefined;
 		};
 		
-		this.setCommandMode=function(){
+		this.setCommandMode = function(){
 			mode = "command";
 			saveState();
 			timer = self.setTimeout(refreshState, 0);
@@ -942,25 +942,26 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
+		// Set the mode depending on what is going on in the input area.
 		var handleModeChange = function(event){
 			
 			if(!event.ctrlKey && !event.metaKey){
 				
-				var _ab = event.keyCode;
+				var keyCode = event.keyCode;
 
-				if((_ab >= 33 && _ab <= 40) || (_ab >= 63232 && _ab <= 63235)){
+				if((keyCode >= 33 && keyCode <= 40) || (keyCode >= 63232 && keyCode <= 63235)){
 					setMode("moving");
 				}
-				else if(_ab == 8 || _ab == 46 || _ab == 127){
+				else if(keyCode == 8 || keyCode == 46 || keyCode == 127){
 					setMode("deleting");
 				}
-				else if(_ab == 13){
+				else if(keyCode == 13){
 					setMode("newlines");
 				}
-				else if(_ab == 27){
+				else if(keyCode == 27){
 					setMode("escape");
 				}
-				else if((_ab < 16||_ab > 20) && _ab != 91){
+				else if((keyCode < 16||keyCode > 20) && keyCode != 91){
 					setMode("typing");
 				}
 			}
@@ -1009,6 +1010,7 @@ Attacklab.wmdBase = function(){
 		init();
 	};
 	
+	// I think my understanding of how the buttons and callbacks are stored in the array is incomplete.
 	wmd.editor = function(inputBox, previewRefreshCallback){
 		
 		if(!previewRefreshCallback){
@@ -1020,26 +1022,31 @@ Attacklab.wmdBase = function(){
 		var btnBarHeight = 28;
 		var btnBarWidth = 4076;
 		
-		var _b4 = 0;
+		var offsetHeight = 0;
 		var _b5;
 		var _b6;
-		var _b7 = this;
-		var _b8;
-		var _b9;
+		
+		var editObj = this;
+		
+		var mainDiv;
+		var mainSpan;
+		
 		var _ba;
 		var _bb;
 		var _bc;
-		var _bd;
-		var _be;
-		var _bf;
+		
+		var undoMgr;		// The undo manager
+		var undoImage;		// The image on the undo button
+		var redoImage;		// The image on the redo button
+		
 		var buttonCallbacks = [];	// Callbacks for the buttons at the top of the input area
 		
 		// Saves the input state at the time of button click and performs the button function.
 		// The parameter is the function performed when this function is called.
 		var saveStateDoButtonAction = function(callback){
 			
-			if(_bd){
-				_bd.setCommandMode();
+			if(undoMgr){
+				undoMgr.setCommandMode();
 			}
 			
 			var state = new wmd.textareaState(inputBox);
@@ -1070,7 +1077,7 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		var _c7 = function(_c8){
+		var doClick = function(_c8){
 			
 			inputBox.focus();
 			
@@ -1079,54 +1086,56 @@ Attacklab.wmdBase = function(){
 			}
 			
 			if(_c8.execute){
-				_c8.execute(_b7);
+				_c8.execute(editObj);
 			}
 		};
 		
-		var _c9 = function(_ca,_cb){
+		var setStyle = function(elem, isEnabled){
 			
-			var _cc = _ca.style;
+			var style = elem.style;
 			
-			if(_cb){
-				_cc.opacity = "1.0";
-				_cc.KHTMLOpacity = "1.0";
+			if(isEnabled){
+				style.opacity = "1.0";
+				style.KHTMLOpacity = "1.0";
 				if(wmd.Util.newIE){
-					_cc.filter = "";
+					style.filter = "";
 				}
 				if(wmd.Util.oldIE){
-					_cc.filter = "chroma(color=fuchsia)";
+					style.filter = "chroma(color=fuchsia)";
 				}
-				_cc.cursor = "pointer";
+				style.cursor = "pointer";
 				
-				_ca.onmouseover = function(){
-					_cc.backgroundColor="lightblue";
-					_cc.border="1px solid blue";
+				// Creates the highlight box.
+				elem.onmouseover = function(){
+					style.backgroundColor = "lightblue";
+					style.border = "1px solid blue";
 				};
 				
-				_ca.onmouseout = function(){
-					_cc.backgroundColor = "";
-					_cc.border = "1px solid transparent";
+				// Removes the highlight box.
+				elem.onmouseout = function(){
+					style.backgroundColor = "";
+					style.border = "1px solid transparent";
 					if(wmd.Util.oldIE){
-						_cc.borderColor = "fuchsia";
-						_cc.filter = "chroma(color=fuchsia)"+_cc.filter;
+						style.borderColor = "fuchsia";
+						style.filter = "chroma(color=fuchsia)" + style.filter;
 					}
 				};
 			}
 			else{
-				_cc.opacity = "0.4";
-				_cc.KHTMLOpacity = "0.4";
+				style.opacity = "0.4";
+				style.KHTMLOpacity = "0.4";
 				if(wmd.Util.oldIE){
-					_cc.filter = "chroma(color=fuchsia) alpha(opacity=40)";
+					style.filter = "chroma(color=fuchsia) alpha(opacity=40)";
 				}
 				if(wmd.Util.newIE){
-					_cc.filter = "alpha(opacity=40)";
+					style.filter = "alpha(opacity=40)";
 				}
-				_cc.cursor = "";
-				_cc.backgroundColor = "";
-				if(_ca.onmouseout){
-					_ca.onmouseout();
+				style.cursor = "";
+				style.backgroundColor = "";
+				if(elem.onmouseout){
+					elem.onmouseout();
 				}
-				_ca.onmouseover=_ca.onmouseout=null;
+				elem.onmouseover = elem.onmouseout = null;
 			}
 		};
 		
@@ -1144,7 +1153,7 @@ Attacklab.wmdBase = function(){
 			var sepImage = util.createImage("images/separator.png", 20, 20);
 			sepImage.style.padding = "4px";
 			sepImage.style.paddingTop = "0px";
-			_b9.appendChild(sepImage);
+			mainSpan.appendChild(sepImage);
 			
 		};
 		
@@ -1160,7 +1169,7 @@ Attacklab.wmdBase = function(){
 					}
 					_d4.title = _d5;
 				}
-				_c9(_d4, true);
+				setStyle(_d4, true);
 				var _d7 = _d4.style;
 				_d7.margin = "0px";
 				_d7.padding = "1px";
@@ -1173,10 +1182,10 @@ Attacklab.wmdBase = function(){
 					if(_d8.onmouseout){
 						_d8.onmouseout();
 					}
-					_c7(_d3);
+					doClick(_d3);
 					return false;
 				};
-				_b9.appendChild(_d8);
+				mainSpan.appendChild(_d8);
 				return _d8;
 			}
 			return;
@@ -1196,35 +1205,47 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		var _db = function(){
-			if(_bd){
-				_c9(_be, _bd.canUndo());
-				_c9(_bf, _bd.canRedo());
+		var setupUndoRedo = function(){
+			if(undoMgr){
+				setStyle(undoImage, undoMgr.canUndo());
+				setStyle(redoImage, undoMgr.canRedo());
 			}
 		};
 		
 		var _dc = function(){
+			
 			if(inputBox.offsetParent){
-				_ba = util.makeElement("div");
-				var _dd = _ba.style;
-				_dd.visibility = "hidden";
-				_dd.top = _dd.left = _dd.width = "0px";
-				_dd.display = "inline";
-				_dd.cssFloat = "left";
-				_dd.overflow = "visible";
-				_dd.opacity = "0.999";
-				_b8.style.position = "absolute";
-				_ba.appendChild(_b8);
+				
+				div = util.makeElement("div");
+				
+				var style = div.style;
+				style.visibility = "hidden";
+				style.top = style.left = style.width = "0px";
+				style.display = "inline";
+				style.cssFloat = "left";
+				style.overflow = "visible";
+				style.opacity = "0.999";
+				
+				mainDiv.style.position = "absolute";
+				
+				div.appendChild(mainDiv);
+				
 				inputBox.style.marginTop = "";
 				var _de = position.getTop(inputBox);
+				
 				inputBox.style.marginTop = "0";
 				var _df = position.getTop(inputBox);
-				_b4 = _de - _df;
-				_e0();
-				inputBox.parentNode.insertBefore(_ba, inputBox);
-				_e1();
-				util.skin(_b8, wmd.basePath + "images/bg.png", btnBarHeight, btnBarWidth);
-				_dd.visibility = "visible";
+				
+				offsetHeight = _de - _df;
+				
+				setupWmdButton();
+				inputBox.parentNode.insertBefore(div, inputBox);
+				
+				setDimensions();
+				
+				util.skin(mainDiv, wmd.basePath + "images/bg.png", btnBarHeight, btnBarWidth);
+				style.visibility = "visible";
+				
 				return true;
 			}
 			return false;
@@ -1280,34 +1301,33 @@ Attacklab.wmdBase = function(){
 			return;
 		};
 		
-		var _e5 = function(){
+		var setupEditor = function(){
 			
 			if(/\?noundo/.test(doc.location.href)){
-				wmd.nativeUndo=true;
+				wmd.nativeUndo = true;
 			}
 			
 			if(!wmd.nativeUndo){
-				_bd = new wmd.undoManager(inputBox,function(){
-					previewRefreshCallback();
-					_db();
-				});
+				undoMgr = new wmd.undoManager(inputBox,
+					function(){
+						previewRefreshCallback();
+						setupUndoRedo();
+					});
 			}
 			
 			var _e6 = inputBox.parentNode;
-			_b8 = util.makeElement("div");
-			_b8.style.display = "block";
-			_b8.style.zIndex = 100;
+			
+			mainDiv = util.makeElement("div");
+			mainDiv.style.display = "block";
+			mainDiv.style.zIndex = 100;
 			if(!wmd.full){
-				_b8.title += "\n(Free Version)";
+				mainDiv.title += "\n(Free Version)";
 			}
-			_b8.unselectable="on";
+			mainDiv.unselectable="on";
+			mainDiv.onclick = function(){ inputBox.focus(); };
 			
-			_b8.onclick = function(){
-				inputBox.focus();
-			};
-			
-			_b9 = util.makeElement("span");
-			var _e7 = _b9.style;
+			mainSpan = util.makeElement("span");
+			var _e7 = mainSpan.style;
 			_e7.height = "auto";
 			_e7.paddingBottom = "2px";
 			_e7.lineHeight = "0";
@@ -1315,81 +1335,85 @@ Attacklab.wmdBase = function(){
 			_e7.paddingRight = "65px";
 			_e7.display = "block";
 			_e7.position = "absolute";
-			_b9.unselectable = "on";
-			_b8.appendChild(_b9);
+			mainSpan.unselectable = "on";
+			mainDiv.appendChild(mainSpan);
+			
+			// The autoindent callback always exists, even though there's no actual button for it.
 			addButtonCallback(command.autoindent);
-			var _e8 = util.createImage("images/bg.png");
-			var _e9 = util.createImage("images/bg-fill.png");
+			
+			// Neither of these variables is uesd anywhere and the createImage() function has no side effects.
+			var bgImage = util.createImage("images/bg.png");
+			var bgFillImage = util.createImage("images/bg-fill.png");
 			
 			setButtonCallbacks();
 			makeButtonRow();
 			
-			if(_bd){
+			// Create the undo/redo buttons.
+			if(undoMgr){
 				makeButtonSeparator();
-				_be = makeButtonImage(command.undo);
-				_bf = makeButtonImage(command.redo);
-				var _ea = nav.platform.toLowerCase();
+				undoImage = makeButtonImage(command.undo);
+				redoImage = makeButtonImage(command.redo);
 				
-				if(/win/.test(_ea)){
-					_be.title+=" - Ctrl+Z";
-					_bf.title+=" - Ctrl+Y";
+				var platform = nav.platform.toLowerCase();
+				if(/win/.test(platform)){
+					undoImage.title+=" - Ctrl+Z";
+					redoImage.title+=" - Ctrl+Y";
+				}
+				else if(/mac/.test(platform)){
+					undoImage.title+=" - Ctrl+Z";
+					redoImage.title+=" - Ctrl+Shift+Z";
 				}
 				else{
-					if(/mac/.test(_ea)){
-						_be.title+=" - Ctrl+Z";
-						_bf.title+=" - Ctrl+Shift+Z";
-					}
-					else{
-						_be.title+=" - Ctrl+Z";
-						_bf.title+=" - Ctrl+Shift+Z";
-					}
+					undoImage.title+=" - Ctrl+Z";
+					redoImage.title+=" - Ctrl+Shift+Z";
 				}
 			}
 			
-			var _eb = "keydown";
+			var keyEvent = "keydown";
 			if(nav.userAgent.indexOf("Opera") != -1){
-				_eb = "keypress";
+				keyEvent = "keypress";
 			}
 			
-			util.addEvent(inputBox, _eb, 
-				function(_ec){
+			util.addEvent(inputBox, keyEvent, 
+				function(key){
 					
-					var _ed = false;
+					var isButtonKey = false;
 					
-					if(_ec.ctrlKey||_ec.metaKey){
+					// Check to see if we have a button key and, if so execute the callback.
+					if(key.ctrlKey || key.metaKey){
 						
-						var _ee = (_ec.charCode || _ec.keyCode);
-						var _ef = String.fromCharCode(_ee).toLowerCase();
+						var keyCode = (key.charCode || key.keyCode);
+						var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
 						for(var callback in buttonCallbacks){
 							
-							var _f1 = buttonCallbacks[callback];
+							var button = buttonCallbacks[callback];
 							
-							if(_f1.key && _ef == _f1.key || _f1.keyCode && _ec.keyCode == _f1.keyCode){
-								_c7(_f1);
-								_ed = true;
+							if(button.key && (keyCodeStr == button.key) || button.keyCode && (key.keyCode == button.keyCode)){
+								doClick(button);
+								isButtonKey = true;
 							}
 						}
 					}
 					
-					if(_ed){
-						
-						if(_ec.preventDefault){
-							_ec.preventDefault();
+					// This should be moved into the if test in the for loop.
+					if(isButtonKey){			
+						if(key.preventDefault){
+							key.preventDefault();
 						}
-						
 						if(self.event){
 							self.event.returnValue = false;
 						}
 					}
 				});
 			
+			// Auto-indent on carriage return (code 13)
 			util.addEvent(inputBox, "keyup", 
-				function(_f2){
-					if(_f2.shiftKey && !_f2.ctrlKey && !_f2.metaKey){
-						var _f3 = (_f2.charCode || _f2.keyCode);
-						switch(_f3){
+				function(key){
+					if(key.shiftKey && !key.ctrlKey && !key.metaKey){
+						var keyCode = (key.charCode || key.keyCode);
+						switch(keyCode){
 							case 13:
-								_c7(command.autoindent);
+								doClick(command.autoindent);		// Yay for the switch/case with one case...
 								break;
 						}
 					}
@@ -1403,134 +1427,154 @@ Attacklab.wmdBase = function(){
 				}, 100);
 			}
 			
-			util.addEvent(self, "resize", _e1);
-			_bb = self.setInterval(_e1, 100);
+			util.addEvent(self, "resize", setDimensions);
+			_bb = self.setInterval(setDimensions, 100);
 			if(inputBox.form){
 				var _f4 = inputBox.form.onsubmit;
 				inputBox.form.onsubmit = function(){
-					_f5();
+					convertToHtml();
 					if(_f4){
 						return _f4.apply(this, arguments);
 					}
 				};
 			}
-			_db();
+			
+			setupUndoRedo();
 		};
 		
-		var _f5 = function(){
-			if(wmd.showdown){
-				var _f6 = new wmd.showdown.converter();
-			}
-			var _f7 = inputBox.value;
+		// Convert the contents of the input textarea to HTML in the output/preview panels.
+		var convertToHtml = function(){
 			
-			var _f8 = function(){
-				inputBox.value = _f7;
-			};
+			if(wmd.showdown){
+				var markdownConverter = new wmd.showdown.converter();
+			}
+			var text = inputBox.value;
+			
+			var callback = function(){ inputBox.value = text; };
 			
 			if(!/markdown/.test(wmd.wmd_env.output.toLowerCase())){
-				if(_f6){
-					inputBox.value = _f6.makeHtml(_f7);
-					self.setTimeout(_f8, 0);
+				if(markdownConverter){
+					inputBox.value = markdownConverter.makeHtml(text);
+					self.setTimeout(callback, 0);
 				}
 			}
 			return true;
 		};
 		
-		var _e0 = function(){
-			var _f9 = util.makeElement("div");
-			var _fa = _f9.style;
-			_fa.paddingRight = "15px";
-			_fa.height = "100%";
-			_fa.display = "block";
-			_fa.position = "absolute";
-			_fa.right = "0";
-			_f9.unselectable = "on";
-			var _fb = util.makeElement("a");
-			_fa = _fb.style;
-			_fa.position = "absolute";
-			_fa.right = "10px";
-			_fa.top = "5px";
-			_fa.display = "inline";
-			_fa.width = "50px";
-			_fa.height = "25px";
-			_fb.href = "http://www.wmd-editor.com/";
-			_fb.target = "_blank";
-			_fb.title = "WMD: The Wysiwym Markdown Editor";
-			var _fc = util.createImage("images/wmd.png");
-			var _fd = util.createImage("images/wmd-on.png");
-			_fb.appendChild(_fc);
-			_fb.onmouseover = function(){
-				util.setImage(_fc, "images/wmd-on.png");
-				_fb.style.cursor = "pointer";
+		// Sets up the WMD button at the upper right of the input area.
+		var setupWmdButton = function(){
+			
+			var div = util.makeElement("div");
+			div.unselectable = "on";
+			var style = div.style;
+			style.paddingRight = "15px";
+			style.height = "100%";
+			style.display = "block";
+			style.position = "absolute";
+			style.right = "0";
+			
+			var anchor = util.makeElement("a");
+			anchor.href = "http://www.wmd-editor.com/";
+			anchor.target = "_blank";
+			anchor.title = "WMD: The Wysiwym Markdown Editor";
+			style = anchor.style;
+			style.position = "absolute";
+			style.right = "10px";
+			style.top = "5px";
+			style.display = "inline";
+			style.width = "50px";
+			style.height = "25px";
+			
+			var normalImage = util.createImage("images/wmd.png");
+			var _fd = util.createImage("images/wmd-on.png");			// Not used.  Typo?
+			
+			anchor.appendChild(normalImage);
+			
+			anchor.onmouseover = function(){
+				util.setImage(normalImage, "images/wmd-on.png");		// The dark WMD
+				anchor.style.cursor = "pointer";
 			};
-			_fb.onmouseout=function(){
-				util.setImage(_fc, "images/wmd.png");
+			anchor.onmouseout=function(){
+				util.setImage(normalImage, "images/wmd.png");			// The light WMD
 			};
-			_b8.appendChild(_fb);
+			
+			mainDiv.appendChild(anchor);
 		};
 		
-		var _e1 = function(){
+		// Calculates and sets dimensions for the input region.
+		// The button bar is inside the input region so it's complicated.
+		var setDimensions = function(){
 			
 			if(!util.elementOk(inputBox)){
-				_b8.style.display = "none";
+				mainDiv.style.display = "none";
 				return;
 			}
-			
-			if(_b8.style.display == "none"){
-				_b8.style.display = "block";
+			if(mainDiv.style.display == "none"){
+				mainDiv.style.display = "block";
 			}
 			
-			var _fe = position.getWidth(inputBox);
-			var _ff = position.getHeight(inputBox);
-			var _100 = position.getLeft(inputBox);
-			if(_b8.style.width == _fe + "px" && _b5 == _ff && _b6 == _100){
-				if(position.getTop(_b8) < position.getTop(inputBox)){
+			var inputWidth = position.getWidth(inputBox);
+			var inputHeight = position.getHeight(inputBox);
+			var inputLeft = position.getLeft(inputBox);
+			
+			if(mainDiv.style.width == inputWidth + "px" && _b5 == inputHeight && _b6 == inputLeft){
+				if(position.getTop(mainDiv) < position.getTop(inputBox)){
 					return;
 				}
 			}
-			_b5 = _ff;
-			_b6 = _100;
-			var _101 = 100;
-			_b8.style.width = Math.max(_fe, _101) + "px";
-			var root = _b8.offsetParent;
-			var _103 = position.getHeight(_b9);
-			var _104 = _103 - btnBarHeight + "px";
-			_b8.style.height = _104;
+			_b5 = inputHeight;
+			_b6 = inputLeft;
+			
+			var minWidth = 100;		// This could be calculated based on the width of the button bar.
+			mainDiv.style.width = Math.max(inputWidth, minWidth) + "px";
+			
+			var root = mainDiv.offsetParent;
+			
+			var spanHeight = position.getHeight(mainSpan);
+			var inputHeight = spanHeight - btnBarHeight + "px";
+			mainDiv.style.height = inputHeight;
+			
 			if(util.fillers){
-				util.fillers[0].style.height = util.fillers[1].style.height = _104;
+				util.fillers[0].style.height = util.fillers[1].style.height = inputHeight;
 			}
-			var _105 = 3;
-			inputBox.style.marginTop = _103 + _105 + _b4 + "px";
-			var _106 = position.getTop(inputBox);
-			var _100 = position.getLeft(inputBox);
-			position.setTop(root, _106 - _103 - _105);
-			position.setLeft(root, _100);
-			_b8.style.opacity = _b8.style.opacity || 0.999;
+			
+			var magicThreePx = 3;														// Why do we pick 3?  Some sort of overlap to cover the border?
+			
+			inputBox.style.marginTop = spanHeight + magicThreePx + offsetHeight + "px";
+			
+			var inputTop = position.getTop(inputBox);
+			inputLeft = position.getLeft(inputBox);				// Originally redefined with var
+			position.setTop(root, inputTop - spanHeight - magicThreePx);
+			position.setLeft(root, inputLeft);
+			
+			mainDiv.style.opacity = mainDiv.style.opacity || 0.999;
+			
 			return;
 		};
 		
 		this.undo = function(){
-			if(_bd){
-				_bd.undo();
+			if(undoMgr){
+				undoMgr.undo();
 			}
 		};
 		
 		this.redo = function(){
-			if(_bd){
-				_bd.redo();
+			if(undoMgr){
+				undoMgr.redo();
 			}
 		};
 		
+		// This is pretty useless...
 		var init = function(){
-			_e5();
+			setupEditor();
 		};
 		
 		this.destroy = function(){
-			if(_bd){
-				_bd.destroy();
+			if(undoMgr){
+				undoMgr.destroy();
 			}
-			if(_ba.parentNode){
-				_ba.parentNode.removeChild(_ba);
+			if(div.parentNode){
+				div.parentNode.removeChild(div);
 			}
 			if(inputBox){
 				inputBox.style.marginTop = "";
