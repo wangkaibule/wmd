@@ -356,36 +356,48 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// This is the thing that pops up and asks for the URL when you click the hyperlink button.
-	util.prompt = function(text, _42, callback){
+	// text:
+	// defaultValue: The default value that appears in the input box.
+	// callback:
+	util.prompt = function(text, defaultValue, callback){
 		
 		var style;
 		var frame;
 		var background;
 		var input;
 		
-		var _48 = function(_49){
-			var _4a = (_49.charCode || _49.keyCode);
-			if(_4a == 27){
-				_4b(true);
+		// Used as a keydown event handler.
+		// Esc dismisses the prompt, but only when the hyperlink input box has the focus.
+		// TODO: might want to fix that...
+		var checkEscape = function(key){
+			var code = (key.charCode || key.keyCode);
+			if(code === 27){
+				close(true);
 			}
 		};
 		
-		var _4b = function(_4c){
-			util.removeEvent(doc.body, "keydown", _48);
-			var _4d = input.value;
-			if(_4c){
-				_4d = null;
+		// Dismisses the hyperlink input box.
+		// isCancel is true if don't care about the input text.
+		// isCancel is false if we are going to keep the text.
+		var close = function(isCancel){
+			util.removeEvent(doc.body, "keydown", checkEscape);
+			var text = input.value;
+			if(isCancel){
+				text = null;
 			}
 			frame.parentNode.removeChild(frame);
 			background.parentNode.removeChild(background);
-			callback(_4d);
+			callback(text);
 			return false;
 		};
 		
-		if(_42 === undefined){
-			_42 = "";
+		// Shouldn't this go someplace else?
+		// Like maybe at the top?
+		if(defaultValue === undefined){
+			defaultValue = "";
 		}
 		
+		// Creates the background behind the hyperlink text entry box.
 		var showBackground = function(){
 			
 			background = util.makeElement("div");
@@ -396,8 +408,8 @@ Attacklab.wmdBase = function(){
 			style.left = "0";
 			style.backgroundColor = "#000";
 			style.zIndex = "1000";
-			var isKonqueror = /konqueror/.test(nav.userAgent.toLowerCase());
 			
+			var isKonqueror = /konqueror/.test(nav.userAgent.toLowerCase());
 			if(isKonqueror){
 				style.backgroundColor = "transparent";
 			}
@@ -406,13 +418,15 @@ Attacklab.wmdBase = function(){
 				style.filter = "alpha(opacity=50)";
 			}
 			
-			var _50 = position.getPageSize();
+			var pageSize = position.getPageSize();
 			style.width = "100%";
-			style.height = _50[1] + "px";
+			style.height = pageSize[1] + "px";
 		};
 		
-		var _51 = function(){
+		// Create the text input box form/window.
+		var makeForm = function(){
 			
+			// The box itself.
 			frame = doc.createElement("div");
 			frame.style.border = "3px solid #333";
 			frame.style.backgroundColor = "#ccc";
@@ -422,71 +436,69 @@ Attacklab.wmdBase = function(){
 			frame.style.position = "fixed";
 			frame.style.width = "400px";
 			frame.style.zIndex = "1001";
-			var _52 = util.makeElement("div");
-			style = _52.style;
+			
+			// The question text
+			var question = util.makeElement("div");
+			style = question.style;
 			style.fontSize = "14px";
 			style.fontFamily = "Helvetica, Arial, Verdana, sans-serif";
 			style.padding = "5px";
-			_52.innerHTML = text;
-			frame.appendChild(_52);
-			var _53 = util.makeElement("form");
+			question.innerHTML = text;
+			frame.appendChild(question);
 			
-			_53.onsubmit = function(){
-				return _4b();
-			};
-			
-			style = _53.style;
+			// The web form container
+			var form = util.makeElement("form");
+			form.onsubmit = function(){ return close(); };
+			style = form.style;
 			style.padding = "0";
 			style.margin = "0";
 			style.cssFloat = "left";
 			style.width = "100%";
 			style.textAlign = "center";
 			style.position = "relative";
-			frame.appendChild(_53);
+			frame.appendChild(form);
+			
+			// The input text box
 			input = doc.createElement("input");
-			input.value = _42;
+			input.value = defaultValue;
 			style = input.style;
 			style.display = "block";
 			style.width = "80%";
 			style.marginLeft = style.marginRight = "auto";
 			style.backgroundColor = "white";
 			style.color = "black";
-			_53.appendChild(input);
-			var _54 = doc.createElement("input");
-			_54.type = "button";
+			form.appendChild(input);
 			
-			_54.onclick = function(){
-				return _4b();
-			};
-			
-			_54.value = "OK";
-			style = _54.style;
+			// The ok button
+			var okButton = doc.createElement("input");
+			okButton.type = "button";
+			okButton.onclick = function(){ return close(); };
+			okButton.value = "OK";
+			style = okButton.style;
 			style.margin = "10px";
 			style.display = "inline";
 			style.width = "7em";
-			var _55 = doc.createElement("input");
-			_55.type = "button";
 			
-			_55.onclick = function(){
-				return _4b(true);
-			};
-			
-			_55.value = "Cancel";
-			style = _55.style;
+			// The cancel button
+			var cancelButton = doc.createElement("input");
+			cancelButton.type = "button";
+			cancelButton.onclick = function(){ return close(true); };
+			cancelButton.value = "Cancel";
+			style = cancelButton.style;
 			style.margin = "10px";
 			style.display = "inline";
 			style.width = "7em";
 			
 			if(/mac/.test(nav.platform.toLowerCase())){
-				_53.appendChild(_55);
-				_53.appendChild(_54);
+				form.appendChild(cancelButton);
+				form.appendChild(okButton);
 			}
 			else{
-				_53.appendChild(_54);
-				_53.appendChild(_55);
+				form.appendChild(okButton);
+				form.appendChild(cancelButton);
 			}
 			
-			util.addEvent(doc.body, "keydown", _48);
+			util.addEvent(doc.body, "keydown", checkEscape);
 			frame.style.top = "50%";
 			frame.style.left = "50%";
 			frame.style.display = "block";
@@ -501,26 +513,27 @@ Attacklab.wmdBase = function(){
 			frame.style.marginLeft =- (position.getWidth(frame) / 2) + "px";
 		};
 		
+		// Why isn't this stuff all in one place?
 		showBackground();
 		
 		self.setTimeout(function(){
 			
-			_51();
-			var _57 = _42.length;
+			makeForm();
 			
+			// Select the default input box text.
+			var defTextLen = defaultValue.length;
 			if(input.selectionStart !== undefined){
 				input.selectionStart = 0;
-				input.selectionEnd = _57;
+				input.selectionEnd = defTextLen;
 			}
-			else{
-				if(input.createTextRange){
-					var _58 = input.createTextRange();
-					_58.collapse(false);
-					_58.moveStart("character", -_57);
-					_58.moveEnd("character", _57);
-					_58.select();
-				}
+			else if(input.createTextRange){
+				var range = input.createTextRange();
+				range.collapse(false);
+				range.moveStart("character", -defTextLen);
+				range.moveEnd("character", defTextLen);
+				range.select();
 			}
+			
 			input.focus();
 		}, 0);
 	};
