@@ -356,9 +356,9 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// This is the thing that pops up and asks for the URL when you click the hyperlink button.
-	// text:
+	// text: The html for the input box.
 	// defaultValue: The default value that appears in the input box.
-	// callback:
+	// callback: The function which is executed when the prompt is dismissed, either via OK or Cancel
 	util.prompt = function(text, defaultValue, callback){
 		
 		var style;
@@ -1835,7 +1835,7 @@ Attacklab.wmdBase = function(){
 	
 	wmd.Chunks.prototype.skipLines = function(_126, _127, _128){
 		
-		if(_126 ===undefined){
+		if(_126 === undefined){
 			_126 = 1;
 		}
 		
@@ -1885,26 +1885,29 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
+	// The markdown symbols - 4 spaces = code, > = blockquote, etc.
 	command.prefixes="(?:\\s{4,}|\\s*>|\\s*-\\s+|\\s*\\d+\\.|=|\\+|-|_|\\*|#|\\s*\\[[^\n]]+\\]:)";
 	
-	command.unwrap = function(chnks){
+	// Remove markdown symbols from the chunk selection.
+	command.unwrap = function(chunk){
 		var txt = new re("([^\\n])\\n(?!(\\n|" + command.prefixes + "))","g");
-		chnks.selection = chnks.selection.replace(txt, "$1 $2");
+		chunk.selection = chunk.selection.replace(txt, "$1 $2");
 	};
 	
-	command.wrap = function(chnks, len){
-		command.unwrap(chnks);
-		var _12f = new re("(.{1," + len + "})( +|$\\n?)", "gm");
+	
+	command.wrap = function(chunk, len){
+		command.unwrap(chunk);
+		var regex = new re("(.{1," + len + "})( +|$\\n?)", "gm");
 		
-		chnks.selection = chnks.selection.replace(_12f,
-			function(_130, line){
-				if(new re("^" + command.prefixes, "").test(_130)){
-					return _130;
+		chunk.selection = chunk.selection.replace(regex,
+			function(line, marked){
+				if(new re("^" + command.prefixes, "").test(line)){
+					return line;
 				}
-				return line + "\n";
+				return marked + "\n";
 			});
 			
-		chnks.selection = chnks.selection.replace(/\s+$/, "");
+		chunk.selection = chunk.selection.replace(/\s+$/, "");
 	};
 	
 	command.doBold = function(chunk){
@@ -1966,112 +1969,133 @@ Attacklab.wmdBase = function(){
 		chunk.after = markup + chunk.after;
 	};
 	
-	command.stripLinkDefs = function(text, _13d){
+	command.stripLinkDefs = function(text, defsToAdd){
 		
 		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm,
-			function(_13e, id, _140, _141, _142){
-				_13d[id] = _13e.replace(/\s*$/, "");
-				if(_141){
-					_13d[id] = _13e.replace(/["(](.+?)[")]$/, "");
-					return _141 + _142;
+			
+			function(totalMatch, id, link, newlines, title){
+				
+				defsToAdd[id] = totalMatch.replace(/\s*$/, "");
+				
+				if(newlines){
+					// Strip the title and return that separately.
+					defsToAdd[id] = totalMatch.replace(/["(](.+?)[")]$/, "");
+					return newlines + title;
 				}
 				return "";
 			});
+			
 		return text;
 	};
 	
-	command.addLinkDef = function(text, _144){
+	command.addLinkDef = function(chunk, linkDef){
 		
 		var _145 = 0;
-		var _146 = {};
+		var defsToAdd = {};
 		
-		text.before = command.stripLinkDefs(text.before, _146);
-		text.selection = command.stripLinkDefs(text.selection, _146);
-		text.after = command.stripLinkDefs(text.after, _146);
+		chunk.before = command.stripLinkDefs(chunk.before, defsToAdd);
+		chunk.selection = command.stripLinkDefs(chunk.selection, defsToAdd);
+		chunk.after = command.stripLinkDefs(chunk.after, defsToAdd);
 		
 		var _147 = "";
-		var _148 = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
+		var regex = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
 		
-		var _149 = function(def){
-			_145++;
-			def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+_145+"]:");
-			_147 += "\n" + def;
-		};
+		var _149 = 
+			function(def){
+				_145++;
+				def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+_145+"]:");
+				_147 += "\n" + def;
+			};
 		
-		var _14b = function(_14c, _14d, id, end){
-			if(_146[id]){
-				_149(_146[id]);
-				return _14d + _145 + end;
-			}
-			return _14c;
-		};
+		var _14b = 
 		
-		text.before = text.before.replace(_148, _14b);
+			function(_14c, _14d, id, end){
 		
-		if(_144){
-			_149(_144);
+				if(defsToAdd[id]){
+		
+					_149(defsToAdd[id]);
+					return _14d + _145 + end;
+		
+				}
+				return _14c;
+			};
+		
+		chunk.before = chunk.before.replace(regex, _14b);
+		
+		if(linkDef){
+			_149(linkDef);
 		}
 		else{
-			text.selection = text.selection.replace(_148, _14b);
+			chunk.selection = chunk.selection.replace(regex, _14b);
 		}
 		
 		var _150 = _145;
-		text.after = text.after.replace(_148, _14b);
 		
-		if(text.after){
-			text.after = text.after.replace(/\n*$/, "");
+		chunk.after = chunk.after.replace(regex, _14b);
+		
+		if(chunk.after){
+			chunk.after = chunk.after.replace(/\n*$/, "");
 		}
-		if(!text.after){
-			text.selection = text.selection.replace(/\n*$/, "");
+		if(!chunk.after){
+			chunk.selection = chunk.selection.replace(/\n*$/, "");
 		}
 		
-		text.after += "\n\n" + _147;
+		chunk.after += "\n\n" + _147;
 		return _150;
 	};
 	
-	command.doLinkOrImage = function(_151, _152, _153){
+	// Done
+	command.doLinkOrImage = function(chunk, isImage, performAction){
 		
-		_151.trimWhitespace();
-		_151.findTags(/\s*!?\[/,/\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
+		chunk.trimWhitespace();
+		chunk.findTags(/\s*!?\[/,/\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
 		
-		if(_151.endTag.length > 1){
-			_151.startTag = _151.startTag.replace(/!?\[/, "");
-			_151.endTag = "";
-			command.addLinkDef(_151, null);
+		if(chunk.endTag.length > 1){
+			
+			chunk.startTag = chunk.startTag.replace(/!?\[/, "");
+			chunk.endTag = "";
+			command.addLinkDef(chunk, null);
+		
 		}
 		else{
 			
-			if(/\n\n/.test(_151.selection)){
-				command.addLinkDef(_151, null);
+			if(/\n\n/.test(chunk.selection)){
+				command.addLinkDef(chunk, null);
 				return;
 			}
 			
-			var _154;
+			var promptForm;
 			
-			var _155 = function(_156){
-				if(_156!=null){
-					_151.startTag = _151.endTag = "";
-					var _157 = " [999]: " + _156;
-					var num = command.addLinkDef(_151, _157);
-					_151.startTag = _152 ? "![" : "[";
-					_151.endTag = "][" + num + "]";
-					if(!_151.selection){
-						if(_152){
-							_151.selection = "alt text";
+			// The function to be executed when you enter a link and press OK or Cancel.
+			// Marks up the link and adds the ref.
+			var callback = function(link){
+				
+				if(link !== null){
+				
+					chunk.startTag = chunk.endTag = "";
+					var linkDef = " [999]: " + link;
+					
+					var num = command.addLinkDef(chunk, linkDef);
+					chunk.startTag = isImage ? "![" : "[";
+					chunk.endTag = "][" + num + "]";
+				
+					if(!chunk.selection){
+						if(isImage){
+							chunk.selection = "alt text";
 						}
 						else{
-							_151.selection="link text";
+							chunk.selection = "link text";
 						}
 					}
 				}
-				_153();
+				performAction();
 			};
 			
-			if(_152){
-				_154 = util.prompt("<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>","http://", _155);
+			if(isImage){
+				promptForm = util.prompt("<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>", "http://", callback);
 			}
 			else{
-				_154 = util.prompt("<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>","http://", _155);
+				promptForm = util.prompt("<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>", "http://", callback);
 			}
 			return true;
 		}
@@ -2096,22 +2120,22 @@ Attacklab.wmdBase = function(){
 	command.link.description = "Hyperlink <a>";
 	command.link.image = "images/link.png";
 	command.link.key = "l";
-	command.link.textOp = function(_159, _15a){
-		return command.doLinkOrImage(_159, false, _15a);
+	command.link.textOp = function(chunk, callback){
+		return command.doLinkOrImage(chunk, false, callback);
 	};
 
 	command.undo = {};
 	command.undo.description = "Undo";
 	command.undo.image = "images/undo.png";
-	command.undo.execute = function(_15b){
-		_15b.undo();
+	command.undo.execute = function(manager){
+		manager.undo();
 	};
 
 	command.redo = {};
 	command.redo.description = "Redo";
 	command.redo.image = "images/redo.png";
-	command.redo.execute = function(_15c){
-		_15c.redo();
+	command.redo.execute = function(manager){
+		manager.redo();
 	};
 	
 
@@ -2239,22 +2263,21 @@ Attacklab.wmdBase = function(){
 			poller = new wmd.inputPoller(inputElem, listener);
 		};
 			
-		var _176 = function(){
-			var _177 = 0;
+		var getDocScrollTop = function(){
+			
+			var result = 0;
+			
 			if(self.innerHeight){
-				_177 = self.pageYOffset;
+				result = self.pageYOffset;
 			}
-			else{
-				if(doc.documentElement && doc.documentElement.scrollTop){
-					_177 = doc.documentElement.scrollTop;
-				}
-				else{
-					if(doc.body){
-						_177 = doc.body.scrollTop;
-					}
-				}
+			else if (doc.documentElement && doc.documentElement.scrollTop) {
+				result = doc.documentElement.scrollTop;
 			}
-			return _177;
+			else if (doc.body) {
+				result = doc.body.scrollTop;
+			}
+
+			return result;
 		};
 			
 		var makePreviewHtml = function(){
@@ -2314,43 +2337,27 @@ Attacklab.wmdBase = function(){
 				timeout = self.setTimeout(makePreviewHtml, delay);
 			}
 		};
-			
-		var _17f;
-		var _180;
-		
-		var _181 = function(_182){
-			if(_182.scrollHeight <= _182.clientHeight){
+
+		var getScaleFactor = function(panel){
+			if(panel.scrollHeight <= panel.clientHeight){
 				return 1;
 			}
-			return _182.scrollTop / (_182.scrollHeight - _182.clientHeight);
+			return panel.scrollTop / (panel.scrollHeight - panel.clientHeight);
 		};
+		
+		var setPanelScrollTops = function(){
 			
-		var _183 = function(_184,_185){
-			_184.scrollTop = (_184.scrollHeight - _184.clientHeight) * _185;
-		};
-			
-		var _186 = function(){
 			if(wmdStuff.preview){
-				_17f = _181(wmdStuff.preview);
+				wmdStuff.preview.scrollTop = (wmdStuff.preview.scrollHeight - wmdStuff.preview.clientHeight) * getScaleFactor(wmdStuff.preview);;
 			}
 			
 			if(wmdStuff.output){
-				_180 = _181(wmdStuff.output);
+				wmdStuff.output.scrollTop = (wmdStuff.output.scrollHeight - wmdStuff.output.clientHeight) * getScaleFactor(wmdStuff.output);;
 			}
 		};
 		
-		var _187 = function(){
-			if(wmdStuff.preview){
-				wmdStuff.preview.scrollTop = wmdStuff.preview.scrollTop;
-				_183(wmdStuff.preview, _17f);
-			}
-			if(wmdStuff.output){
-				_183(wmdStuff.output, _180);
-			}
-		};
-		
-		this.refresh = function(_188){
-			if(_188){
+		this.refresh = function(requiresRefresh){
+			if(requiresRefresh){
 				oldInputText = "";
 				makePreviewHtml();
 			}
@@ -2374,12 +2381,11 @@ Attacklab.wmdBase = function(){
 			managerObj.refresh();
 		};
 		
-		var _18a = true;
+		var isFirstTimeFilled = true;
 		
 		var pushPreviewHtml = function(text){
 			
-			_186();
-			var _18c = position.getTop(wmdStuff.input) - _176();
+			var emptyTop = position.getTop(wmdStuff.input) - getDocScrollTop();
 			
 			// Send the encoded HTML to the output textarea/div.
 			if(wmdStuff.output){
@@ -2398,24 +2404,23 @@ Attacklab.wmdBase = function(){
 			}
 			
 			if(wmdStuff.preview){
-				// The preview is just raw HTML
 				wmdStuff.preview.innerHTML = text;
 			}
 			
-			_187();
+			setPanelScrollTops();
 			
-			if(_18a){
-				_18a = false;
+			if(isFirstTimeFilled){
+				isFirstTimeFilled = false;
 				return;
 			}
 			
-			var _18e = position.getTop(wmdStuff.input) - _176();
+			var fullTop = position.getTop(wmdStuff.input) - getDocScrollTop();
 			
 			if(nav.userAgent.indexOf("MSIE")!=-1){
-				self.setTimeout(function(){self.scrollBy(0, _18e - _18c);}, 0);
+				self.setTimeout(function(){self.scrollBy(0, fullTop - emptyTop);}, 0);
 			}
 			else{
-				self.scrollBy(0, _18e - _18c);
+				self.scrollBy(0, fullTop - emptyTop);
 			}
 		};
 		
