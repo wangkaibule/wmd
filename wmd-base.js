@@ -859,7 +859,7 @@ Attacklab.wmdBase = function(){
 			refreshState();
 		};
 		
-		// Undo an undo action.
+		// Redo an action.
 		this.redo = function(){
 			
 			if(undoObj.canRedo()){
@@ -1023,17 +1023,21 @@ Attacklab.wmdBase = function(){
 		var btnBarWidth = 4076;
 		
 		var offsetHeight = 0;
-		var _b5;
-		var _b6;
+		
+		// These saved values are used to see if the editor has been resized.
+		var savedHeight;
+		var savedLeft;
 		
 		var editObj = this;
 		
 		var mainDiv;
 		var mainSpan;
 		
-		var _ba;
-		var _bb;
-		var _bc;
+		var div;	// used in the _dc function.  I should rename this.
+		
+		// Used to cancel recurring events from setInterval.
+		var resizePollHandle;
+		var creationHandle;
 		
 		var undoMgr;		// The undo manager
 		var undoImage;		// The image on the undo button
@@ -1070,23 +1074,24 @@ Attacklab.wmdBase = function(){
 				previewRefreshCallback();
 			};
 			
-			var _c6 = callback(chunks, performAction);
+			var action = callback(chunks, performAction);
 			
-			if(!_c6){
+			if(!action){
 				performAction();
 			}
 		};
 		
-		var doClick = function(_c8){
+		// Perform the button's action.
+		var doClick = function(button){
 			
 			inputBox.focus();
 			
-			if(_c8.textOp){
-				saveStateDoButtonAction(_c8.textOp);
+			if(button.textOp){
+				saveStateDoButtonAction(button.textOp);
 			}
 			
-			if(_c8.execute){
-				_c8.execute(editObj);
+			if(button.execute){
+				button.execute(editObj);
 			}
 		};
 		
@@ -1157,37 +1162,44 @@ Attacklab.wmdBase = function(){
 			
 		};
 		
-		var makeButtonImage = function(_d3){
-			if(_d3.image){
-				var _d4 = util.createImage(_d3.image, 16, 16);
-				_d4.border = 0;
-				if(_d3.description){
-					var _d5 = _d3.description;
-					if(_d3.key){
-						var _d6 = " Ctrl+";
-						_d5 += _d6 + _d3.key.toUpperCase();
-					}
-					_d4.title = _d5;
-				}
-				setStyle(_d4, true);
-				var _d7 = _d4.style;
-				_d7.margin = "0px";
-				_d7.padding = "1px";
-				_d7.marginTop = "7px";
-				_d7.marginBottom = "5px";
-				_d4.onmouseout();
-				var _d8 = _d4;
+		var makeButton = function(button){
+			
+			if(button.image){
 				
-				_d8.onclick = function(){
-					if(_d8.onmouseout){
-						_d8.onmouseout();
+				// Create the image and add properties.
+				var btnImage = util.createImage(button.image, 16, 16);
+				btnImage.border = 0;
+				if(button.description){
+					var desc = button.description;
+					if(button.key){
+						var ctrl = " Ctrl+";
+						desc += ctrl + button.key.toUpperCase();
 					}
-					doClick(_d3);
+					btnImage.title = desc;
+				}
+				
+				// Set the button's style.
+				setStyle(btnImage, true);
+				var style = btnImage.style;
+				style.margin = "0px";
+				style.padding = "1px";
+				style.marginTop = "7px";
+				style.marginBottom = "5px";
+				
+				btnImage.onmouseout();
+				var img = btnImage;		// Why is this being aliased?
+				
+				img.onclick = function(){
+					if(img.onmouseout){
+						img.onmouseout();
+					}
+					doClick(button);
 					return false;
 				};
-				mainSpan.appendChild(_d8);
-				return _d8;
+				mainSpan.appendChild(img);
+				return img;
 			}
+			
 			return;
 		};
 		
@@ -1200,7 +1212,7 @@ Attacklab.wmdBase = function(){
 					makeButtonSeparator();
 				}
 				else{
-					makeButtonImage(buttonCallbacks[callback]);
+					makeButton(buttonCallbacks[callback]);
 				}
 			}
 		};
@@ -1212,7 +1224,7 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		var _dc = function(){
+		var createEditor = function(){
 			
 			if(inputBox.offsetParent){
 				
@@ -1231,12 +1243,12 @@ Attacklab.wmdBase = function(){
 				div.appendChild(mainDiv);
 				
 				inputBox.style.marginTop = "";
-				var _de = position.getTop(inputBox);
+				var height1 = position.getTop(inputBox);
 				
 				inputBox.style.marginTop = "0";
-				var _df = position.getTop(inputBox);
+				var height2 = position.getTop(inputBox);
 				
-				offsetHeight = _de - _df;
+				offsetHeight = height1 - height2;
 				
 				setupWmdButton();
 				inputBox.parentNode.insertBefore(div, inputBox);
@@ -1315,7 +1327,7 @@ Attacklab.wmdBase = function(){
 					});
 			}
 			
-			var _e6 = inputBox.parentNode;
+			var unused = inputBox.parentNode;			// Delete this.  Not used anywhere.
 			
 			mainDiv = util.makeElement("div");
 			mainDiv.style.display = "block";
@@ -1327,14 +1339,14 @@ Attacklab.wmdBase = function(){
 			mainDiv.onclick = function(){ inputBox.focus(); };
 			
 			mainSpan = util.makeElement("span");
-			var _e7 = mainSpan.style;
-			_e7.height = "auto";
-			_e7.paddingBottom = "2px";
-			_e7.lineHeight = "0";
-			_e7.paddingLeft = "15px";
-			_e7.paddingRight = "65px";
-			_e7.display = "block";
-			_e7.position = "absolute";
+			var style = mainSpan.style;
+			style.height = "auto";
+			style.paddingBottom = "2px";
+			style.lineHeight = "0";
+			style.paddingLeft = "15px";
+			style.paddingRight = "65px";
+			style.display = "block";
+			style.position = "absolute";
 			mainSpan.unselectable = "on";
 			mainDiv.appendChild(mainSpan);
 			
@@ -1351,8 +1363,8 @@ Attacklab.wmdBase = function(){
 			// Create the undo/redo buttons.
 			if(undoMgr){
 				makeButtonSeparator();
-				undoImage = makeButtonImage(command.undo);
-				redoImage = makeButtonImage(command.redo);
+				undoImage = makeButton(command.undo);
+				redoImage = makeButton(command.redo);
 				
 				var platform = nav.platform.toLowerCase();
 				if(/win/.test(platform)){
@@ -1419,22 +1431,22 @@ Attacklab.wmdBase = function(){
 					}
 				});
 			
-			if(!_dc()){
-				_bc = self.setInterval(function(){
-					if(_dc()){
-						self.clearInterval(_bc);
+			if(!createEditor()){
+				creationHandle = self.setInterval(function(){
+					if(createEditor()){
+						self.clearInterval(creationHandle);
 					}
 				}, 100);
 			}
 			
 			util.addEvent(self, "resize", setDimensions);
-			_bb = self.setInterval(setDimensions, 100);
+			resizePollHandle = self.setInterval(setDimensions, 100);
 			if(inputBox.form){
-				var _f4 = inputBox.form.onsubmit;
+				var submitCallback = inputBox.form.onsubmit;
 				inputBox.form.onsubmit = function(){
 					convertToHtml();
-					if(_f4){
-						return _f4.apply(this, arguments);
+					if(submitCallback){
+						return submitCallback.apply(this, arguments);
 					}
 				};
 			}
@@ -1517,13 +1529,15 @@ Attacklab.wmdBase = function(){
 			var inputHeight = position.getHeight(inputBox);
 			var inputLeft = position.getLeft(inputBox);
 			
-			if(mainDiv.style.width == inputWidth + "px" && _b5 == inputHeight && _b6 == inputLeft){
+			// Check for resize.
+			if(mainDiv.style.width == (inputWidth + "px") && (savedHeight == inputHeight) && (savedLeft == inputLeft)){
 				if(position.getTop(mainDiv) < position.getTop(inputBox)){
 					return;
 				}
 			}
-			_b5 = inputHeight;
-			_b6 = inputLeft;
+			
+			savedHeight = inputHeight;
+			savedLeft = inputLeft;
 			
 			var minWidth = 100;		// This could be calculated based on the width of the button bar.
 			mainDiv.style.width = Math.max(inputWidth, minWidth) + "px";
@@ -1564,7 +1578,8 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		// This is pretty useless...
+		// This is pretty useless.  The setupEditor function contents
+		// should just be copied here.
 		var init = function(){
 			setupEditor();
 		};
@@ -1579,32 +1594,34 @@ Attacklab.wmdBase = function(){
 			if(inputBox){
 				inputBox.style.marginTop = "";
 			}
-			self.clearInterval(_bb);
-			self.clearInterval(_bc);
+			self.clearInterval(resizePollHandle);
+			self.clearInterval(creationHandle);
 		};
 		
 		init();
 	};
 	
+	// DONE
+	// The textarea state/contents.
+	// This is only used to implement undo/redo by the undo manager.
 	wmd.textareaState = function(inputArea){
 		
 		var stateObj = this;
 		
-		var _10a = function(_10b){
+		var setSelection = function(targetArea){
 		
-			// If it's hidden we just return.
 			if(util.getStyleProperty(inputArea, "display") === "none"){
 				return;
 			}
 			
 			var isOpera = nav.userAgent.indexOf("Opera") != -1;
 			
-			if(_10b.selectionStart !== undefined && !isOpera){
+			if(targetArea.selectionStart !== undefined && !isOpera){
 				
-				_10b.focus();
-				_10b.selectionStart = stateObj.start;
-				_10b.selectionEnd = stateObj.end;
-				_10b.scrollTop = stateObj.scrollTop;
+				targetArea.focus();
+				targetArea.selectionStart = stateObj.start;
+				targetArea.selectionEnd = stateObj.end;
+				targetArea.scrollTop = stateObj.scrollTop;
 			
 			}
 			else if(doc.selection){
@@ -1613,43 +1630,42 @@ Attacklab.wmdBase = function(){
 					return;
 				}
 				
-				_10b.focus();
-				var _10d=_10b.createTextRange();
-				_10d.moveStart("character", -_10b.value.length);
-				_10d.moveEnd("character", -_10b.value.length);
-				_10d.moveEnd("character", stateObj.end);
-				_10d.moveStart("character", stateObj.start);
-				_10d.select();
+				targetArea.focus();
+				var range = targetArea.createTextRange();
+				range.moveStart("character", -targetArea.value.length);
+				range.moveEnd("character", -targetArea.value.length);
+				range.moveEnd("character", stateObj.end);
+				range.moveStart("character", stateObj.start);
+				range.select();
 			}
 		};
 		
-		this.init = function(newArea){
+		this.init = function(targetArea){
 			
 			// Normally the argument is not passed so the arguemnt passed to constructor
 			// is used as the input area.
-			if(newArea){
-				inputArea = newArea;
+			if(targetArea){
+				inputArea = targetArea;
 			}
 			
-			// If hidden, do nothing.
 			if(util.getStyleProperty(inputArea,"display") == "none"){
 				return;
 			}
 			
-			_10f(inputArea);
+			setStartEnd();
 			stateObj.scrollTop = inputArea.scrollTop;
 			if(!stateObj.text && inputArea.selectionStart || inputArea.selectionStart === 0){
 				stateObj.text = inputArea.value;
 			}
 		};
 		
-		var _110 = function(_111){
-			_111 = _111.replace(/\r\n/g, "\n");
-			_111 = _111.replace(/\r/g, "\n");
-			return _111;
+		var fixEolChars = function(text){
+			text = text.replace(/\r\n/g, "\n");
+			text = text.replace(/\r/g, "\n");
+			return text;
 		};
 		
-		var _10f = function(){
+		var setStartEnd = function(){
 			
 			if(inputArea.selectionStart || inputArea.selectionStart === 0){
 				
@@ -1658,73 +1674,89 @@ Attacklab.wmdBase = function(){
 			}
 			else if(doc.selection){
 
-				stateObj.text = _110(inputArea.value);
-				var _112 = doc.selection.createRange();
-				var _113 = _110(_112.text);
-				var _114 = "\x07";
-				var _115 = _114 + _113 + _114;
-				_112.text = _115;
-				var _116 = _110(inputArea.value);
-				_112.moveStart("character", -_115.length);
-				_112.text = _113;
-				stateObj.start = _116.indexOf(_114);
-				stateObj.end = _116.lastIndexOf(_114) - _114.length;
+				stateObj.text = fixEolChars(inputArea.value);
+				
+				var range = doc.selection.createRange();		// The currently selected text.
+				var fixedRange = fixEolChars(range.text);		// The currently selected text with regular newlines.
+				
+				var marker = "\x07";							// A marker for the selected text.
+				var markedRange = marker + fixedRange + marker;	// Surround the selection with a marker.
+				
+				range.text = markedRange;						// Change the selection text to marked up range.
+				
+				var inputText = fixEolChars(inputArea.value);
+				
+				range.moveStart("character", -markedRange.length);	// Move the selection start back to the beginning of the marked up text.
+				range.text = fixedRange;							// And substitute the text with the fixed newlines.
+				
+				// Start and End refer to the marked up region.
+				stateObj.start = inputText.indexOf(marker);
+				stateObj.end = inputText.lastIndexOf(marker) - marker.length;
 					
-				var _117 = stateObj.text.length - _110(inputArea.value).length;
-				if(_117){
-					_112.moveStart("character", -_113.length);
-					while(_117--){
-						_113 += "\n";
+				var len = stateObj.text.length - fixEolChars(inputArea.value).length;
+				
+				if(len){
+					range.moveStart("character", -fixedRange.length);
+					while(len--){
+						fixedRange += "\n";
 						stateObj.end += 1;
 					}
-					_112.text=_113;
+					range.text = fixedRange;
 				}
 					
-				_10a(inputArea);
+				setSelection(inputArea);
 			}
 			
 			
 			return stateObj;
 		};
 		
-		this.restore = function(_118){
-			if(!_118){
-				_118 = inputArea;
+		// Restore this state into the input area.
+		this.restore = function(targetArea){
+			
+			// The target area argument is never used so it will always
+			// be the inputArea.
+			if(!targetArea){
+				targetArea = inputArea;
 			}
-			if(stateObj.text != undefined && stateObj.text != _118.value){
-				_118.value = stateObj.text;
+			if(stateObj.text != undefined && stateObj.text != targetArea.value){
+				targetArea.value = stateObj.text;
 			}
-			_10a(_118, stateObj);
-			_118.scrollTop = stateObj.scrollTop;
+			setSelection(targetArea);
+			targetArea.scrollTop = stateObj.scrollTop;
 		};
 		
+		// Gets a collection of HTML chunks from the inptut textarea.
 		this.getChunks = function(){
-			var _119 = new wmd.Chunks();
-			_119.before = _110(stateObj.text.substring(0, stateObj.start));
-			_119.startTag = "";
-			_119.selection = _110(stateObj.text.substring(stateObj.start, stateObj.end));
-			_119.endTag = "";
-			_119.after = _110(stateObj.text.substring(stateObj.end));
-			_119.scrollTop = stateObj.scrollTop;
-			return _119;
+			
+			var chunk = new wmd.Chunks();
+			
+			chunk.before = fixEolChars(stateObj.text.substring(0, stateObj.start));
+			chunk.startTag = "";
+			chunk.selection = fixEolChars(stateObj.text.substring(stateObj.start, stateObj.end));
+			chunk.endTag = "";
+			chunk.after = fixEolChars(stateObj.text.substring(stateObj.end));
+			chunk.scrollTop = stateObj.scrollTop;
+			
+			return chunk;
 		};
 		
-		this.setChunks = function(_11a){
+		this.setChunks = function(chunk){
 			
-			_11a.before = _11a.before + _11a.startTag;
-			_11a.after = _11a.endTag + _11a.after;
+			chunk.before = chunk.before + chunk.startTag;
+			chunk.after = chunk.endTag + chunk.after;
 			
-			var _11b = nav.userAgent.indexOf("Opera") !== -1;
-			if(_11b){
-				_11a.before = _11a.before.replace(/\n/g,"\r\n");
-				_11a.selection = _11a.selection.replace(/\n/g,"\r\n");
-				_11a.after = _11a.after.replace(/\n/g,"\r\n");
+			var isOpera = nav.userAgent.indexOf("Opera") !== -1;
+			if(isOpera){
+				chunk.before = chunk.before.replace(/\n/g, "\r\n");
+				chunk.selection = chunk.selection.replace(/\n/g, "\r\n");
+				chunk.after = chunk.after.replace(/\n/g, "\r\n");
 			}
 			
-			stateObj.start = _11a.before.length;
-			stateObj.end = _11a.before.length + _11a.selection.length;
-			stateObj.text = _11a.before + _11a.selection + _11a.after;
-			stateObj.scrollTop = _11a.scrollTop;
+			stateObj.start = chunk.before.length;
+			stateObj.end = chunk.before.length + chunk.selection.length;
+			stateObj.text = chunk.before + chunk.selection + chunk.after;
+			stateObj.scrollTop = chunk.scrollTop;
 		};
 		
 		this.init();
@@ -1934,28 +1966,28 @@ Attacklab.wmdBase = function(){
 		chunk.after = markup + chunk.after;
 	};
 	
-	command.stripLinkDefs = function(_13c, _13d){
+	command.stripLinkDefs = function(text, _13d){
 		
-		_13c = _13c.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm,
+		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm,
 			function(_13e, id, _140, _141, _142){
-				_13d[id] = _13e.replace(/\s*$/,"");
+				_13d[id] = _13e.replace(/\s*$/, "");
 				if(_141){
-					_13d[id] = _13e.replace(/["(](.+?)[")]$/,"");
+					_13d[id] = _13e.replace(/["(](.+?)[")]$/, "");
 					return _141 + _142;
 				}
 				return "";
 			});
-		return _13c;
+		return text;
 	};
 	
-	command.addLinkDef = function(_143, _144){
+	command.addLinkDef = function(text, _144){
 		
 		var _145 = 0;
 		var _146 = {};
 		
-		_143.before = command.stripLinkDefs(_143.before, _146);
-		_143.selection = command.stripLinkDefs(_143.selection, _146);
-		_143.after = command.stripLinkDefs(_143.after, _146);
+		text.before = command.stripLinkDefs(text.before, _146);
+		text.selection = command.stripLinkDefs(text.selection, _146);
+		text.after = command.stripLinkDefs(text.after, _146);
 		
 		var _147 = "";
 		var _148 = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
@@ -1974,26 +2006,26 @@ Attacklab.wmdBase = function(){
 			return _14c;
 		};
 		
-		_143.before = _143.before.replace(_148, _14b);
+		text.before = text.before.replace(_148, _14b);
 		
 		if(_144){
 			_149(_144);
 		}
 		else{
-			_143.selection = _143.selection.replace(_148, _14b);
+			text.selection = text.selection.replace(_148, _14b);
 		}
 		
 		var _150 = _145;
-		_143.after = _143.after.replace(_148, _14b);
+		text.after = text.after.replace(_148, _14b);
 		
-		if(_143.after){
-			_143.after = _143.after.replace(/\n*$/, "");
+		if(text.after){
+			text.after = text.after.replace(/\n*$/, "");
 		}
-		if(!_143.after){
-			_143.selection = _143.selection.replace(/\n*$/, "");
+		if(!text.after){
+			text.selection = text.selection.replace(/\n*$/, "");
 		}
 		
-		_143.after += "\n\n" + _147;
+		text.after += "\n\n" + _147;
 		return _150;
 	};
 	
