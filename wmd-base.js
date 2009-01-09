@@ -1873,7 +1873,9 @@ Attacklab.wmdBase = function(){
 		}
 		
 		if(this.after){
+			
 			_129 = _12a = "";
+			
 			while(_127--){
 				_129 += "\\n?";
 				_12a += "\n";
@@ -1881,6 +1883,7 @@ Attacklab.wmdBase = function(){
 			if(_128){
 				_129 = "\\n*";
 			}
+			
 			this.after = this.after.replace(new re(_129, ""), _12a);
 		}
 	};
@@ -1893,7 +1896,6 @@ Attacklab.wmdBase = function(){
 		var txt = new re("([^\\n])\\n(?!(\\n|" + command.prefixes + "))","g");
 		chunk.selection = chunk.selection.replace(txt, "$1 $2");
 	};
-	
 	
 	command.wrap = function(chunk, len){
 		command.unwrap(chunk);
@@ -1990,7 +1992,7 @@ Attacklab.wmdBase = function(){
 	
 	command.addLinkDef = function(chunk, linkDef){
 		
-		var _145 = 0;
+		var refNumber = 0;
 		var defsToAdd = {};
 		
 		chunk.before = command.stripLinkDefs(chunk.before, defsToAdd);
@@ -2002,8 +2004,8 @@ Attacklab.wmdBase = function(){
 		
 		var _149 = 
 			function(def){
-				_145++;
-				def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+_145+"]:");
+				refNumber++;
+				def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+ refNumber +"]:");
 				_147 += "\n" + def;
 			};
 		
@@ -2014,7 +2016,7 @@ Attacklab.wmdBase = function(){
 				if(defsToAdd[id]){
 		
 					_149(defsToAdd[id]);
-					return _14d + _145 + end;
+					return _14d + refNumber + end;
 		
 				}
 				return _14c;
@@ -2029,7 +2031,7 @@ Attacklab.wmdBase = function(){
 			chunk.selection = chunk.selection.replace(regex, _14b);
 		}
 		
-		var _150 = _145;
+		var _150 = refNumber;
 		
 		chunk.after = chunk.after.replace(regex, _14b);
 		
@@ -2233,7 +2235,7 @@ Attacklab.wmdBase = function(){
 		var ignored = self.setInterval(loadListener, 100);
 	};
 	
-	// UNFINISHED - needs display stuff
+	// DONE
 	wmd.previewManager = function(wmdStuff){
 		
 		// wmdStuff stores random things we need to keep track of, like
