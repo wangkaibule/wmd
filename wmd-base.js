@@ -1836,20 +1836,22 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	wmd.Chunks.prototype.skipLines = function(_126, _127, _128){
+	
+	wmd.Chunks.prototype.skipLines = function(nLinesBefore, nLinesAfter, findExtraNewlines){
 		
-		if(_126 === undefined){
-			_126 = 1;
+		if(nLinesBefore === undefined){
+			nLinesBefore = 1;
 		}
 		
-		if(_127 === undefined){
-			_127 = 1;
+		if(nLinesAfter === undefined){
+			nLinesAfter = 1;
 		}
 		
-		_126++;
-		_127++;
+		nLinesBefore++;
+		nLinesAfter++;
 		
-		var _129, _12a;
+		var regexText;
+		var replacementText;
 		
 		this.selection = this.selection.replace(/(^\n*)/, "");
 		this.startTag = this.startTag + re.$1;
@@ -1862,32 +1864,32 @@ Attacklab.wmdBase = function(){
 		
 		if(this.before){
 			
-			_129 = _12a = "";
+			regexText = replacementText = "";
 			
-			while(_126--){
-				_129 += "\\n?";
-				_12a += "\n";
+			while(nLinesBefore--){
+				regexText += "\\n?";
+				replacementText += "\n";
 			}
 			
-			if(_128){
-				_129 = "\\n*";
+			if(findExtraNewlines){
+				regexText = "\\n*";
 			}
-			this.before = this.before.replace(new re(_129 + "$", ""), _12a);
+			this.before = this.before.replace(new re(regexText + "$", ""), replacementText);
 		}
 		
 		if(this.after){
 			
-			_129 = _12a = "";
+			regexText = replacementText = "";
 			
-			while(_127--){
-				_129 += "\\n?";
-				_12a += "\n";
+			while(nLinesAfter--){
+				regexText += "\\n?";
+				replacementText += "\n";
 			}
-			if(_128){
-				_129 = "\\n*";
+			if(findExtraNewlines){
+				regexText = "\\n*";
 			}
 			
-			this.after = this.after.replace(new re(_129, ""), _12a);
+			this.after = this.after.replace(new re(regexText, ""), replacementText);
 		}
 	};
 	
@@ -1974,6 +1976,7 @@ Attacklab.wmdBase = function(){
 		chunk.after = markup + chunk.after;
 	};
 	
+	// DONE
 	command.stripLinkDefs = function(text, defsToAdd){
 		
 		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm,
@@ -1993,50 +1996,48 @@ Attacklab.wmdBase = function(){
 		return text;
 	};
 	
+	// DONE
 	command.addLinkDef = function(chunk, linkDef){
 		
-		var refNumber = 0;
-		var defsToAdd = {};
+		var refNumber = 0;		// The current reference number
+		var defsToAdd = {};		//
 		
+		// Start with a clean slate by removing all previous link definitions.
 		chunk.before = command.stripLinkDefs(chunk.before, defsToAdd);
 		chunk.selection = command.stripLinkDefs(chunk.selection, defsToAdd);
 		chunk.after = command.stripLinkDefs(chunk.after, defsToAdd);
 		
-		var _147 = "";
+		var defs = "";
 		var regex = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
 		
-		var _149 = 
-			function(def){
-				refNumber++;
-				def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+ refNumber +"]:");
-				_147 += "\n" + def;
-			};
+		var addDefNumber =  function(def){
+			refNumber++;
+			def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+ refNumber +"]:");
+			defs += "\n" + def;
+		};
 		
-		var _14b = 
+		var getLink = function(wholeMatch, link, id, end){
 		
-			function(_14c, _14d, id, end){
+			if(defsToAdd[id]){
+				addDefNumber(defsToAdd[id]);
+				return link + refNumber + end;
 		
-				if(defsToAdd[id]){
+			}
+			return wholeMatch;
+		};
 		
-					_149(defsToAdd[id]);
-					return _14d + refNumber + end;
-		
-				}
-				return _14c;
-			};
-		
-		chunk.before = chunk.before.replace(regex, _14b);
+		chunk.before = chunk.before.replace(regex, getLink);
 		
 		if(linkDef){
-			_149(linkDef);
+			addDefNumber(linkDef);
 		}
 		else{
-			chunk.selection = chunk.selection.replace(regex, _14b);
+			chunk.selection = chunk.selection.replace(regex, getLink);
 		}
 		
-		var _150 = refNumber;
+		var refOut = refNumber;
 		
-		chunk.after = chunk.after.replace(regex, _14b);
+		chunk.after = chunk.after.replace(regex, getLink);
 		
 		if(chunk.after){
 			chunk.after = chunk.after.replace(/\n*$/, "");
@@ -2045,8 +2046,9 @@ Attacklab.wmdBase = function(){
 			chunk.selection = chunk.selection.replace(/\n*$/, "");
 		}
 		
-		chunk.after += "\n\n" + _147;
-		return _150;
+		chunk.after += "\n\n" + defs;
+		
+		return refOut;
 	};
 	
 	// Done
