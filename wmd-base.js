@@ -1763,6 +1763,9 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// DONE - empty
+	//
+	// before: contains all the text in the input box BEFORE the selection.
+	// after: contains all the text in the input box AFTER the selection.
 	wmd.Chunks = function(){
 	};
 	

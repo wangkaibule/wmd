@@ -34,70 +34,72 @@ Attacklab.wmdPlus=function(){
 		}
 	};
 	
+	// DONE
 	command.doBlockquote = function(chunk){
 		
 		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
-			function(_b, _c, _d, _e){
-				chunk.before += _c;
-				chunk.after = _e + chunk.after;
-				return _d;
+			function(totalMatch, newlinesBefore, text, newlinesAfter){
+				chunk.before += newlinesBefore;
+				chunk.after = newlinesAfter + chunk.after;
+				return text;
 			});
 			
 		chunk.before = chunk.before.replace(/(>[ \t]*)$/,
-			function(_f,_10){
-				chunk.selection = _10 + chunk.selection;
+			function(totalMatch, blankLine){
+				chunk.selection = blankLine + chunk.selection;
 				return "";
 			});
 			
-		chunk.selection = chunk.selection.replace(/^(\s|>)+$/,"");
+		chunk.selection = chunk.selection.replace(/^(\s|>)+$/ ,"");
 		chunk.selection = chunk.selection || "Blockquote";
 		
 		if(chunk.before){
 			chunk.before = chunk.before.replace(/\n?$/,"\n");
 		}
-		
 		if(chunk.after){
 			chunk.after = chunk.after.replace(/^\n?/,"\n");
 		}
 		
 		chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
-			function(_11){
-				chunk.startTag = _11;
+			function(totalMatch){
+				chunk.startTag = totalMatch;
 				return "";
 			});
 			
 		chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
-			function(_12){
-				chunk.endTag = _12;
+			function(totalMatch){
+				chunk.endTag = totalMatch;
 				return "";
 			});
 		
-		var _13 = function(_14){
-			var _15 = _14 ? "> ":"";
+		var replaceBlanksInTags = function(useBracket){
+			
+			var replacement = useBracket ? "> " : "";
+			
 			if(chunk.startTag){
 				chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/,
-					function(_16, _17){
-						return "\n" + _17.replace(/^[ ]{0,3}>?[ \t]*$/gm, _15) + "\n";
+					function(totalMatch, markdown){
+						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
 					});
 			}
 			if(chunk.endTag){
-				chunk.endTag=chunk.endTag.replace(/^\n((>|\s)*)\n/,
-				function(_18, _19){
-					return "\n" + _19.replace(/^[ ]{0,3}>?[ \t]*$/gm,_15) + "\n";
-				});
+				chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/,
+					function(totalMatch, markdown){
+						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+					});
 			}
 		};
 		
 		if(/^(?![ ]{0,3}>)/m.test(chunk.selection)){
 			command.wrap(chunk, wmd.wmd_env.lineLength - 2);
 			chunk.selection = chunk.selection.replace(/^/gm, "> ");
-			_13(true);
+			replaceBlanksInTags(true);
 			chunk.skipLines();
 		}
 		else{
 			chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
 			command.unwrap(chunk);
-			_13(false);
+			replaceBlanksInTags(false);
 			
 			if(!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag){
 				chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
@@ -109,38 +111,41 @@ Attacklab.wmdPlus=function(){
 		}
 		
 		if(!/\n/.test(chunk.selection)){
-			chunk.selection=chunk.selection.replace(/^(> *)/,
-			function(_1a, _1b){
-				chunk.startTag += _1b;
+			chunk.selection = chunk.selection.replace(/^(> *)/,
+			function(wholeMatch, blanks){
+				chunk.startTag += blanks;
 				return "";
 			});
 		}
 	};
 
+	// DONE
 	command.doCode = function(chunk){
 		
-		var _1d = /\S[ ]*$/.test(chunk.before);
-		var _1e = /^[ ]*\S/.test(chunk.after);
+		var hasTextBefore = /\S[ ]*$/.test(chunk.before);
+		var hasTextAfter = /^[ ]*\S/.test(chunk.after);
 		
-		if((!_1e && !_1d) || /\n/.test(chunk.selection)){
+		// Use 'four space' markdown if the selection is on its own
+		// line or is multiline.
+		if((!hasTextAfter && !hasTextBefore) || /\n/.test(chunk.selection)){
 			
 			chunk.before = chunk.before.replace(/[ ]{4}$/,
-				function(_1f){
-					chunk.selection = _1f + chunk.selection;
+				function(totalMatch){
+					chunk.selection = totalMatch + chunk.selection;
 					return "";
 				});
 				
-			var _20 = 1;
-			var _21 = 1;
+			var nLinesBack = 1;
+			var nLinesForward = 1;
 			
 			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before)){
-				_20 = 0;
+				nLinesBack = 0;
 			}
 			if(/^\n(\t|[ ]{4,})/.test(chunk.after)){
-				_21 = 0;
+				nLinesForward = 0;
 			}
 			
-			chunk.skipLines(_20, _21);
+			chunk.skipLines(nLinesBack, nLinesForward);
 			
 			if(!chunk.selection){
 				chunk.startTag = "    ";
@@ -156,6 +161,8 @@ Attacklab.wmdPlus=function(){
 			}
 		}
 		else{
+			
+			// Use backticks (`) to delimit the code block.
 			
 			chunk.trimWhitespace();
 			chunk.findTags(/`/,/`/);
@@ -197,105 +204,123 @@ Attacklab.wmdPlus=function(){
 	command.img.description = "Image <img>";
 	command.img.image = "images/img.png";
 	command.img.key = "g";
-	command.img.textOp = function(chunk, _24){
-		return command.doLinkOrImage(chunk, true, _24);
+	command.img.textOp = function(chunk, callback){
+		return command.doLinkOrImage(chunk, true, callback);
 	};
 	
-	command.doList = function(chunk, _26){
+	// DONE
+	command.doList = function(chunk, isNumberedList){
 		
-		var _27 = /(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
-		var _28 = "";
-		var _29 = 1;
+		var listItemRegex = /(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
+		var bulletSymbol = "";
+		var num = 1;	// The number in a numbered list.
 		
-		var _2a = function(){
-			if(_26){
-				var _2b = " " + _29 + ". ";
-				_29++;
-				return _2b;
+		// Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
+		var getItemPrefix = function(){
+			var prefix;
+			if(isNumberedList){
+				prefix = " " + num + ". ";
+				num++;
 			}
-			var _2c = _28 || "-";
-			return "  " + _2c + " ";
+			else{
+				var bullet = bulletSymbol || "-";
+				prefix = " " + bullet + " ";
+			}
+			return prefix;
 		};
 		
-		var _2d = function(_2e){
+		// Does two things, which is kind of dumb.
+		// 1. Decides if we have a numbered list or not if the flag isn't set.
+		// 2. Makes the list item prefixes uniform.
+		var fixPrefixes = function(text){
 			
-			if(_26 == undefined){
-				_26 = /^\s*\d/.test(_2e);
+			// Why on EARTH would this variable not be set?
+			// Javascript is, without a doubt, the SLOPPIEST language I've encountered in a LONG time.
+			if(isNumberedList === undefined){
+				isNumberedList = /^\s*\d/.test(text);
 			}
-			_2e = _2e.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
-				function(_2f){
-					return _2a();
+			
+			text = text.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
+				function(totalSelection){
+					return getItemPrefix();
 				});
 				
-			return _2e;
+			return text;
 		};
 		
-		var _30 = function(){
-			_31 = util.regexToString(_27);
-			_31.expression = "^\n*" + _31.expression;
-			var _32 = util.stringToRegex(_31);
-			chunk.after = chunk.after.replace(_32,_2d);
+		// Finds and fixes up the list items after this item.
+		// Used when we are editing inside a list.
+		var fixLaterItems = function(){
+			
+			// regexThing is that weird, non-string thing that regexToString returns.
+			regexThing = util.regexToString(listItemRegex);
+			regexThing.expression = "^\n*" + regexThing.expression;
+			var regex = util.stringToRegex(regexThing);
+			
+			chunk.after = chunk.after.replace(regex, fixPrefixes);
 		};
 		
-		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/,null);
-		var _33 = /^\n/;
+		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
 		
-		if(chunk.before && !/\n$/.test(chunk.before) && !_33.test(chunk.startTag)){
+		if(chunk.before && !/\n$/.test(chunk.before) && !/^\n/.test(chunk.startTag)){
 			chunk.before += chunk.startTag;
-			chunk.startTag="";
+			chunk.startTag = "";
 		}
 		
 		if(chunk.startTag){
-			var _34 = /\d+[.]/.test(chunk.startTag);
+			
+			var hasDigits = /\d+[.]/.test(chunk.startTag);
 			chunk.startTag = "";
 			chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
 			command.unwrap(chunk);
 			chunk.skipLines();
 			
-			if(_34){
-				_30();
+			if(hasDigits){
+				fixLaterItems();
 			}
-			if(_26 == _34){
+			if(isNumberedList == hasDigits){
 				return;
 			}
 		}
 		
-		var _35 = 1;
-		var _31 = util.regexToString(_27);
-		_31.expression = "(\\n|^)" + _31.expression + "$";
-		var _36 = util.stringToRegex(_31);
+		var nLinesUp = 1;
 		
-		chunk.before = chunk.before.replace(_36,
-			function(_37){
-				if(/^\s*([*+-])/.test(_37)){
-					_28 = re.$1;
+		var regexThing = util.regexToString(listItemRegex);
+		regexThing.expression = "(\\n|^)" + regexThing.expression + "$";
+		var regex = util.stringToRegex(regexThing);
+		
+		chunk.before = chunk.before.replace(regex,
+			function(wholeMatch){
+				if(/^\s*([*+-])/.test(wholeMatch)){
+					bulletSymbol = re.$1;
 				}
-				_35 = /[^\n]\n\n[^\n]/.test(_37) ? 1 : 0;
-				return _2d(_37);
+				nLinesUp = /[^\n]\n\n[^\n]/.test(wholeMatch) ? 1 : 0;
+				return fixPrefixes(wholeMatch);
 			});
 			
 		if(!chunk.selection){
 			chunk.selection = "List item";
 		}
 		
-		var _38 = _2a();
-		var _39 = 1;
-		_31 = util.regexToString(_27);
-		_31.expression = "^\n*" + _31.expression;
-		_36 = util.stringToRegex(_31);
+		var prefix = getItemPrefix();
 		
-		chunk.after = chunk.after.replace(_36,
-			function(_3a){
-				_39 = /[^\n]\n\n[^\n]/.test(_3a) ? 1 : 0;
-				return _2d(_3a);
+		var nLinesDown = 1;
+		regexThing = util.regexToString(listItemRegex);
+		regexThing.expression = "^\n*" + regexThing.expression;
+		regex = util.stringToRegex(regexThing);
+		
+		chunk.after = chunk.after.replace(regex,
+			function(wholeMatch){
+				nLinesDown = /[^\n]\n\n[^\n]/.test(wholeMatch) ? 1 : 0;
+				return fixPrefixes(wholeMatch);
 			});
 			
 		chunk.trimWhitespace(true);
-		chunk.skipLines(_35, _39, true);
-		chunk.startTag = _38;
-		var _3b = _38.replace(/./g, " ");
-		command.wrap(chunk, wmd.wmd_env.lineLength - _3b.length);
-		chunk.selection = chunk.selection.replace(/\n/g, "\n" + _3b);
+		chunk.skipLines(nLinesUp, nLinesDown, true);
+		chunk.startTag = prefix;
+		var spaces = prefix.replace(/./g, " ");
+		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
+		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
 	};
 	
 	// DONE
