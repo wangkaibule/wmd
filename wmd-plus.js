@@ -11,139 +11,168 @@ Attacklab.wmdPlus=function(){
 	var position = wmd.Position;
 	var command = wmd.Command;
 	
-	command.doAutoindent = function(_9){
-		_9.before=_9.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/,"\n\n");
-		_9.before=_9.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/,"\n\n");
-		_9.before=_9.before.replace(/(\n|^)[ \t]+\n$/,"\n\n");
-		if(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]+.*\n$/.test(_9.before)){
+	// DONE
+	command.doAutoindent = function(chunk){
+		
+		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
+		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
+		chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+		if(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]+.*\n$/.test(chunk.before)){
 			if(command.doList){
-				command.doList(_9);
+				command.doList(chunk);
 			}
 		}
-		if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(_9.before)){
+		if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)){
 			if(command.doBlockquote){
-				command.doBlockquote(_9);
+				command.doBlockquote(chunk);
 			}
 		}
-		if(/(\n|^)(\t|[ ]{4,}).*\n$/.test(_9.before)){
+		if(/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)){
 			if(command.doCode){
-				command.doCode(_9);
+				command.doCode(chunk);
 			}
 		}
 	};
 	
-	command.doBlockquote = function(_a){
-		_a.selection=_a.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
-			function(_b,_c,_d,_e){
-				_a.before+=_c;
-				_a.after=_e+_a.after;
+	command.doBlockquote = function(chunk){
+		
+		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
+			function(_b, _c, _d, _e){
+				chunk.before += _c;
+				chunk.after = _e + chunk.after;
 				return _d;
 			});
 			
-		_a.before=_a.before.replace(/(>[ \t]*)$/,function(_f,_10){
-		_a.selection=_10+_a.selection;
-		return "";
-		});
-		_a.selection=_a.selection.replace(/^(\s|>)+$/,"");
-		_a.selection=_a.selection||"Blockquote";
-		if(_a.before){
-		_a.before=_a.before.replace(/\n?$/,"\n");
+		chunk.before = chunk.before.replace(/(>[ \t]*)$/,
+			function(_f,_10){
+				chunk.selection = _10 + chunk.selection;
+				return "";
+			});
+			
+		chunk.selection = chunk.selection.replace(/^(\s|>)+$/,"");
+		chunk.selection = chunk.selection || "Blockquote";
+		
+		if(chunk.before){
+			chunk.before = chunk.before.replace(/\n?$/,"\n");
 		}
-		if(_a.after){
-		_a.after=_a.after.replace(/^\n?/,"\n");
+		
+		if(chunk.after){
+			chunk.after = chunk.after.replace(/^\n?/,"\n");
 		}
-		_a.before=_a.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,function(_11){
-		_a.startTag=_11;
-		return "";
-		});
-		_a.after=_a.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,function(_12){
-		_a.endTag=_12;
-		return "";
-		});
-		var _13=function(_14){
-		var _15=_14?"> ":"";
-		if(_a.startTag){
-		_a.startTag=_a.startTag.replace(/\n((>|\s)*)\n$/,function(_16,_17){
-		return "\n"+_17.replace(/^[ ]{0,3}>?[ \t]*$/gm,_15)+"\n";
-		});
-		}
-		if(_a.endTag){
-		_a.endTag=_a.endTag.replace(/^\n((>|\s)*)\n/,function(_18,_19){
-		return "\n"+_19.replace(/^[ ]{0,3}>?[ \t]*$/gm,_15)+"\n";
-		});
-		}
+		
+		chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
+			function(_11){
+				chunk.startTag = _11;
+				return "";
+			});
+			
+		chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
+			function(_12){
+				chunk.endTag = _12;
+				return "";
+			});
+		
+		var _13 = function(_14){
+			var _15 = _14 ? "> ":"";
+			if(chunk.startTag){
+				chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/,
+					function(_16, _17){
+						return "\n" + _17.replace(/^[ ]{0,3}>?[ \t]*$/gm, _15) + "\n";
+					});
+			}
+			if(chunk.endTag){
+				chunk.endTag=chunk.endTag.replace(/^\n((>|\s)*)\n/,
+				function(_18, _19){
+					return "\n" + _19.replace(/^[ ]{0,3}>?[ \t]*$/gm,_15) + "\n";
+				});
+			}
 		};
-		if(/^(?![ ]{0,3}>)/m.test(_a.selection)){
-		command.wrap(_a,wmd.wmd_env.lineLength-2);
-		_a.selection=_a.selection.replace(/^/gm,"> ");
-		_13(true);
-		_a.skipLines();
-		}else{
-		_a.selection=_a.selection.replace(/^[ ]{0,3}> ?/gm,"");
-		command.unwrap(_a);
-		_13(false);
-		if(!/^(\n|^)[ ]{0,3}>/.test(_a.selection)){
-		if(_a.startTag){
-		_a.startTag=_a.startTag.replace(/\n{0,2}$/,"\n\n");
+		
+		if(/^(?![ ]{0,3}>)/m.test(chunk.selection)){
+			command.wrap(chunk, wmd.wmd_env.lineLength - 2);
+			chunk.selection = chunk.selection.replace(/^/gm, "> ");
+			_13(true);
+			chunk.skipLines();
 		}
+		else{
+			chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
+			command.unwrap(chunk);
+			_13(false);
+			
+			if(!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag){
+				chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
+			}
+			
+			if(!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag){
+				chunk.endTag=chunk.endTag.replace(/^\n{0,2}/, "\n\n");
+			}
 		}
-		if(!/(\n|^)[ ]{0,3}>.*$/.test(_a.selection)){
-		if(_a.endTag){
-		_a.endTag=_a.endTag.replace(/^\n{0,2}/,"\n\n");
-		}
-		}
-		}
-		if(!/\n/.test(_a.selection)){
-		_a.selection=_a.selection.replace(/^(> *)/,function(_1a,_1b){
-		_a.startTag+=_1b;
-		return "";
-		});
+		
+		if(!/\n/.test(chunk.selection)){
+			chunk.selection=chunk.selection.replace(/^(> *)/,
+			function(_1a, _1b){
+				chunk.startTag += _1b;
+				return "";
+			});
 		}
 	};
 
-	command.doCode = function(_1c){
-		var _1d=/\S[ ]*$/.test(_1c.before);
-		var _1e=/^[ ]*\S/.test(_1c.after);
-		if((!_1e&&!_1d)||/\n/.test(_1c.selection)){
-		_1c.before=_1c.before.replace(/[ ]{4}$/,function(_1f){
-		_1c.selection=_1f+_1c.selection;
-		return "";
-		});
-		var _20=1;
-		var _21=1;
-		if(/\n(\t|[ ]{4,}).*\n$/.test(_1c.before)){
-		_20=0;
+	command.doCode = function(chunk){
+		
+		var _1d = /\S[ ]*$/.test(chunk.before);
+		var _1e = /^[ ]*\S/.test(chunk.after);
+		
+		if((!_1e && !_1d) || /\n/.test(chunk.selection)){
+			
+			chunk.before = chunk.before.replace(/[ ]{4}$/,
+				function(_1f){
+					chunk.selection = _1f + chunk.selection;
+					return "";
+				});
+				
+			var _20 = 1;
+			var _21 = 1;
+			
+			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before)){
+				_20 = 0;
+			}
+			if(/^\n(\t|[ ]{4,})/.test(chunk.after)){
+				_21 = 0;
+			}
+			
+			chunk.skipLines(_20, _21);
+			
+			if(!chunk.selection){
+				chunk.startTag = "    ";
+				chunk.selection = "print(\"code sample\");";
+				return;
+			}
+			
+			if(/^[ ]{0,3}\S/m.test(chunk.selection)){
+				chunk.selection = chunk.selection.replace(/^/gm, "    ");
+			}
+			else{
+				chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+			}
 		}
-		if(/^\n(\t|[ ]{4,})/.test(_1c.after)){
-		_21=0;
-		}
-		_1c.skipLines(_20,_21);
-		if(!_1c.selection){
-		_1c.startTag="    ";
-		_1c.selection="print(\"code sample\");";
-		return;
-		}
-		if(/^[ ]{0,3}\S/m.test(_1c.selection)){
-		_1c.selection=_1c.selection.replace(/^/gm,"    ");
-		}else{
-		_1c.selection=_1c.selection.replace(/^[ ]{4}/gm,"");
-		}
-		}else{
-		_1c.trimWhitespace();
-		_1c.findTags(/`/,/`/);
-		if(!_1c.startTag&&!_1c.endTag){
-		_1c.startTag=_1c.endTag="`";
-		if(!_1c.selection){
-		_1c.selection="print(\"code sample\");";
-		}
-		}else{
-		if(_1c.endTag&&!_1c.startTag){
-		_1c.before+=_1c.endTag;
-		_1c.endTag="";
-		}else{
-		_1c.startTag=_1c.endTag="";
-		}
-		}
+		else{
+			
+			chunk.trimWhitespace();
+			chunk.findTags(/`/,/`/);
+			
+			if(!chunk.startTag && !chunk.endTag){
+				chunk.startTag = chunk.endTag="`";
+				if(!chunk.selection){
+					chunk.selection = "print(\"code sample\");";
+				}
+			}
+			else if(chunk.endTag && !chunk.startTag){
+				chunk.before += chunk.endTag;
+				chunk.endTag = "";
+			}
+			else{
+				chunk.startTag = chunk.endTag="";
+			}
 		}
 	};
 	
@@ -154,8 +183,8 @@ Attacklab.wmdPlus=function(){
 	command.blockquote.image = "images/blockquote.png";
 	command.blockquote.key = ".";
 	command.blockquote.keyCode = 190;
-	command.blockquote.textOp = function(_22){
-		return command.doBlockquote(_22);
+	command.blockquote.textOp = function(chunk){
+		return command.doBlockquote(chunk);
 	};
 	
 	command.code = {};
@@ -168,123 +197,164 @@ Attacklab.wmdPlus=function(){
 	command.img.description = "Image <img>";
 	command.img.image = "images/img.png";
 	command.img.key = "g";
-	command.img.textOp = function(_23, _24){
-		return command.doLinkOrImage(_23, true, _24);
+	command.img.textOp = function(chunk, _24){
+		return command.doLinkOrImage(chunk, true, _24);
 	};
 	
-	command.doList = function(_25, _26){
-		var _27=/(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
-		var _28="";
-		var _29=1;
-		var _2a=function(){
-		if(_26){
-		var _2b=" "+_29+". ";
-		_29++;
-		return _2b;
-		}
-		var _2c=_28||"-";
-		return "  "+_2c+" ";
+	command.doList = function(chunk, _26){
+		
+		var _27 = /(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
+		var _28 = "";
+		var _29 = 1;
+		
+		var _2a = function(){
+			if(_26){
+				var _2b = " " + _29 + ". ";
+				_29++;
+				return _2b;
+			}
+			var _2c = _28 || "-";
+			return "  " + _2c + " ";
 		};
-		var _2d=function(_2e){
-		if(_26==undefined){
-		_26=/^\s*\d/.test(_2e);
-		}
-		_2e=_2e.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,function(_2f){
-		return _2a();
-		});
-		return _2e;
+		
+		var _2d = function(_2e){
+			
+			if(_26 == undefined){
+				_26 = /^\s*\d/.test(_2e);
+			}
+			_2e = _2e.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
+				function(_2f){
+					return _2a();
+				});
+				
+			return _2e;
 		};
-		var _30=function(){
-		_31=util.regexToString(_27);
-		_31.expression="^\n*"+_31.expression;
-		var _32=util.stringToRegex(_31);
-		_25.after=_25.after.replace(_32,_2d);
+		
+		var _30 = function(){
+			_31 = util.regexToString(_27);
+			_31.expression = "^\n*" + _31.expression;
+			var _32 = util.stringToRegex(_31);
+			chunk.after = chunk.after.replace(_32,_2d);
 		};
-		_25.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/,null);
-		var _33=/^\n/;
-		if(_25.before&&!/\n$/.test(_25.before)&&!_33.test(_25.startTag)){
-		_25.before+=_25.startTag;
-		_25.startTag="";
+		
+		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/,null);
+		var _33 = /^\n/;
+		
+		if(chunk.before && !/\n$/.test(chunk.before) && !_33.test(chunk.startTag)){
+			chunk.before += chunk.startTag;
+			chunk.startTag="";
 		}
-		if(_25.startTag){
-		var _34=/\d+[.]/.test(_25.startTag);
-		_25.startTag="";
-		_25.selection=_25.selection.replace(/\n[ ]{4}/g,"\n");
-		command.unwrap(_25);
-		_25.skipLines();
-		if(_34){
-		_30();
+		
+		if(chunk.startTag){
+			var _34 = /\d+[.]/.test(chunk.startTag);
+			chunk.startTag = "";
+			chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
+			command.unwrap(chunk);
+			chunk.skipLines();
+			
+			if(_34){
+				_30();
+			}
+			if(_26 == _34){
+				return;
+			}
 		}
-		if(_26==_34){
-		return;
+		
+		var _35 = 1;
+		var _31 = util.regexToString(_27);
+		_31.expression = "(\\n|^)" + _31.expression + "$";
+		var _36 = util.stringToRegex(_31);
+		
+		chunk.before = chunk.before.replace(_36,
+			function(_37){
+				if(/^\s*([*+-])/.test(_37)){
+					_28 = re.$1;
+				}
+				_35 = /[^\n]\n\n[^\n]/.test(_37) ? 1 : 0;
+				return _2d(_37);
+			});
+			
+		if(!chunk.selection){
+			chunk.selection = "List item";
 		}
-		}
-		var _35=1;
-		var _31=util.regexToString(_27);
-		_31.expression="(\\n|^)"+_31.expression+"$";
-		var _36=util.stringToRegex(_31);
-		_25.before=_25.before.replace(_36,function(_37){
-		if(/^\s*([*+-])/.test(_37)){
-		_28=re.$1;
-		}
-		_35=/[^\n]\n\n[^\n]/.test(_37)?1:0;
-		return _2d(_37);
-		});
-		if(!_25.selection){
-		_25.selection="List item";
-		}
-		var _38=_2a();
-		var _39=1;
-		_31=util.regexToString(_27);
-		_31.expression="^\n*"+_31.expression;
-		_36=util.stringToRegex(_31);
-		_25.after=_25.after.replace(_36,function(_3a){
-		_39=/[^\n]\n\n[^\n]/.test(_3a)?1:0;
-		return _2d(_3a);
-		});
-		_25.trimWhitespace(true);
-		_25.skipLines(_35,_39,true);
-		_25.startTag=_38;
-		var _3b=_38.replace(/./g," ");
-		command.wrap(_25,wmd.wmd_env.lineLength-_3b.length);
-		_25.selection=_25.selection.replace(/\n/g,"\n"+_3b);
+		
+		var _38 = _2a();
+		var _39 = 1;
+		_31 = util.regexToString(_27);
+		_31.expression = "^\n*" + _31.expression;
+		_36 = util.stringToRegex(_31);
+		
+		chunk.after = chunk.after.replace(_36,
+			function(_3a){
+				_39 = /[^\n]\n\n[^\n]/.test(_3a) ? 1 : 0;
+				return _2d(_3a);
+			});
+			
+		chunk.trimWhitespace(true);
+		chunk.skipLines(_35, _39, true);
+		chunk.startTag = _38;
+		var _3b = _38.replace(/./g, " ");
+		command.wrap(chunk, wmd.wmd_env.lineLength - _3b.length);
+		chunk.selection = chunk.selection.replace(/\n/g, "\n" + _3b);
 	};
 	
-	command.doHeading = function(_3c){
-		_3c.selection=_3c.selection.replace(/\s+/g," ");
-		_3c.selection=_3c.selection.replace(/(^\s+|\s+$)/g,"");
-		var _3d=0;
-		_3c.findTags(/#+[ ]*/,/[ ]*#+/);
-		if(/#+/.test(_3c.startTag)){
-		_3d=re.lastMatch.length;
+	// DONE
+	command.doHeading = function(chunk){
+		
+		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
+		chunk.selection = chunk.selection.replace(/\s+/g, " ");
+		chunk.selection = chunk.selection.replace(/(^\s+|\s+$)/g, "");
+		
+		// If we clicked the button with no selected text, we just
+		// make a level 2 hash header around some default text.
+		if(!chunk.selection){
+			chunk.startTag = "## ";
+			chunk.selection = "Heading";
+			chunk.endTag = " ##";
+			return;
 		}
-		_3c.startTag=_3c.endTag="";
-		_3c.findTags(null,/\s?(-+|=+)/);
-		if(/=+/.test(_3c.endTag)){
-		_3d=1;
+		
+		var headerLevel = 0;		// The existing header level of the selected text.
+		
+		// Remove any existing hash heading markdown and save the header level.
+		chunk.findTags(/#+[ ]*/, /[ ]*#+/);
+		if(/#+/.test(chunk.startTag)){
+			headerLevel = re.lastMatch.length;
 		}
-		if(/-+/.test(_3c.endTag)){
-		_3d=2;
+		chunk.startTag = chunk.endTag = "";
+		
+		// Try to get the current header level by looking for - and = in the line
+		// below the selection.
+		chunk.findTags(null, /\s?(-+|=+)/);
+		if(/=+/.test(chunk.endTag)){
+			headerLevel = 1;
 		}
-		_3c.startTag=_3c.endTag="";
-		_3c.skipLines(1,1);
-		if(!_3c.selection){
-		_3c.startTag="## ";
-		_3c.selection="Heading";
-		_3c.endTag=" ##";
-		return;
+		if(/-+/.test(chunk.endTag)){
+			headerLevel = 2;
 		}
-		var _3e=_3d==0?2:_3d-1;
-		if(_3e){
-		var _3f=_3e>=2?"-":"=";
-		var _40=_3c.selection.length;
-		if(_40>wmd.wmd_env.lineLength){
-		_40=wmd.wmd_env.lineLength;
-		}
-		_3c.endTag="\n";
-		while(_40--){
-		_3c.endTag+=_3f;
-		}
+		
+		// Skip to the next line so we can create the header markdown.
+		chunk.startTag = chunk.endTag = "";
+		chunk.skipLines(1, 1);
+
+		// We make a level 2 header if there is no current header.
+		// If there is a header level, we substract one from the header level.
+		// If it's already a level 1 header, it's removed.
+		var headerLevelToCreate = headerLevel == 0 ? 2 : headerLevel - 1;
+		
+		if(headerLevelToCreate > 0){
+			
+			// The button only creates level 1 and 2 underline headers.
+			// Why not have it iterate over hash header levels?  Wouldn't that be easier and cleaner?
+			var headerChar = headerLevelToCreate >= 2 ? "-" : "=";
+			var len = chunk.selection.length;
+			if(len > wmd.wmd_env.lineLength){
+				len = wmd.wmd_env.lineLength;
+			}
+			chunk.endTag = "\n";
+			while(len--){
+				chunk.endTag += headerChar;
+			}
 		}
 	};
 	
@@ -292,16 +362,16 @@ Attacklab.wmdPlus=function(){
 	command.ol.description = "Numbered List <ol>";
 	command.ol.image = "images/ol.png";
 	command.ol.key = "o";
-	command.ol.textOp = function(_41){
-		command.doList(_41,true);
+	command.ol.textOp = function(chunk){
+		command.doList(chunk, true);
 	};
 	
 	command.ul = {};
 	command.ul.description = "Bulleted List <ul>";
 	command.ul.image = "images/ul.png";
 	command.ul.key = "u";
-	command.ul.textOp = function(_42){
-		command.doList(_42, false);
+	command.ul.textOp = function(chunk){
+		command.doList(chunk, false);
 	};
 	
 	command.h1 = {};
@@ -314,10 +384,10 @@ Attacklab.wmdPlus=function(){
 	command.hr.description = "Horizontal Rule <hr>";
 	command.hr.image = "images/hr.png";
 	command.hr.key = "r";
-	command.hr.textOp=function(_43){	
-		_43.startTag = "----------\n";
-		_43.selection = "";
-		_43.skipLines(2, 1, true);
+	command.hr.textOp = function(chunk){	
+		chunk.startTag = "----------\n";
+		chunk.selection = "";
+		chunk.skipLines(2, 1, true);
 	};
 };
 
