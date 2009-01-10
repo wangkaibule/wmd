@@ -909,7 +909,7 @@ Attacklab.wmdBase = function(){
 			
 			if(event.ctrlKey || event.metaKey){
 				
-				var keyCode = (event.charCode || event.keyCode) | 96;
+				var keyCode = (event.charCode || event.keyCode);
 				var keyCodeChar = String.fromCharCode(keyCode);
 				
 				switch(keyCodeChar){
