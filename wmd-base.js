@@ -2248,11 +2248,10 @@ Attacklab.wmdBase = function(){
 							preview = new wmd.previewManager(wmdStuff);
 							previewRefreshCallback = preview.refresh;
 						}
-						
+
 						edit = new wmd.editor(wmdStuff.input, previewRefreshCallback);
 					}
 					else if(preview){
-							
 							preview.refresh(true);
 					}
 				}
@@ -2260,6 +2259,7 @@ Attacklab.wmdBase = function(){
 			catch(e){
 				// Useful!
 			}
+			
 		};
 		
 		util.addEvent(self, "load", loadListener);
@@ -2288,8 +2288,6 @@ Attacklab.wmdBase = function(){
 			util.addEvent(inputElem, "input", listener);
 			inputElem.onpaste = listener;
 			inputElem.ondrop = listener;
-			
-			util.addEvent(self, "keypress", listener);		// Why is this one self?
 			
 			util.addEvent(inputElem, "keypress", listener);
 			util.addEvent(inputElem, "keydown", listener);
@@ -2390,6 +2388,7 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.refresh = function(requiresRefresh){
+			
 			if(requiresRefresh){
 				oldInputText = "";
 				makePreviewHtml();
@@ -2449,7 +2448,7 @@ Attacklab.wmdBase = function(){
 			
 			var fullTop = position.getTop(wmdStuff.input) - getDocScrollTop();
 			
-			if(nav.userAgent.indexOf("MSIE")!=-1){
+			if(nav.userAgent.indexOf("MSIE") != -1){
 				self.setTimeout(function(){self.scrollBy(0, fullTop - emptyTop);}, 0);
 			}
 			else{
