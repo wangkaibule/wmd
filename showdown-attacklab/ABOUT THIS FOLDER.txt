@@ -1,0 +1,2 @@
+This is the version of showdown.js which was downloaded from AttackLab
+in early January, 2008.
