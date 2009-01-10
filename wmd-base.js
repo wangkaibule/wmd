@@ -909,7 +909,8 @@ Attacklab.wmdBase = function(){
 			
 			if(event.ctrlKey || event.metaKey){
 				
-				var keyCode = (event.charCode || event.keyCode);
+				// IE and Opera do not support charCode.
+				var keyCode = event.charCode || event.keyCode;
 				var keyCodeChar = String.fromCharCode(keyCode);
 				
 				switch(keyCodeChar){
@@ -936,7 +937,7 @@ Attacklab.wmdBase = function(){
 					event.preventDefault();
 				}
 				if(self.event){
-					self.event.returnValue=false;
+					self.event.returnValue = false;
 				}
 				return;
 			}
@@ -950,18 +951,30 @@ Attacklab.wmdBase = function(){
 				var keyCode = event.keyCode;
 
 				if((keyCode >= 33 && keyCode <= 40) || (keyCode >= 63232 && keyCode <= 63235)){
+					// 33 - 40: page up/dn and arrow keys
+					// 63232 - 63235: page up/dn and arrow keys on safari
 					setMode("moving");
 				}
+
 				else if(keyCode == 8 || keyCode == 46 || keyCode == 127){
+					// 8: backspace
+					// 46: delete
+					// 127: ?
 					setMode("deleting");
 				}
 				else if(keyCode == 13){
+					// 13: Enter
 					setMode("newlines");
 				}
 				else if(keyCode == 27){
+					// 27: escape
 					setMode("escape");
 				}
-				else if((keyCode < 16||keyCode > 20) && keyCode != 91){
+				else if((keyCode < 16 || keyCode > 20) && keyCode != 91){
+					// 16-20 are shift, etc. 
+					// 91: left window key
+					// I think this might be a little messed up since there are
+					// a lot of nonprinting keys above 20.
 					setMode("typing");
 				}
 			}
@@ -970,6 +983,8 @@ Attacklab.wmdBase = function(){
 		var setEventHandlers = function(){
 			
 			util.addEvent(elem, "keypress", function(event){
+				// keyCode 89: y
+				// keyCode 90: z
 				if((event.ctrlKey || event.metaKey) && (event.keyCode == 89 || event.keyCode == 90)){
 					event.preventDefault();
 				}
@@ -1424,6 +1439,7 @@ Attacklab.wmdBase = function(){
 					if(key.shiftKey && !key.ctrlKey && !key.metaKey){
 						var keyCode = (key.charCode || key.keyCode);
 						switch(keyCode){
+							// Character 13 is Enter
 							case 13:
 								doClick(command.autoindent);		// Yay for the switch/case with one case...
 								break;
