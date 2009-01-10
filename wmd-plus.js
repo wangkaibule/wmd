@@ -149,7 +149,7 @@ Attacklab.wmdPlus=function(){
 			
 			if(!chunk.selection){
 				chunk.startTag = "    ";
-				chunk.selection = "print(\"code sample\");";
+				chunk.selection = "enter code here";
 				return;
 			}
 			
@@ -170,7 +170,7 @@ Attacklab.wmdPlus=function(){
 			if(!chunk.startTag && !chunk.endTag){
 				chunk.startTag = chunk.endTag="`";
 				if(!chunk.selection){
-					chunk.selection = "print(\"code sample\");";
+					chunk.selection = "enter code here";
 				}
 			}
 			else if(chunk.endTag && !chunk.startTag){

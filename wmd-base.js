@@ -987,8 +987,8 @@ Attacklab.wmdBase = function(){
 			
 			poller = new wmd.inputPoller(elem, handlePaste, 100);
 			
-			util.addEvent(elem,"keydown", handleCtrlYZ);
-			util.addEvent(elem,"keydown", handleModeChange);
+			util.addEvent(elem, "keydown", handleCtrlYZ);
+			util.addEvent(elem, "keydown", handleModeChange);
 			
 			util.addEvent(elem, "mousedown", function(){ setMode("moving"); });
 			elem.onpaste = handlePaste;
