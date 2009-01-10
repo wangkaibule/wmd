@@ -955,11 +955,10 @@ Attacklab.wmdBase = function(){
 					// 63232 - 63235: page up/dn and arrow keys on safari
 					setMode("moving");
 				}
-
 				else if(keyCode == 8 || keyCode == 46 || keyCode == 127){
 					// 8: backspace
 					// 46: delete
-					// 127: ?
+					// 127: delete
 					setMode("deleting");
 				}
 				else if(keyCode == 13){
@@ -1409,13 +1408,24 @@ Attacklab.wmdBase = function(){
 					// Check to see if we have a button key and, if so execute the callback.
 					if(key.ctrlKey || key.metaKey){
 						
-						var keyCode = (key.charCode || key.keyCode);
+						var keyCode = key.charCode || key.keyCode;
 						var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
+						
+						// Bugfix for messed up DEL and .
+						if(keyCode === 46)
+						{
+							keyCodeStr = "";
+						}
+						if(keyCode === 190)
+						{
+							keyCodeStr = ".";
+						}
+						
 						for(var callback in buttonCallbacks){
 							
 							var button = buttonCallbacks[callback];
 							
-							if(button.key && (keyCodeStr == button.key) || button.keyCode && (key.keyCode == button.keyCode)){
+							if(!key.altKey && !key.shiftKey && ((button.key && (keyCodeStr === button.key)))){
 								doClick(button);
 								isButtonKey = true;
 							}
@@ -1437,7 +1447,7 @@ Attacklab.wmdBase = function(){
 			util.addEvent(inputBox, "keyup", 
 				function(key){
 					if(key.shiftKey && !key.ctrlKey && !key.metaKey){
-						var keyCode = (key.charCode || key.keyCode);
+						var keyCode = key.charCode || key.keyCode;
 						switch(keyCode){
 							// Character 13 is Enter
 							case 13:

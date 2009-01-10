@@ -189,7 +189,7 @@ Attacklab.wmdPlus=function(){
 	command.blockquote.description = "Blockquote <blockquote>";
 	command.blockquote.image = "images/blockquote.png";
 	command.blockquote.key = ".";
-	command.blockquote.keyCode = 190;
+	//command.blockquote.keyCode = 190;
 	command.blockquote.textOp = function(chunk){
 		return command.doBlockquote(chunk);
 	};
