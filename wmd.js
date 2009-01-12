@@ -216,20 +216,16 @@ Attacklab.wmdBase = function(){
 		// Creates the background behind the hyperlink text entry box.
 		// Most of this has been moved to CSS but the div creation and
 		// browser-specific hacks remain here.
-		var showBackground = function(){
+		var createBackground = function(){
 		
 			background = doc.createElement("div");
 			background.className = "wmd-prompt-background";
-			style = background.style;
 			doc.body.appendChild(background);
 			
-			var isKonqueror = /konqueror/.test(nav.userAgent.toLowerCase());
-			if (isKonqueror) {
-				style.backgroundColor = "transparent";
-			}
-			else {
-				style.opacity = "0.5";
-				style.filter = "alpha(opacity=50)";
+			// Some versions of Konqueror don't support transparent colors
+			// so we make the whole window transparent, frustrating the users.
+			if (/konqueror/.test(nav.userAgent.toLowerCase())){
+				background.style.backgroundColor = "transparent";
 			}
 		};
 		
@@ -331,7 +327,7 @@ Attacklab.wmdBase = function(){
 		};
 		
 		// Why isn't this stuff all in one place?
-		showBackground();
+		createBackground();
 		
 		self.setTimeout(function(){
 		

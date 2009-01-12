@@ -15,4 +15,8 @@
 	height:100%;
 	background-color:#000;
 	z-index:1000;
+	
+	opacity:0.5;	/* Normal browsers */
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";	/* IE8 */
+	filter:alpha(opacity=50);	/* IE7. The IE8 code must come before IE7! */
 }
