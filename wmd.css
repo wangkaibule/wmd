@@ -20,3 +20,15 @@
 	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";	/* IE8 */
 	filter:alpha(opacity=50);	/* IE7. The IE8 code must come before IE7! */
 }
+
+.wmd-prompt-dialog
+{
+	border:3px solid #333;
+	border-left:3px solid white;
+	border-top:3px solid white;
+	background-color:#ccc;
+	padding:10px;
+	position:fixed;
+	width:400px;
+	z-index:1001;
+}

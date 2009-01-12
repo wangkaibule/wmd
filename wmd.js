@@ -178,7 +178,7 @@ Attacklab.wmdBase = function(){
 	util.prompt = function(text, defaultValue, callback){
 	
 		var style;
-		var frame;
+		var dialog;
 		var background;
 		var input;
 		
@@ -201,7 +201,7 @@ Attacklab.wmdBase = function(){
 			if (isCancel) {
 				text = null;
 			}
-			frame.parentNode.removeChild(frame);
+			dialog.parentNode.removeChild(dialog);
 			background.parentNode.removeChild(background);
 			callback(text);
 			return false;
@@ -230,19 +230,11 @@ Attacklab.wmdBase = function(){
 		};
 		
 		// Create the text input box form/window.
-		var makeForm = function(){
+		var createDialog = function(){
 		
 			// The box itself.
-			frame = doc.createElement("div");
-			frame.className = "wmd-prompt";
-			frame.style.border = "3px solid #333";
-			frame.style.backgroundColor = "#ccc";
-			frame.style.padding = "10px;";
-			frame.style.borderTop = "3px solid white";
-			frame.style.borderLeft = "3px solid white";
-			frame.style.position = "fixed";
-			frame.style.width = "400px";
-			frame.style.zIndex = "1001";
+			dialog = doc.createElement("div");
+			dialog.className = "wmd-prompt-dialog";
 			
 			// The question text
 			var question = doc.createElement("div");
@@ -251,7 +243,7 @@ Attacklab.wmdBase = function(){
 			style.fontFamily = "Helvetica, Arial, Verdana, sans-serif";
 			style.padding = "5px";
 			question.innerHTML = text;
-			frame.appendChild(question);
+			dialog.appendChild(question);
 			
 			// The web form container
 			var form = doc.createElement("form");
@@ -265,7 +257,7 @@ Attacklab.wmdBase = function(){
 			style.width = "100%";
 			style.textAlign = "center";
 			style.position = "relative";
-			frame.appendChild(form);
+			dialog.appendChild(form);
 			
 			// The input text box
 			input = doc.createElement("input");
@@ -312,18 +304,18 @@ Attacklab.wmdBase = function(){
 			}
 			
 			util.addEvent(doc.body, "keydown", checkEscape);
-			frame.style.top = "50%";
-			frame.style.left = "50%";
-			frame.style.display = "block";
+			dialog.style.top = "50%";
+			dialog.style.left = "50%";
+			dialog.style.display = "block";
 			if (wmd.Util.oldIE) {
 				var _56 = position.getPageSize();
-				frame.style.position = "absolute";
-				frame.style.top = doc.documentElement.scrollTop + 200 + "px";
-				frame.style.left = "50%";
+				dialog.style.position = "absolute";
+				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
+				dialog.style.left = "50%";
 			}
-			doc.body.appendChild(frame);
-			frame.style.marginTop = -(position.getHeight(frame) / 2) + "px";
-			frame.style.marginLeft = -(position.getWidth(frame) / 2) + "px";
+			doc.body.appendChild(dialog);
+			dialog.style.marginTop = -(position.getHeight(dialog) / 2) + "px";
+			dialog.style.marginLeft = -(position.getWidth(dialog) / 2) + "px";
 		};
 		
 		// Why isn't this stuff all in one place?
@@ -331,7 +323,7 @@ Attacklab.wmdBase = function(){
 		
 		self.setTimeout(function(){
 		
-			makeForm();
+			createDialog();
 			
 			// Select the default input box text.
 			var defTextLen = defaultValue.length;
