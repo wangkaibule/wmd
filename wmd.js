@@ -173,18 +173,18 @@ Attacklab.wmdBase = function(){
 	
 	// This is the thing that pops up and asks for the URL when you click the hyperlink button.
 	// text: The html for the input box.
-	// defaultValue: The default value that appears in the input box.
+	// defaultInputText: The default value that appears in the input box.
 	// callback: The function which is executed when the prompt is dismissed, either via OK or Cancel
-	util.prompt = function(text, defaultValue, callback){
+	util.prompt = function(text, defaultInputText, callback){
 	
-		var style;
-		var dialog;
-		var background;
-		var input;
+		// These variables need to be declared at this level since they are used
+		// in multiple functions.
+		var dialog;			// The dialog box.
+		var background;		// The background beind the dialog box.
+		var input;			// The text box where you enter the hyperlink.
 		
-		// Used as a keydown event handler.
-		// Esc dismisses the prompt, but only when the hyperlink input box has the focus.
-		// TODO: might want to fix that...
+		// Used as a keydown event handler. Esc dismisses the prompt.
+		// Key code 27 is ESC.
 		var checkEscape = function(key){
 			var code = (key.charCode || key.keyCode);
 			if (code === 27) {
@@ -209,8 +209,8 @@ Attacklab.wmdBase = function(){
 		
 		// Shouldn't this go someplace else?
 		// Like maybe at the top?
-		if (defaultValue === undefined) {
-			defaultValue = "";
+		if (defaultInputText === undefined) {
+			defaultInputText = "";
 		}
 		
 		// Creates the background behind the hyperlink text entry box.
@@ -236,38 +236,22 @@ Attacklab.wmdBase = function(){
 			dialog = doc.createElement("div");
 			dialog.className = "wmd-prompt-dialog";
 			
-			// The question text
+			// The dialog text.
 			var question = doc.createElement("div");
-			//style = question.style;
-			//style.fontSize = "14px";
-			//style.fontFamily = "Helvetica, Arial, Verdana, sans-serif";
-			//style.padding = "5px";
 			question.innerHTML = text;
 			dialog.appendChild(question);
 			
-			// The web form container
+			// The web form container for the text box and buttons.
 			var form = doc.createElement("form");
 			form.onsubmit = function(){
 				return close();
 			};
-			style = form.style;
-			style.padding = "0";
-			style.margin = "0";
-			style.cssFloat = "left";
-			style.width = "100%";
-			style.textAlign = "center";
-			style.position = "relative";
 			dialog.appendChild(form);
 			
 			// The input text box
 			input = doc.createElement("input");
-			input.value = defaultValue;
-			style = input.style;
-			style.display = "block";
-			style.width = "80%";
-			style.marginLeft = style.marginRight = "auto";
-			style.backgroundColor = "white";
-			style.color = "black";
+			input.type = "text";
+			input.value = defaultInputText;
 			form.appendChild(input);
 			
 			// The ok button
@@ -277,10 +261,7 @@ Attacklab.wmdBase = function(){
 				return close();
 			};
 			okButton.value = "OK";
-			style = okButton.style;
-			style.margin = "10px";
-			style.display = "inline";
-			style.width = "7em";
+
 			
 			// The cancel button
 			var cancelButton = doc.createElement("input");
@@ -289,10 +270,7 @@ Attacklab.wmdBase = function(){
 				return close(true);
 			};
 			cancelButton.value = "Cancel";
-			style = cancelButton.style;
-			style.margin = "10px";
-			style.display = "inline";
-			style.width = "7em";
+
 			
 			if (/mac/.test(nav.platform.toLowerCase())) {
 				form.appendChild(cancelButton);
@@ -303,19 +281,20 @@ Attacklab.wmdBase = function(){
 				form.appendChild(cancelButton);
 			}
 			
-			util.addEvent(doc.body, "keydown", checkEscape);
-			dialog.style.top = "50%";
-			dialog.style.left = "50%";
-			dialog.style.display = "block";
+			
 			if (wmd.Util.oldIE) {
-				var _56 = position.getPageSize();
+				// Move to CSS in conditional comment.
 				dialog.style.position = "absolute";
 				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
-				dialog.style.left = "50%";
 			}
+
+			util.addEvent(doc.body, "keydown", checkEscape);
 			doc.body.appendChild(dialog);
+			
+			// This has to be done AFTER adding the dialog to the form if you want it to be centered.
 			dialog.style.marginTop = -(position.getHeight(dialog) / 2) + "px";
 			dialog.style.marginLeft = -(position.getWidth(dialog) / 2) + "px";
+			
 		};
 		
 		// Why isn't this stuff all in one place?
@@ -326,7 +305,7 @@ Attacklab.wmdBase = function(){
 			createDialog();
 			
 			// Select the default input box text.
-			var defTextLen = defaultValue.length;
+			var defTextLen = defaultInputText.length;
 			if (input.selectionStart !== undefined) {
 				input.selectionStart = 0;
 				input.selectionEnd = defTextLen;
