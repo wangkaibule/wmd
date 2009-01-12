@@ -214,16 +214,14 @@ Attacklab.wmdBase = function(){
 		}
 		
 		// Creates the background behind the hyperlink text entry box.
+		// Most of this has been moved to CSS but the div creation and
+		// browser-specific hacks remain here.
 		var showBackground = function(){
 		
 			background = doc.createElement("div");
+			background.className = "wmd-prompt-background";
 			style = background.style;
 			doc.body.appendChild(background);
-			style.position = "absolute";
-			style.top = "0";
-			style.left = "0";
-			style.backgroundColor = "#000";
-			style.zIndex = "1000";
 			
 			var isKonqueror = /konqueror/.test(nav.userAgent.toLowerCase());
 			if (isKonqueror) {
@@ -233,10 +231,6 @@ Attacklab.wmdBase = function(){
 				style.opacity = "0.5";
 				style.filter = "alpha(opacity=50)";
 			}
-			
-			var pageSize = position.getPageSize();
-			style.width = "100%";
-			style.height = pageSize[1] + "px";
 		};
 		
 		// Create the text input box form/window.
@@ -244,6 +238,7 @@ Attacklab.wmdBase = function(){
 		
 			// The box itself.
 			frame = doc.createElement("div");
+			frame.className = "wmd-prompt";
 			frame.style.border = "3px solid #333";
 			frame.style.backgroundColor = "#ccc";
 			frame.style.padding = "10px;";
