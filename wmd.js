@@ -20,31 +20,17 @@ Attacklab.wmdBase = function(){
 	wmd.Util.oldIE = (nav.userAgent.indexOf("MSIE 6.") != -1 || nav.userAgent.indexOf("MSIE 5.") != -1);
 	wmd.Util.newIE = !wmd.Util.oldIE && (nav.userAgent.indexOf("MSIE") != -1);
 	
-	// UNFINISHED, but good enough for now - cleaned up - jslint clean
-	// This is always used to see if "display" is set to "none".
-	// Might want to rename it checkVisible() or something.
-	// Might want to return null instead of "" on style search failure.
-	util.getStyleProperty = function(elem, property){
+	// Returns true if the element is visible, false if it's hidden.
+	util.isVisible = function (elem) {
 	
-		// IE styles use camel case so we have to convert the first letter of
-		// a word following a dash to uppercase.
-		var convertToIEForm = function(str){
-			return str.replace(/-(\S)/g, function(_, m1){
-				return m1.toUpperCase();
-			});
-		};
-		
-		// currentStyle is IE only.  Everything else uses getComputedStyle().
-		if (self.getComputedStyle) {
-			return self.getComputedStyle(elem, null).getPropertyValue(property);
+	    if (window.getComputedStyle) {
+	        // Most browsers
+			return window.getComputedStyle(elem, null).getPropertyValue("display") !== "none";
 		}
-		else 
-			if (elem.currentStyle) {
-				property = convertToIEForm(property);
-				return elem.currentStyle[property];
-			}
-		
-		return "";
+		else if (elem.currentStyle) {
+		    // IE
+			return elem.currentStyle["display"] !== "none";
+		}
 	};
 	
 	// DONE - cleaned up - jslint clean
@@ -118,10 +104,8 @@ Attacklab.wmdBase = function(){
 		if (!elem || !elem.parentNode) {
 			return false;
 		}
-		if (util.getStyleProperty(elem, "display") === "none") {
-			return false;
-		}
-		return true;
+		
+		return util.isVisible(elem);
 	};
 	
 	// DONE - cleaned up - jslint clean
@@ -599,7 +583,7 @@ Attacklab.wmdBase = function(){
 		
 		var doTickCallback = function(){
 		
-			if (util.getStyleProperty(inputArea, "display") === "none") {
+			if (!util.isVisible(inputArea)) {
 				return;
 			}
 			
@@ -1480,7 +1464,7 @@ Attacklab.wmdBase = function(){
 		
 		var setSelection = function(targetArea){
 		
-			if (util.getStyleProperty(inputArea, "display") === "none") {
+			if (!util.isVisible(inputArea)) {
 				return;
 			}
 			
@@ -1519,7 +1503,7 @@ Attacklab.wmdBase = function(){
 				inputArea = targetArea;
 			}
 			
-			if (util.getStyleProperty(inputArea, "display") == "none") {
+			if (!util.isVisible(inputArea)) {
 				return;
 			}
 			
