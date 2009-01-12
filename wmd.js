@@ -232,16 +232,16 @@ Attacklab.wmdBase = function(){
 		// Create the text input box form/window.
 		var createDialog = function(){
 		
-			// The box itself.
+			// The main dialog box.
 			dialog = doc.createElement("div");
 			dialog.className = "wmd-prompt-dialog";
 			
 			// The question text
 			var question = doc.createElement("div");
-			style = question.style;
-			style.fontSize = "14px";
-			style.fontFamily = "Helvetica, Arial, Verdana, sans-serif";
-			style.padding = "5px";
+			//style = question.style;
+			//style.fontSize = "14px";
+			//style.fontFamily = "Helvetica, Arial, Verdana, sans-serif";
+			//style.padding = "5px";
 			question.innerHTML = text;
 			dialog.appendChild(question);
 			

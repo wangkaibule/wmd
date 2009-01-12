@@ -32,3 +32,9 @@
 	width:400px;
 	z-index:1001;
 }
+
+.wmd-prompt-dialog > div {
+	font-size:14px;
+	font-family:helvetica, arial, verdana, sans-serif;
+	padding:5px;
+}
