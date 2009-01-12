@@ -20,37 +20,6 @@ Attacklab.wmdBase = function(){
 	wmd.Util.oldIE = (nav.userAgent.indexOf("MSIE 6.") != -1 || nav.userAgent.indexOf("MSIE 5.") != -1);
 	wmd.Util.newIE = !wmd.Util.oldIE && (nav.userAgent.indexOf("MSIE") != -1);
 	
-	// DONE - jslint clean
-	//
-	// Creates and returns a new HtmlElement.
-	// If noStyle is false a default style is applied.
-	// This should be refactored to take a Style object or
-	// something instead of the weird noStyle argument.
-	util.makeElement = function(type, noStyle){
-	
-		var elem = doc.createElement(type);
-		
-		// I hate the double negative here.
-		if (!noStyle) {
-			var style = elem.style;
-			style.margin = "0";
-			style.padding = "0";
-			style.clear = "none";
-			style.cssFloat = "none";
-			style.textAlign = "left";
-			style.position = "relative";
-			style.lineHeight = "1em";
-			style.border = "none";
-			style.color = "black";
-			style.backgroundRepeat = "no-repeat";
-			style.backgroundImage = "none";
-			style.minWidth = style.minHeight = "0";
-			style.maxWidth = style.maxHeight = "90000px"; // kinda arbitrary but ok
-		}
-		
-		return elem;
-	};
-	
 	// UNFINISHED, but good enough for now - cleaned up - jslint clean
 	// This is always used to see if "display" is set to "none".
 	// Might want to rename it checkVisible() or something.
@@ -184,14 +153,14 @@ Attacklab.wmdBase = function(){
 		if (nav.userAgent.indexOf("MSIE") !== -1) {
 		
 			// IE-specific
-			elem = util.makeElement("span");
+			elem = doc.createElement("span");
 			var style = elem.style;
 			style.display = "inline-block";
 			style.height = "1px";
 			style.width = "1px";
 			elem.unselectable = "on";
 			
-			var span = util.makeElement("span");
+			var span = doc.createElement("span");
 			style = span.style;
 			style.display = "inline-block";
 			style.height = "1px";
@@ -203,7 +172,7 @@ Attacklab.wmdBase = function(){
 		else {
 		
 			// Rest of the world
-			elem = util.makeElement("img");
+			elem = doc.createElement("img");
 			elem.style.display = "inline";
 			elem.src = img;
 		}
@@ -263,7 +232,7 @@ Attacklab.wmdBase = function(){
 		// Creates the background behind the hyperlink text entry box.
 		var showBackground = function(){
 		
-			background = util.makeElement("div");
+			background = doc.createElement("div");
 			style = background.style;
 			doc.body.appendChild(background);
 			style.position = "absolute";
@@ -301,7 +270,7 @@ Attacklab.wmdBase = function(){
 			frame.style.zIndex = "1001";
 			
 			// The question text
-			var question = util.makeElement("div");
+			var question = doc.createElement("div");
 			style = question.style;
 			style.fontSize = "14px";
 			style.fontFamily = "Helvetica, Arial, Verdana, sans-serif";
@@ -310,7 +279,7 @@ Attacklab.wmdBase = function(){
 			frame.appendChild(question);
 			
 			// The web form container
-			var form = util.makeElement("form");
+			var form = doc.createElement("form");
 			form.onsubmit = function(){
 				return close();
 			};
@@ -1121,7 +1090,7 @@ Attacklab.wmdBase = function(){
 		
 			if (inputBox.offsetParent) {
 			
-				div = util.makeElement("div");
+				div = doc.createElement("div");
 				
 				var style = div.style;
 				style.visibility = "hidden";
@@ -1219,7 +1188,7 @@ Attacklab.wmdBase = function(){
 			}
 			
 			var unused = inputBox.parentNode; // Delete this.  Not used anywhere.
-			mainDiv = util.makeElement("div");
+			mainDiv = doc.createElement("div");
 			mainDiv.style.display = "block";
 			mainDiv.style.zIndex = 100;
 			if (!wmd.full) {
@@ -1230,7 +1199,7 @@ Attacklab.wmdBase = function(){
 				inputBox.focus();
 			};
 			
-			mainSpan = util.makeElement("span");
+			mainSpan = doc.createElement("span");
 			var style = mainSpan.style;
 			style.height = "auto";
 			style.paddingBottom = "2px";
@@ -1379,7 +1348,7 @@ Attacklab.wmdBase = function(){
 		// Sets up the WMD button at the upper right of the input area.
 		var setupWmdButton = function(){
 		
-			var div = util.makeElement("div");
+			var div = doc.createElement("div");
 			div.unselectable = "on";
 			var style = div.style;
 			style.paddingRight = "15px";
@@ -1388,7 +1357,7 @@ Attacklab.wmdBase = function(){
 			style.position = "absolute";
 			style.right = "0";
 			
-			var anchor = util.makeElement("a");
+			var anchor = doc.createElement("a");
 			anchor.href = "http://www.wmd-editor.com/";
 			anchor.target = "_blank";
 			anchor.title = "WMD: The Wysiwym Markdown Editor";
