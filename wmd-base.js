@@ -1,6 +1,6 @@
 var Attacklab = Attacklab || {};
 Attacklab.wmdBase = function(){
-	
+
 	var self = top;
 	var wmd = self["Attacklab"];
 	var doc = self["document"];
@@ -15,9 +15,9 @@ Attacklab.wmdBase = function(){
 	var position = wmd.Position;
 	var command = wmd.Command;
 	
-	wmd.Util.IE =( nav.userAgent.indexOf("MSIE") != -1);
+	wmd.Util.IE = (nav.userAgent.indexOf("MSIE") != -1);
 	wmd.Util.oldIE = (nav.userAgent.indexOf("MSIE 6.") != -1 || nav.userAgent.indexOf("MSIE 5.") != -1);
-	wmd.Util.newIE = !wmd.Util.oldIE&&(nav.userAgent.indexOf("MSIE") != -1);
+	wmd.Util.newIE = !wmd.Util.oldIE && (nav.userAgent.indexOf("MSIE") != -1);
 	
 	// DONE - jslint clean
 	//
@@ -26,11 +26,11 @@ Attacklab.wmdBase = function(){
 	// This should be refactored to take a Style object or
 	// something instead of the weird noStyle argument.
 	util.makeElement = function(type, noStyle){
-		
+	
 		var elem = doc.createElement(type);
 		
 		// I hate the double negative here.
-		if(!noStyle){
+		if (!noStyle) {
 			var style = elem.style;
 			style.margin = "0";
 			style.padding = "0";
@@ -44,7 +44,7 @@ Attacklab.wmdBase = function(){
 			style.backgroundRepeat = "no-repeat";
 			style.backgroundImage = "none";
 			style.minWidth = style.minHeight = "0";
-			style.maxWidth = style.maxHeight = "90000px";		// kinda arbitrary but ok
+			style.maxWidth = style.maxHeight = "90000px"; // kinda arbitrary but ok
 		}
 		
 		return elem;
@@ -55,24 +55,24 @@ Attacklab.wmdBase = function(){
 	// Might want to rename it checkVisible() or something.
 	// Might want to return null instead of "" on style search failure.
 	util.getStyleProperty = function(elem, property){
-		
+	
 		// IE styles use camel case so we have to convert the first letter of
 		// a word following a dash to uppercase.
 		var convertToIEForm = function(str){
-			return str.replace(/-(\S)/g,
-				function(_, m1){
-					return m1.toUpperCase();
-				});
+			return str.replace(/-(\S)/g, function(_, m1){
+				return m1.toUpperCase();
+			});
 		};
 		
 		// currentStyle is IE only.  Everything else uses getComputedStyle().
-		if(self.getComputedStyle){
+		if (self.getComputedStyle) {
 			return self.getComputedStyle(elem, null).getPropertyValue(property);
 		}
-		else if(elem.currentStyle){
-			property = convertToIEForm(property);
-			return elem.currentStyle[property];			
-		}
+		else 
+			if (elem.currentStyle) {
+				property = convertToIEForm(property);
+				return elem.currentStyle[property];
+			}
 		
 		return "";
 	};
@@ -80,18 +80,18 @@ Attacklab.wmdBase = function(){
 	// DONE - cleaned up - jslint clean
 	// Like getElementsByTagName() but searches for a class.
 	util.getElementsByClass = function(searchClass, searchTag){
-		
+	
 		var results = [];
 		
-		if(searchTag === null){
+		if (searchTag === null) {
 			searchTag = "*";
 		}
 		
 		var elements = doc.getElementsByTagName(searchTag);
 		var regex = new re("(^|\\s)" + searchClass + "(\\s|$)");
 		
-		for(var i = 0; i < elements.length; i++){
-			if(regex.test(elements[i].className.toLowerCase())){
+		for (var i = 0; i < elements.length; i++) {
+			if (regex.test(elements[i].className.toLowerCase())) {
 				results.push(elements[i]);
 			}
 		}
@@ -100,12 +100,12 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// DONE - jslint clean
-	util.addEvent = function(elem, event, listener){	
-		if(elem.attachEvent){
+	util.addEvent = function(elem, event, listener){
+		if (elem.attachEvent) {
 			// IE only.  The "on" is mandatory.
 			elem.attachEvent("on" + event, listener);
 		}
-		else{
+		else {
 			// Other browsers.
 			elem.addEventListener(event, listener, false);
 		}
@@ -113,11 +113,11 @@ Attacklab.wmdBase = function(){
 	
 	// DONE - jslint clean
 	util.removeEvent = function(elem, event, listener){
-		if(elem.detachEvent){
+		if (elem.detachEvent) {
 			// IE only.  The "on" is mandatory.
 			elem.detachEvent("on" + event, listener);
 		}
-		else{
+		else {
 			// Other browsers.
 			elem.removeEventListener(event, listener, false);
 		}
@@ -145,10 +145,10 @@ Attacklab.wmdBase = function(){
 	// DONE - jslint clean
 	// Check to see if a node is not a parent and not hidden.
 	util.elementOk = function(elem){
-		if(!elem || !elem.parentNode){
+		if (!elem || !elem.parentNode) {
 			return false;
 		}
-		if(util.getStyleProperty(elem, "display") === "none"){
+		if (util.getStyleProperty(elem, "display") === "none") {
 			return false;
 		}
 		return true;
@@ -157,18 +157,18 @@ Attacklab.wmdBase = function(){
 	// DONE
 	// Adds a skin to the button "bar" at the top of the textarea.
 	util.skin = function(elem, backImagePath, height, width){
-		
+	
 		var style;
 		var isIE = (nav.userAgent.indexOf("MSIE") != -1);
 		
-		if(isIE){
+		if (isIE) {
 			util.fillers = [];
 		}
 		
 		var halfHeight = height / 2;
 		
-		for(var corner = 0; corner < 4; corner++){
-			
+		for (var corner = 0; corner < 4; corner++) {
+		
 			var div = util.makeElement("div");
 			
 			style = div.style;
@@ -181,23 +181,23 @@ Attacklab.wmdBase = function(){
 			style.maxHeight = halfHeight + "px";
 			style.position = "absolute";
 			
-			if(corner & 1){
+			if (corner & 1) {
 				style.top = "0";
 			}
-			else{
+			else {
 				style.bottom = -height + "px";
 			}
 			
 			style.zIndex = "-1000";
 			
-			if(corner & 2){
+			if (corner & 2) {
 				style.left = "0";
 			}
-			else{
+			else {
 				style.marginLeft = "50%";
 			}
 			
-			if(isIE){
+			if (isIE) {
 				var span = util.makeElement("span");
 				
 				style = span.style;
@@ -206,23 +206,23 @@ Attacklab.wmdBase = function(){
 				style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + wmd.basePath + "images/bg.png')";
 				style.position = "absolute";
 				
-				if(corner & 1){
+				if (corner & 1) {
 					style.top = "0";
 				}
-				else{
+				else {
 					style.bottom = "0";
 				}
 				
-				if(corner & 2){
+				if (corner & 2) {
 					style.left = "0";
 				}
-				else{
+				else {
 					style.right = "0";
 				}
 				
 				div.appendChild(span);
 			}
-			else{
+			else {
 				style.backgroundImage = "url(" + backImagePath + ")";
 				style.backgroundPosition = (corner & 2 ? "left" : "right") + " " + (corner & 1 ? "top" : "bottom");
 			}
@@ -232,10 +232,10 @@ Attacklab.wmdBase = function(){
 		
 		// This is a terrible name for something that returns a div.
 		var fill = function(left){
-			
+		
 			var div = util.makeElement("div");
 			
-			if(util.fillers){
+			if (util.fillers) {
 				util.fillers.push(div);
 			}
 			
@@ -250,8 +250,8 @@ Attacklab.wmdBase = function(){
 			style.position = "absolute";
 			style.zIndex = "-1000";
 			
-			if(isIE){
-				
+			if (isIE) {
+			
 				var span = util.makeElement("span");
 				
 				style = span.style;
@@ -261,27 +261,27 @@ Attacklab.wmdBase = function(){
 				style.position = "absolute";
 				div.appendChild(span);
 				
-				if(left){
+				if (left) {
 					style.left = "0";
 				}
-				if(!left){
+				if (!left) {
 					style.right = "0";
 				}
 			}
 			
-			if(!isIE){
-				
+			if (!isIE) {
+			
 				style.backgroundImage = "url(" + wmd.basePath + "images/bg-fill.png)";
 				style.backgroundRepeat = "repeat-y";
-				if(left){
+				if (left) {
 					style.backgroundPosition = "left top";
 				}
-				if(!left){
+				if (!left) {
 					style.backgroundPosition = "right top";
 				}
 			}
 			
-			if(!left){
+			if (!left) {
 				div.style.marginLeft = "50%";
 			}
 			
@@ -295,16 +295,16 @@ Attacklab.wmdBase = function(){
 	// DONE - cleaned up - jslint clean
 	// Sets the image for a "button" on the WMD editor.
 	util.setImage = function(elem, imgPath){
-		
+	
 		imgPath = wmd.basePath + imgPath;
 		
-		if(nav.userAgent.indexOf("MSIE") != -1){
+		if (nav.userAgent.indexOf("MSIE") != -1) {
 			// Internet Explorer
 			var child = elem.firstChild;
 			var style = child.style;
 			style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + imgPath + "')";
 		}
-		else{
+		else {
 			// Regular browser
 			elem.src = imgPath;
 		}
@@ -314,12 +314,12 @@ Attacklab.wmdBase = function(){
 	
 	// DONE - reworked slightly and jslint clean
 	util.createImage = function(img, width, height){
-		
+	
 		img = wmd.basePath + img;
 		var elem;
 		
-		if(nav.userAgent.indexOf("MSIE")!== -1){
-			
+		if (nav.userAgent.indexOf("MSIE") !== -1) {
+		
 			// IE-specific
 			elem = util.makeElement("span");
 			var style = elem.style;
@@ -337,8 +337,8 @@ Attacklab.wmdBase = function(){
 			span.unselectable = "on";
 			elem.appendChild(span);
 		}
-		else{
-			
+		else {
+		
 			// Rest of the world
 			elem = util.makeElement("img");
 			elem.style.display = "inline";
@@ -348,7 +348,7 @@ Attacklab.wmdBase = function(){
 		elem.style.border = "none";
 		elem.border = "0";
 		
-		if(width && height){
+		if (width && height) {
 			elem.style.width = width + "px";
 			elem.style.height = height + "px";
 		}
@@ -360,7 +360,7 @@ Attacklab.wmdBase = function(){
 	// defaultValue: The default value that appears in the input box.
 	// callback: The function which is executed when the prompt is dismissed, either via OK or Cancel
 	util.prompt = function(text, defaultValue, callback){
-		
+	
 		var style;
 		var frame;
 		var background;
@@ -371,7 +371,7 @@ Attacklab.wmdBase = function(){
 		// TODO: might want to fix that...
 		var checkEscape = function(key){
 			var code = (key.charCode || key.keyCode);
-			if(code === 27){
+			if (code === 27) {
 				close(true);
 			}
 		};
@@ -382,7 +382,7 @@ Attacklab.wmdBase = function(){
 		var close = function(isCancel){
 			util.removeEvent(doc.body, "keydown", checkEscape);
 			var text = input.value;
-			if(isCancel){
+			if (isCancel) {
 				text = null;
 			}
 			frame.parentNode.removeChild(frame);
@@ -393,13 +393,13 @@ Attacklab.wmdBase = function(){
 		
 		// Shouldn't this go someplace else?
 		// Like maybe at the top?
-		if(defaultValue === undefined){
+		if (defaultValue === undefined) {
 			defaultValue = "";
 		}
 		
 		// Creates the background behind the hyperlink text entry box.
 		var showBackground = function(){
-			
+		
 			background = util.makeElement("div");
 			style = background.style;
 			doc.body.appendChild(background);
@@ -410,10 +410,10 @@ Attacklab.wmdBase = function(){
 			style.zIndex = "1000";
 			
 			var isKonqueror = /konqueror/.test(nav.userAgent.toLowerCase());
-			if(isKonqueror){
+			if (isKonqueror) {
 				style.backgroundColor = "transparent";
 			}
-			else{
+			else {
 				style.opacity = "0.5";
 				style.filter = "alpha(opacity=50)";
 			}
@@ -425,7 +425,7 @@ Attacklab.wmdBase = function(){
 		
 		// Create the text input box form/window.
 		var makeForm = function(){
-			
+		
 			// The box itself.
 			frame = doc.createElement("div");
 			frame.style.border = "3px solid #333";
@@ -448,7 +448,9 @@ Attacklab.wmdBase = function(){
 			
 			// The web form container
 			var form = util.makeElement("form");
-			form.onsubmit = function(){ return close(); };
+			form.onsubmit = function(){
+				return close();
+			};
 			style = form.style;
 			style.padding = "0";
 			style.margin = "0";
@@ -472,7 +474,9 @@ Attacklab.wmdBase = function(){
 			// The ok button
 			var okButton = doc.createElement("input");
 			okButton.type = "button";
-			okButton.onclick = function(){ return close(); };
+			okButton.onclick = function(){
+				return close();
+			};
 			okButton.value = "OK";
 			style = okButton.style;
 			style.margin = "10px";
@@ -482,18 +486,20 @@ Attacklab.wmdBase = function(){
 			// The cancel button
 			var cancelButton = doc.createElement("input");
 			cancelButton.type = "button";
-			cancelButton.onclick = function(){ return close(true); };
+			cancelButton.onclick = function(){
+				return close(true);
+			};
 			cancelButton.value = "Cancel";
 			style = cancelButton.style;
 			style.margin = "10px";
 			style.display = "inline";
 			style.width = "7em";
 			
-			if(/mac/.test(nav.platform.toLowerCase())){
+			if (/mac/.test(nav.platform.toLowerCase())) {
 				form.appendChild(cancelButton);
 				form.appendChild(okButton);
 			}
-			else{
+			else {
 				form.appendChild(okButton);
 				form.appendChild(cancelButton);
 			}
@@ -502,37 +508,38 @@ Attacklab.wmdBase = function(){
 			frame.style.top = "50%";
 			frame.style.left = "50%";
 			frame.style.display = "block";
-			if(wmd.Util.oldIE){
+			if (wmd.Util.oldIE) {
 				var _56 = position.getPageSize();
 				frame.style.position = "absolute";
 				frame.style.top = doc.documentElement.scrollTop + 200 + "px";
 				frame.style.left = "50%";
 			}
 			doc.body.appendChild(frame);
-			frame.style.marginTop =- (position.getHeight(frame) / 2) + "px";
-			frame.style.marginLeft =- (position.getWidth(frame) / 2) + "px";
+			frame.style.marginTop = -(position.getHeight(frame) / 2) + "px";
+			frame.style.marginLeft = -(position.getWidth(frame) / 2) + "px";
 		};
 		
 		// Why isn't this stuff all in one place?
 		showBackground();
 		
 		self.setTimeout(function(){
-			
+		
 			makeForm();
 			
 			// Select the default input box text.
 			var defTextLen = defaultValue.length;
-			if(input.selectionStart !== undefined){
+			if (input.selectionStart !== undefined) {
 				input.selectionStart = 0;
 				input.selectionEnd = defTextLen;
 			}
-			else if(input.createTextRange){
-				var range = input.createTextRange();
-				range.collapse(false);
-				range.moveStart("character", -defTextLen);
-				range.moveEnd("character", defTextLen);
-				range.select();
-			}
+			else 
+				if (input.createTextRange) {
+					var range = input.createTextRange();
+					range.collapse(false);
+					range.moveStart("character", -defTextLen);
+					range.moveEnd("character", defTextLen);
+					range.select();
+				}
 			
 			input.focus();
 		}, 0);
@@ -541,72 +548,75 @@ Attacklab.wmdBase = function(){
 	// UNFINISHED - almost a direct copy of original function
 	// except that I use !== and flip a and b in the second test block.
 	util.objectsEqual = function(a, b){
-        for (var key in a) {
-            if (a[key] !== b[key]) {
-                return false;
-            }
-        }
-        for (key in b) {
-            if (b[key] !== a[key]) {
-                return false;
-            }
-        }
-        return true;
+		for (var key in a) {
+			if (a[key] !== b[key]) {
+				return false;
+			}
+		}
+		for (key in b) {
+			if (b[key] !== a[key]) {
+				return false;
+			}
+		}
+		return true;
 	};
 	
 	// UNFINISHED - direct copy of the original function
 	util.cloneObject = function(obj){
-        var result = {};
-        for (var key in obj) {
-            result[key] = obj[key];
-        }
-        return result;
+		var result = {};
+		for (var key in obj) {
+			result[key] = obj[key];
+		}
+		return result;
 	};
 	
 	// DONE - updated - jslint clean
 	position.getPageSize = function(){
-		
+	
 		var scrollWidth, scrollHeight;
 		var innerWidth, innerHeight;
 		
 		// It's not very clear which blocks work with which browsers.
-		if(self.innerHeight && self.scrollMaxY){
+		if (self.innerHeight && self.scrollMaxY) {
 			scrollWidth = doc.body.scrollWidth;
 			scrollHeight = self.innerHeight + self.scrollMaxY;
 		}
-		else if(doc.body.scrollHeight > doc.body.offsetHeight){
-			scrollWidth = doc.body.scrollWidth;
-			scrollHeight = doc.body.scrollHeight;
-		}
-		else{
-			scrollWidth = doc.body.offsetWidth;
-			scrollHeight = doc.body.offsetHeight;
-		}
+		else 
+			if (doc.body.scrollHeight > doc.body.offsetHeight) {
+				scrollWidth = doc.body.scrollWidth;
+				scrollHeight = doc.body.scrollHeight;
+			}
+			else {
+				scrollWidth = doc.body.offsetWidth;
+				scrollHeight = doc.body.offsetHeight;
+			}
 		
-		if(self.innerHeight){
+		if (self.innerHeight) {
 			// Non-IE browser
 			innerWidth = self.innerWidth;
 			innerHeight = self.innerHeight;
 		}
-		else if(doc.documentElement && doc.documentElement.clientHeight){
-			// Some versions of IE (IE 6 w/ a DOCTYPE declaration)
-			innerWidth = doc.documentElement.clientWidth;
-			innerHeight = doc.documentElement.clientHeight;
-		}
-		else if(doc.body){
-			// Other versions of IE
-			innerWidth = doc.body.clientWidth;
-			innerHeight = doc.body.clientHeight;
-		}
+		else 
+			if (doc.documentElement && doc.documentElement.clientHeight) {
+				// Some versions of IE (IE 6 w/ a DOCTYPE declaration)
+				innerWidth = doc.documentElement.clientWidth;
+				innerHeight = doc.documentElement.clientHeight;
+			}
+			else 
+				if (doc.body) {
+					// Other versions of IE
+					innerWidth = doc.body.clientWidth;
+					innerHeight = doc.body.clientHeight;
+				}
 		
-        var maxWidth = Math.max(scrollWidth, innerWidth);
-        var maxHeight = Math.max(scrollHeight, innerHeight);
-        return [maxWidth, maxHeight, innerWidth, innerHeight];
+		var maxWidth = Math.max(scrollWidth, innerWidth);
+		var maxHeight = Math.max(scrollHeight, innerHeight);
+		return [maxWidth, maxHeight, innerWidth, innerHeight];
 	};
 	
 	// DONE - jslint clean
 	position.getPixelVal = function(val){
-		if(val && /^(-?\d+(\.\d*)?)px$/.test(val)){
+		if (val && /^(-?\d+(\.\d*)?)px$/.test(val)) {
 			return re.$1;
 		}
 		return undefined;
@@ -617,8 +627,8 @@ Attacklab.wmdBase = function(){
 	// I'll change it to a for loop later.
 	position.getTop = function(elem, isInner){
 		var result = elem.offsetTop;
-		if(!isInner){
-			while(elem = elem.offsetParent){
+		if (!isInner) {
+			while (elem = elem.offsetParent) {
 				result += elem.offsetTop;
 			}
 		}
@@ -628,7 +638,7 @@ Attacklab.wmdBase = function(){
 	// DONE - updated
 	position.setTop = function(elem, newTop, isInner){
 		var curTop = position.getPixelVal(elem.style.top);
-		if(curTop === undefined){
+		if (curTop === undefined) {
 			elem.style.top = newTop + "px";
 			curTop = newTop;
 		}
@@ -642,8 +652,8 @@ Attacklab.wmdBase = function(){
 	// I'll change it to a for loop later.
 	position.getLeft = function(elem, isInner){
 		var result = elem.offsetLeft;
-		if(!isInner){
-			while(elem = elem.offsetParent){
+		if (!isInner) {
+			while (elem = elem.offsetParent) {
 				result += elem.offsetLeft;
 			}
 		}
@@ -653,12 +663,12 @@ Attacklab.wmdBase = function(){
 	// DONE - updated
 	position.setLeft = function(elem, newLeft, isInner){
 		var curLeft = position.getPixelVal(elem.style.left);
-		if(curLeft === undefined){
+		if (curLeft === undefined) {
 			elem.style.left = newLeft + "px";
 			curLeft = newLeft;
 		}
 		var offset = position.getLeft(elem, isInner) - curLeft;
-		elem.style.left = (newLeft - offset)+"px";
+		elem.style.left = (newLeft - offset) + "px";
 	};
 	
 	// DONE - copied from cky (simplified)
@@ -667,18 +677,18 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// DONE - copied from cky
-    position.setHeight = function (elem, newHeight) {
-        var curHeight = position.getPixelVal(elem.style.height);
-        if (curHeight == undefined) {
-            elem.style.height = newHeight + "px";
-            curHeight = newHeight;
-        }
-        var offset = position.getHeight(elem) - curHeight;
-        if (offset > newHeight) {
-            offset = newHeight;
-        }
-        elem.style.height = (newHeight - offset) + "px";
-    };
+	position.setHeight = function(elem, newHeight){
+		var curHeight = position.getPixelVal(elem.style.height);
+		if (curHeight == undefined) {
+			elem.style.height = newHeight + "px";
+			curHeight = newHeight;
+		}
+		var offset = position.getHeight(elem) - curHeight;
+		if (offset > newHeight) {
+			offset = newHeight;
+		}
+		elem.style.height = (newHeight - offset) + "px";
+	};
 	
 	// DONE - copied from cky (simplified)
 	position.getWidth = function(elem){
@@ -686,28 +696,32 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// DONE - copied from cky
-    position.setWidth = function (elem, newWidth) {
-        var curWidth = position.getPixelVal(elem.style.width);
-        if (curWidth == undefined) {
-            elem.style.width = newWidth + "px";
-            curWidth = newWidth;
-        }
-        var offset = position.getWidth(elem) - curWidth;
-        if (offset > newWidth) {
-            offset = newWidth;
-        }
-        elem.style.width = (newWidth - offset) + "px";
-    };
+	position.setWidth = function(elem, newWidth){
+		var curWidth = position.getPixelVal(elem.style.width);
+		if (curWidth == undefined) {
+			elem.style.width = newWidth + "px";
+			curWidth = newWidth;
+		}
+		var offset = position.getWidth(elem) - curWidth;
+		if (offset > newWidth) {
+			offset = newWidth;
+		}
+		elem.style.width = (newWidth - offset) + "px";
+	};
 	
 	// DONE - copied from cky
 	position.getWindowHeight = function(){
-        if (self.innerHeight) {
-            return self.innerHeight;
-        } else if (doc.documentElement && doc.documentElement.clientHeight) {
-            return doc.documentElement.clientHeight;
-        } else if (doc.body) {
-            return doc.body.clientHeight;
-        }
+		if (self.innerHeight) {
+			return self.innerHeight;
+		}
+		else 
+			if (doc.documentElement && doc.documentElement.clientHeight) {
+				return doc.documentElement.clientHeight;
+			}
+			else 
+				if (doc.body) {
+					return doc.body.clientHeight;
+				}
 	};
 	
 	// DONE - slightly improved - jslint clean
@@ -715,7 +729,7 @@ Attacklab.wmdBase = function(){
 	// Watches the input textarea, polling at an interval and runs
 	// a callback function if anything has changed.
 	wmd.inputPoller = function(inputArea, callback, interval){
-		
+	
 		var pollerObj = this;
 		
 		// Stored start, end and text.  Used to see if there are changes to the input.
@@ -723,26 +737,25 @@ Attacklab.wmdBase = function(){
 		var lastEnd;
 		var markdown;
 		
-		var killHandle;	// Used to cancel monitoring on destruction.
-		
+		var killHandle; // Used to cancel monitoring on destruction.
 		// Checks to see if anything has changed in the textarea.
 		// If so, it runs the callback.
 		this.tick = function(){
-			
+		
 			// Silently die if the input area is hidden, etc.
-			if(!util.elementOk(inputArea)){
+			if (!util.elementOk(inputArea)) {
 				return;
 			}
 			
 			// Update the selection start and end, text.
-			if(inputArea.selectionStart || inputArea.selectionStart === 0){
+			if (inputArea.selectionStart || inputArea.selectionStart === 0) {
 				var start = inputArea.selectionStart;
 				var end = inputArea.selectionEnd;
-				if(start != lastStart || end != lastEnd){
+				if (start != lastStart || end != lastEnd) {
 					lastStart = start;
 					lastEnd = end;
 					
-					if(markdown != inputArea.value){
+					if (markdown != inputArea.value) {
 						markdown = inputArea.value;
 						return true;
 					}
@@ -753,20 +766,20 @@ Attacklab.wmdBase = function(){
 		
 		
 		var doTickCallback = function(){
-			
-			if(util.getStyleProperty(inputArea, "display") === "none"){
+		
+			if (util.getStyleProperty(inputArea, "display") === "none") {
 				return;
 			}
 			
 			// If anything has changed, call the function.
-			if(pollerObj.tick()){
+			if (pollerObj.tick()) {
 				callback();
 			}
 		};
 		
 		// Set how often we poll the textarea for changes.
 		var assignInterval = function(){
-			if(interval === undefined){
+			if (interval === undefined) {
 				interval = 500;
 			}
 			killHandle = self.setInterval(doTickCallback, interval);
@@ -783,30 +796,30 @@ Attacklab.wmdBase = function(){
 	// Handles pushing and popping textareaStates for undo/redo commands.
 	// I should rename the stack variables to list.
 	wmd.undoManager = function(elem, callback){
-		
+	
 		var undoObj = this;
-		var undoStack = [];		// A stack of undo states
-		var stackPtr = 0;		// The index of the current state
+		var undoStack = []; // A stack of undo states
+		var stackPtr = 0; // The index of the current state
 		var mode = "none";
-		var lastState;			// The last state
+		var lastState; // The last state
 		var poller;
-		var timer;				// The setTimeout handle for cancelling the timer
+		var timer; // The setTimeout handle for cancelling the timer
 		var inputStateObj;
 		
 		// Set the mode for later logic steps.
 		var setMode = function(newMode, noSave){
-			
-			if(mode != newMode){
+		
+			if (mode != newMode) {
 				mode = newMode;
-				if(!noSave){
+				if (!noSave) {
 					saveState();
 				}
 			}
 			
-			if(!wmd.Util.IE || mode != "moving"){
+			if (!wmd.Util.IE || mode != "moving") {
 				timer = self.setTimeout(refreshState, 1);
 			}
-			else{
+			else {
 				inputStateObj = null;
 			}
 		};
@@ -829,7 +842,7 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.canRedo = function(){
-			if(undoStack[stackPtr + 1]){
+			if (undoStack[stackPtr + 1]) {
 				return true;
 			}
 			return false;
@@ -837,18 +850,18 @@ Attacklab.wmdBase = function(){
 		
 		// Removes the last state and restores it.
 		this.undo = function(){
-			
-			if(undoObj.canUndo()){
-				if(lastState){
+		
+			if (undoObj.canUndo()) {
+				if (lastState) {
 					// What about setting state -1 to null or checking for undefined?
 					lastState.restore();
 					lastState = null;
 				}
-				else{
+				else {
 					undoStack[stackPtr] = new wmd.textareaState(elem);
 					undoStack[--stackPtr].restore();
 					
-					if(callback){
+					if (callback) {
 						callback();
 					}
 				}
@@ -861,12 +874,12 @@ Attacklab.wmdBase = function(){
 		
 		// Redo an action.
 		this.redo = function(){
-			
-			if(undoObj.canRedo()){
+		
+			if (undoObj.canRedo()) {
 			
 				undoStack[++stackPtr].restore();
-			
-				if(callback){
+				
+				if (callback) {
 					callback();
 				}
 			}
@@ -878,53 +891,53 @@ Attacklab.wmdBase = function(){
 		
 		// Push the input area state to the stack.
 		var saveState = function(){
-			
+		
 			var currState = inputStateObj || new wmd.textareaState(elem);
 			
-			if(!currState){
+			if (!currState) {
 				return false;
 			}
-			if(mode == "moving"){		
-				if(!lastState){
+			if (mode == "moving") {
+				if (!lastState) {
 					lastState = currState;
 				}
 				return;
 			}
-			if(lastState){
-				if(undoStack[stackPtr - 1].text != lastState.text){
+			if (lastState) {
+				if (undoStack[stackPtr - 1].text != lastState.text) {
 					undoStack[stackPtr++] = lastState;
 				}
 				lastState = null;
 			}
 			undoStack[stackPtr++] = currState;
 			undoStack[stackPtr + 1] = null;
-			if(callback){
+			if (callback) {
 				callback();
 			}
 		};
 		
 		var handleCtrlYZ = function(event){
-			
+		
 			var handled = false;
 			
-			if(event.ctrlKey || event.metaKey){
-				
+			if (event.ctrlKey || event.metaKey) {
+			
 				// IE and Opera do not support charCode.
 				var keyCode = event.charCode || event.keyCode;
 				var keyCodeChar = String.fromCharCode(keyCode);
 				
-				switch(keyCodeChar){
-					
+				switch (keyCodeChar) {
+				
 					case "y":
 						undoObj.redo();
 						handled = true;
 						break;
-					
+						
 					case "z":
-						if(!event.shiftKey){
+						if (!event.shiftKey) {
 							undoObj.undo();
 						}
-						else{
+						else {
 							undoObj.redo();
 						}
 						handled = true;
@@ -932,11 +945,11 @@ Attacklab.wmdBase = function(){
 				}
 			}
 			
-			if(handled){
-				if(event.preventDefault){
+			if (handled) {
+				if (event.preventDefault) {
 					event.preventDefault();
 				}
-				if(self.event){
+				if (self.event) {
 					self.event.returnValue = false;
 				}
 				return;
@@ -945,53 +958,57 @@ Attacklab.wmdBase = function(){
 		
 		// Set the mode depending on what is going on in the input area.
 		var handleModeChange = function(event){
+		
+			if (!event.ctrlKey && !event.metaKey) {
 			
-			if(!event.ctrlKey && !event.metaKey){
-				
 				var keyCode = event.keyCode;
-
-				if((keyCode >= 33 && keyCode <= 40) || (keyCode >= 63232 && keyCode <= 63235)){
+				
+				if ((keyCode >= 33 && keyCode <= 40) || (keyCode >= 63232 && keyCode <= 63235)) {
 					// 33 - 40: page up/dn and arrow keys
 					// 63232 - 63235: page up/dn and arrow keys on safari
 					setMode("moving");
 				}
-				else if(keyCode == 8 || keyCode == 46 || keyCode == 127){
-					// 8: backspace
-					// 46: delete
-					// 127: delete
-					setMode("deleting");
-				}
-				else if(keyCode == 13){
-					// 13: Enter
-					setMode("newlines");
-				}
-				else if(keyCode == 27){
-					// 27: escape
-					setMode("escape");
-				}
-				else if((keyCode < 16 || keyCode > 20) && keyCode != 91){
-					// 16-20 are shift, etc. 
-					// 91: left window key
-					// I think this might be a little messed up since there are
-					// a lot of nonprinting keys above 20.
-					setMode("typing");
-				}
+				else 
+					if (keyCode == 8 || keyCode == 46 || keyCode == 127) {
+						// 8: backspace
+						// 46: delete
+						// 127: delete
+						setMode("deleting");
+					}
+					else 
+						if (keyCode == 13) {
+							// 13: Enter
+							setMode("newlines");
+						}
+						else 
+							if (keyCode == 27) {
+								// 27: escape
+								setMode("escape");
+							}
+							else 
+								if ((keyCode < 16 || keyCode > 20) && keyCode != 91) {
+									// 16-20 are shift, etc. 
+									// 91: left window key
+									// I think this might be a little messed up since there are
+									// a lot of nonprinting keys above 20.
+									setMode("typing");
+								}
 			}
 		};
 		
 		var setEventHandlers = function(){
-			
+		
 			util.addEvent(elem, "keypress", function(event){
 				// keyCode 89: y
 				// keyCode 90: z
-				if((event.ctrlKey || event.metaKey) && (event.keyCode == 89 || event.keyCode == 90)){
+				if ((event.ctrlKey || event.metaKey) && (event.keyCode == 89 || event.keyCode == 90)) {
 					event.preventDefault();
 				}
 			});
 			
 			var handlePaste = function(){
-				if(wmd.Util.IE || (inputStateObj && inputStateObj.text != elem.value)){
-					if(timer == undefined){
+				if (wmd.Util.IE || (inputStateObj && inputStateObj.text != elem.value)) {
+					if (timer == undefined) {
 						mode = "paste";
 						saveState();
 						refreshState();
@@ -1004,7 +1021,9 @@ Attacklab.wmdBase = function(){
 			util.addEvent(elem, "keydown", handleCtrlYZ);
 			util.addEvent(elem, "keydown", handleModeChange);
 			
-			util.addEvent(elem, "mousedown", function(){ setMode("moving"); });
+			util.addEvent(elem, "mousedown", function(){
+				setMode("moving");
+			});
 			elem.onpaste = handlePaste;
 			elem.ondrop = handlePaste;
 		};
@@ -1016,7 +1035,7 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.destroy = function(){
-			if(poller){
+			if (poller) {
 				poller.destroy();
 			}
 		};
@@ -1026,9 +1045,10 @@ Attacklab.wmdBase = function(){
 	
 	// I think my understanding of how the buttons and callbacks are stored in the array is incomplete.
 	wmd.editor = function(inputBox, previewRefreshCallback){
-		
-		if(!previewRefreshCallback){
-			previewRefreshCallback = function(){};
+	
+		if (!previewRefreshCallback) {
+			previewRefreshCallback = function(){
+			};
 		}
 		
 		// Width and height of the button bar for the util.skin function.
@@ -1047,29 +1067,26 @@ Attacklab.wmdBase = function(){
 		var mainDiv;
 		var mainSpan;
 		
-		var div;	// used in the _dc function.  I should rename this.
-		
+		var div; // used in the _dc function.  I should rename this.
 		// Used to cancel recurring events from setInterval.
 		var resizePollHandle;
 		var creationHandle;
 		
-		var undoMgr;		// The undo manager
-		var undoImage;		// The image on the undo button
-		var redoImage;		// The image on the redo button
-		
-		var buttonCallbacks = [];	// Callbacks for the buttons at the top of the input area
-		
+		var undoMgr; // The undo manager
+		var undoImage; // The image on the undo button
+		var redoImage; // The image on the redo button
+		var buttonCallbacks = []; // Callbacks for the buttons at the top of the input area
 		// Saves the input state at the time of button click and performs the button function.
 		// The parameter is the function performed when this function is called.
 		var saveStateDoButtonAction = function(callback){
-			
-			if(undoMgr){
+		
+			if (undoMgr) {
 				undoMgr.setCommandMode();
 			}
 			
 			var state = new wmd.textareaState(inputBox);
 			
-			if(!state){
+			if (!state) {
 				return;
 			}
 			
@@ -1077,10 +1094,10 @@ Attacklab.wmdBase = function(){
 			
 			// This seems like a very convoluted way of performing the action.
 			var performAction = function(){
-				
+			
 				inputBox.focus();
 				
-				if(chunks){
+				if (chunks) {
 					state.setChunks(chunks);
 				}
 				
@@ -1090,36 +1107,36 @@ Attacklab.wmdBase = function(){
 			
 			var action = callback(chunks, performAction);
 			
-			if(!action){
+			if (!action) {
 				performAction();
 			}
 		};
 		
 		// Perform the button's action.
 		var doClick = function(button){
-			
+		
 			inputBox.focus();
 			
-			if(button.textOp){
+			if (button.textOp) {
 				saveStateDoButtonAction(button.textOp);
 			}
 			
-			if(button.execute){
+			if (button.execute) {
 				button.execute(editObj);
 			}
 		};
 		
 		var setStyle = function(elem, isEnabled){
-			
+		
 			var style = elem.style;
 			
-			if(isEnabled){
+			if (isEnabled) {
 				style.opacity = "1.0";
 				style.KHTMLOpacity = "1.0";
-				if(wmd.Util.newIE){
+				if (wmd.Util.newIE) {
 					style.filter = "";
 				}
-				if(wmd.Util.oldIE){
+				if (wmd.Util.oldIE) {
 					style.filter = "chroma(color=fuchsia)";
 				}
 				style.cursor = "pointer";
@@ -1134,24 +1151,24 @@ Attacklab.wmdBase = function(){
 				elem.onmouseout = function(){
 					style.backgroundColor = "";
 					style.border = "1px solid transparent";
-					if(wmd.Util.oldIE){
+					if (wmd.Util.oldIE) {
 						style.borderColor = "fuchsia";
 						style.filter = "chroma(color=fuchsia)" + style.filter;
 					}
 				};
 			}
-			else{
+			else {
 				style.opacity = "0.4";
 				style.KHTMLOpacity = "0.4";
-				if(wmd.Util.oldIE){
+				if (wmd.Util.oldIE) {
 					style.filter = "chroma(color=fuchsia) alpha(opacity=40)";
 				}
-				if(wmd.Util.newIE){
+				if (wmd.Util.newIE) {
 					style.filter = "alpha(opacity=40)";
 				}
 				style.cursor = "";
 				style.backgroundColor = "";
-				if(elem.onmouseout){
+				if (elem.onmouseout) {
 					elem.onmouseout();
 				}
 				elem.onmouseover = elem.onmouseout = null;
@@ -1168,7 +1185,7 @@ Attacklab.wmdBase = function(){
 		
 		// Creates a separator in the button row at the top of the input area.
 		var makeButtonSeparator = function(){
-			
+		
 			var sepImage = util.createImage("images/separator.png", 20, 20);
 			sepImage.style.padding = "4px";
 			sepImage.style.paddingTop = "0px";
@@ -1177,15 +1194,15 @@ Attacklab.wmdBase = function(){
 		};
 		
 		var makeButton = function(button){
+		
+			if (button.image) {
 			
-			if(button.image){
-				
 				// Create the image and add properties.
 				var btnImage = util.createImage(button.image, 16, 16);
 				btnImage.border = 0;
-				if(button.description){
+				if (button.description) {
 					var desc = button.description;
-					if(button.key){
+					if (button.key) {
 						var ctrl = " Ctrl+";
 						desc += ctrl + button.key.toUpperCase();
 					}
@@ -1201,10 +1218,9 @@ Attacklab.wmdBase = function(){
 				style.marginBottom = "5px";
 				
 				btnImage.onmouseout();
-				var img = btnImage;		// Why is this being aliased?
-				
+				var img = btnImage; // Why is this being aliased?
 				img.onclick = function(){
-					if(img.onmouseout){
+					if (img.onmouseout) {
 						img.onmouseout();
 					}
 					doClick(button);
@@ -1219,29 +1235,29 @@ Attacklab.wmdBase = function(){
 		
 		// Creates the button row above the input area.
 		var makeButtonRow = function(){
+		
+			for (var callback in buttonCallbacks) {
 			
-			for(var callback in buttonCallbacks){
-				
-				if(buttonCallbacks[callback] == "|"){
+				if (buttonCallbacks[callback] == "|") {
 					makeButtonSeparator();
 				}
-				else{
+				else {
 					makeButton(buttonCallbacks[callback]);
 				}
 			}
 		};
 		
 		var setupUndoRedo = function(){
-			if(undoMgr){
+			if (undoMgr) {
 				setStyle(undoImage, undoMgr.canUndo());
 				setStyle(redoImage, undoMgr.canRedo());
 			}
 		};
 		
 		var createEditor = function(){
+		
+			if (inputBox.offsetParent) {
 			
-			if(inputBox.offsetParent){
-				
 				div = util.makeElement("div");
 				
 				var style = div.style;
@@ -1278,12 +1294,12 @@ Attacklab.wmdBase = function(){
 		};
 		
 		var setButtonCallbacks = function(){
-			
+		
 			var buttons = wmd.wmd_env.buttons.split(/\s+/);
 			
-			for(var btn in buttons){
-				
-				switch(buttons[btn]){
+			for (var btn in buttons) {
+			
+				switch (buttons[btn]) {
 					case "|":
 						addButtonSeparator();
 						break;
@@ -1298,8 +1314,8 @@ Attacklab.wmdBase = function(){
 						break;
 				}
 				
-				if(wmd.full){
-					switch(buttons[btn]){
+				if (wmd.full) {
+					switch (buttons[btn]) {
 						case "blockquote":
 							addButtonCallback(command.blockquote);
 							break;
@@ -1328,29 +1344,29 @@ Attacklab.wmdBase = function(){
 		};
 		
 		var setupEditor = function(){
-			
-			if(/\?noundo/.test(doc.location.href)){
+		
+			if (/\?noundo/.test(doc.location.href)) {
 				wmd.nativeUndo = true;
 			}
 			
-			if(!wmd.nativeUndo){
-				undoMgr = new wmd.undoManager(inputBox,
-					function(){
-						previewRefreshCallback();
-						setupUndoRedo();
-					});
+			if (!wmd.nativeUndo) {
+				undoMgr = new wmd.undoManager(inputBox, function(){
+					previewRefreshCallback();
+					setupUndoRedo();
+				});
 			}
 			
-			var unused = inputBox.parentNode;			// Delete this.  Not used anywhere.
-			
+			var unused = inputBox.parentNode; // Delete this.  Not used anywhere.
 			mainDiv = util.makeElement("div");
 			mainDiv.style.display = "block";
 			mainDiv.style.zIndex = 100;
-			if(!wmd.full){
+			if (!wmd.full) {
 				mainDiv.title += "\n(Free Version)";
 			}
-			mainDiv.unselectable="on";
-			mainDiv.onclick = function(){ inputBox.focus(); };
+			mainDiv.unselectable = "on";
+			mainDiv.onclick = function(){
+				inputBox.focus();
+			};
 			
 			mainSpan = util.makeElement("span");
 			var style = mainSpan.style;
@@ -1375,91 +1391,88 @@ Attacklab.wmdBase = function(){
 			makeButtonRow();
 			
 			// Create the undo/redo buttons.
-			if(undoMgr){
+			if (undoMgr) {
 				makeButtonSeparator();
 				undoImage = makeButton(command.undo);
 				redoImage = makeButton(command.redo);
 				
 				var platform = nav.platform.toLowerCase();
-				if(/win/.test(platform)){
-					undoImage.title+=" - Ctrl+Z";
-					redoImage.title+=" - Ctrl+Y";
+				if (/win/.test(platform)) {
+					undoImage.title += " - Ctrl+Z";
+					redoImage.title += " - Ctrl+Y";
 				}
-				else if(/mac/.test(platform)){
-					undoImage.title+=" - Ctrl+Z";
-					redoImage.title+=" - Ctrl+Shift+Z";
-				}
-				else{
-					undoImage.title+=" - Ctrl+Z";
-					redoImage.title+=" - Ctrl+Shift+Z";
-				}
+				else 
+					if (/mac/.test(platform)) {
+						undoImage.title += " - Ctrl+Z";
+						redoImage.title += " - Ctrl+Shift+Z";
+					}
+					else {
+						undoImage.title += " - Ctrl+Z";
+						redoImage.title += " - Ctrl+Shift+Z";
+					}
 			}
 			
 			var keyEvent = "keydown";
-			if(nav.userAgent.indexOf("Opera") != -1){
+			if (nav.userAgent.indexOf("Opera") != -1) {
 				keyEvent = "keypress";
 			}
 			
-			util.addEvent(inputBox, keyEvent, 
-				function(key){
+			util.addEvent(inputBox, keyEvent, function(key){
+			
+				var isButtonKey = false;
+				
+				// Check to see if we have a button key and, if so execute the callback.
+				if (key.ctrlKey || key.metaKey) {
+				
+					var keyCode = key.charCode || key.keyCode;
+					var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
 					
-					var isButtonKey = false;
-					
-					// Check to see if we have a button key and, if so execute the callback.
-					if(key.ctrlKey || key.metaKey){
-						
-						var keyCode = key.charCode || key.keyCode;
-						var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
-						
-						// Bugfix for messed up DEL and .
-						if(keyCode === 46)
-						{
-							keyCodeStr = "";
-						}
-						if(keyCode === 190)
-						{
-							keyCodeStr = ".";
-						}
-						
-						for(var callback in buttonCallbacks){
-							
-							var button = buttonCallbacks[callback];
-							
-							if(!key.altKey && !key.shiftKey && ((button.key && (keyCodeStr === button.key)))){
-								doClick(button);
-								isButtonKey = true;
-							}
-						}
+					// Bugfix for messed up DEL and .
+					if (keyCode === 46) {
+						keyCodeStr = "";
+					}
+					if (keyCode === 190) {
+						keyCodeStr = ".";
 					}
 					
-					// This should be moved into the if test in the for loop.
-					if(isButtonKey){			
-						if(key.preventDefault){
-							key.preventDefault();
-						}
-						if(self.event){
-							self.event.returnValue = false;
+					for (var callback in buttonCallbacks) {
+					
+						var button = buttonCallbacks[callback];
+						
+						if (!key.altKey && !key.shiftKey && ((button.key && (keyCodeStr === button.key)))) {
+							doClick(button);
+							isButtonKey = true;
 						}
 					}
-				});
+				}
+				
+				// This should be moved into the if test in the for loop.
+				if (isButtonKey) {
+					if (key.preventDefault) {
+						key.preventDefault();
+					}
+					if (self.event) {
+						self.event.returnValue = false;
+					}
+				}
+			});
 			
 			// Auto-indent on carriage return (code 13)
-			util.addEvent(inputBox, "keyup", 
-				function(key){
-					if(key.shiftKey && !key.ctrlKey && !key.metaKey){
-						var keyCode = key.charCode || key.keyCode;
-						switch(keyCode){
-							// Character 13 is Enter
-							case 13:
-								doClick(command.autoindent);		// Yay for the switch/case with one case...
-								break;
-						}
+			util.addEvent(inputBox, "keyup", function(key){
+				if (key.shiftKey && !key.ctrlKey && !key.metaKey) {
+					var keyCode = key.charCode || key.keyCode;
+					switch (keyCode) {
+						// Character 13 is Enter
+						case 13:
+							doClick(command.autoindent); // Yay for the switch/case with one case...
+							break;
 					}
-				});
+				}
+			});
 			
-			if(!createEditor()){
+			if (!createEditor()) {
 				creationHandle = self.setInterval(function(){
-					if(createEditor()){
+					if (createEditor()) {
 						self.clearInterval(creationHandle);
 					}
 				}, 100);
@@ -1467,11 +1480,11 @@ Attacklab.wmdBase = function(){
 			
 			util.addEvent(self, "resize", setDimensions);
 			resizePollHandle = self.setInterval(setDimensions, 100);
-			if(inputBox.form){
+			if (inputBox.form) {
 				var submitCallback = inputBox.form.onsubmit;
 				inputBox.form.onsubmit = function(){
 					convertToHtml();
-					if(submitCallback){
+					if (submitCallback) {
 						return submitCallback.apply(this, arguments);
 					}
 				};
@@ -1482,16 +1495,18 @@ Attacklab.wmdBase = function(){
 		
 		// Convert the contents of the input textarea to HTML in the output/preview panels.
 		var convertToHtml = function(){
-			
-			if(wmd.showdown){
+		
+			if (wmd.showdown) {
 				var markdownConverter = new wmd.showdown.converter();
 			}
 			var text = inputBox.value;
 			
-			var callback = function(){ inputBox.value = text; };
+			var callback = function(){
+				inputBox.value = text;
+			};
 			
-			if(!/markdown/.test(wmd.wmd_env.output.toLowerCase())){
-				if(markdownConverter){
+			if (!/markdown/.test(wmd.wmd_env.output.toLowerCase())) {
+				if (markdownConverter) {
 					inputBox.value = markdownConverter.makeHtml(text);
 					self.setTimeout(callback, 0);
 				}
@@ -1501,7 +1516,7 @@ Attacklab.wmdBase = function(){
 		
 		// Sets up the WMD button at the upper right of the input area.
 		var setupWmdButton = function(){
-			
+		
 			var div = util.makeElement("div");
 			div.unselectable = "on";
 			var style = div.style;
@@ -1524,16 +1539,15 @@ Attacklab.wmdBase = function(){
 			style.height = "25px";
 			
 			var normalImage = util.createImage("images/wmd.png");
-			var _fd = util.createImage("images/wmd-on.png");			// Not used.  Typo?
-			
+			var _fd = util.createImage("images/wmd-on.png"); // Not used.  Typo?
 			anchor.appendChild(normalImage);
 			
 			anchor.onmouseover = function(){
-				util.setImage(normalImage, "images/wmd-on.png");		// The dark WMD
+				util.setImage(normalImage, "images/wmd-on.png"); // The dark WMD
 				anchor.style.cursor = "pointer";
 			};
-			anchor.onmouseout=function(){
-				util.setImage(normalImage, "images/wmd.png");			// The light WMD
+			anchor.onmouseout = function(){
+				util.setImage(normalImage, "images/wmd.png"); // The light WMD
 			};
 			
 			mainDiv.appendChild(anchor);
@@ -1542,12 +1556,12 @@ Attacklab.wmdBase = function(){
 		// Calculates and sets dimensions for the input region.
 		// The button bar is inside the input region so it's complicated.
 		var setDimensions = function(){
-			
-			if(!util.elementOk(inputBox)){
+		
+			if (!util.elementOk(inputBox)) {
 				mainDiv.style.display = "none";
 				return;
 			}
-			if(mainDiv.style.display == "none"){
+			if (mainDiv.style.display == "none") {
 				mainDiv.style.display = "block";
 			}
 			
@@ -1556,8 +1570,8 @@ Attacklab.wmdBase = function(){
 			var inputLeft = position.getLeft(inputBox);
 			
 			// Check for resize.
-			if(mainDiv.style.width == (inputWidth + "px") && (savedHeight == inputHeight) && (savedLeft == inputLeft)){
-				if(position.getTop(mainDiv) < position.getTop(inputBox)){
+			if (mainDiv.style.width == (inputWidth + "px") && (savedHeight == inputHeight) && (savedLeft == inputLeft)) {
+				if (position.getTop(mainDiv) < position.getTop(inputBox)) {
 					return;
 				}
 			}
@@ -1565,7 +1579,7 @@ Attacklab.wmdBase = function(){
 			savedHeight = inputHeight;
 			savedLeft = inputLeft;
 			
-			var minWidth = 100;		// This could be calculated based on the width of the button bar.
+			var minWidth = 100; // This could be calculated based on the width of the button bar.
 			mainDiv.style.width = Math.max(inputWidth, minWidth) + "px";
 			
 			var root = mainDiv.offsetParent;
@@ -1574,16 +1588,15 @@ Attacklab.wmdBase = function(){
 			var inputHeight = spanHeight - btnBarHeight + "px";
 			mainDiv.style.height = inputHeight;
 			
-			if(util.fillers){
+			if (util.fillers) {
 				util.fillers[0].style.height = util.fillers[1].style.height = inputHeight;
 			}
 			
-			var magicThreePx = 3;														// Why do we pick 3?  Some sort of overlap to cover the border?
-			
+			var magicThreePx = 3; // Why do we pick 3?  Some sort of overlap to cover the border?
 			inputBox.style.marginTop = spanHeight + magicThreePx + offsetHeight + "px";
 			
 			var inputTop = position.getTop(inputBox);
-			inputLeft = position.getLeft(inputBox);				// Originally redefined with var
+			inputLeft = position.getLeft(inputBox); // Originally redefined with var
 			position.setTop(root, inputTop - spanHeight - magicThreePx);
 			position.setLeft(root, inputLeft);
 			
@@ -1593,13 +1606,13 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.undo = function(){
-			if(undoMgr){
+			if (undoMgr) {
 				undoMgr.undo();
 			}
 		};
 		
 		this.redo = function(){
-			if(undoMgr){
+			if (undoMgr) {
 				undoMgr.redo();
 			}
 		};
@@ -1611,13 +1624,13 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.destroy = function(){
-			if(undoMgr){
+			if (undoMgr) {
 				undoMgr.destroy();
 			}
-			if(div.parentNode){
+			if (div.parentNode) {
 				div.parentNode.removeChild(div);
 			}
-			if(inputBox){
+			if (inputBox) {
 				inputBox.style.marginTop = "";
 			}
 			self.clearInterval(resizePollHandle);
@@ -1631,56 +1644,57 @@ Attacklab.wmdBase = function(){
 	// The textarea state/contents.
 	// This is only used to implement undo/redo by the undo manager.
 	wmd.textareaState = function(inputArea){
-		
+	
 		var stateObj = this;
 		
 		var setSelection = function(targetArea){
 		
-			if(util.getStyleProperty(inputArea, "display") === "none"){
+			if (util.getStyleProperty(inputArea, "display") === "none") {
 				return;
 			}
 			
 			var isOpera = nav.userAgent.indexOf("Opera") != -1;
 			
-			if(targetArea.selectionStart !== undefined && !isOpera){
-				
+			if (targetArea.selectionStart !== undefined && !isOpera) {
+			
 				targetArea.focus();
 				targetArea.selectionStart = stateObj.start;
 				targetArea.selectionEnd = stateObj.end;
 				targetArea.scrollTop = stateObj.scrollTop;
-			
-			}
-			else if(doc.selection){
 				
-				if(doc.activeElement && doc.activeElement !== inputArea){
-					return;
+			}
+			else 
+				if (doc.selection) {
+				
+					if (doc.activeElement && doc.activeElement !== inputArea) {
+						return;
+					}
+					
+					targetArea.focus();
+					var range = targetArea.createTextRange();
+					range.moveStart("character", -targetArea.value.length);
+					range.moveEnd("character", -targetArea.value.length);
+					range.moveEnd("character", stateObj.end);
+					range.moveStart("character", stateObj.start);
+					range.select();
 				}
-				
-				targetArea.focus();
-				var range = targetArea.createTextRange();
-				range.moveStart("character", -targetArea.value.length);
-				range.moveEnd("character", -targetArea.value.length);
-				range.moveEnd("character", stateObj.end);
-				range.moveStart("character", stateObj.start);
-				range.select();
-			}
 		};
 		
 		this.init = function(targetArea){
-			
+		
 			// Normally the argument is not passed so the arguemnt passed to constructor
 			// is used as the input area.
-			if(targetArea){
+			if (targetArea) {
 				inputArea = targetArea;
 			}
 			
-			if(util.getStyleProperty(inputArea,"display") == "none"){
+			if (util.getStyleProperty(inputArea, "display") == "none") {
 				return;
 			}
 			
 			setStartEnd();
 			stateObj.scrollTop = inputArea.scrollTop;
-			if(!stateObj.text && inputArea.selectionStart || inputArea.selectionStart === 0){
+			if (!stateObj.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
 				stateObj.text = inputArea.value;
 			}
 		};
@@ -1692,46 +1706,43 @@ Attacklab.wmdBase = function(){
 		};
 		
 		var setStartEnd = function(){
+		
+			if (inputArea.selectionStart || inputArea.selectionStart === 0) {
 			
-			if(inputArea.selectionStart || inputArea.selectionStart === 0){
-				
 				stateObj.start = inputArea.selectionStart;
 				stateObj.end = inputArea.selectionEnd;
 			}
-			else if(doc.selection){
-
-				stateObj.text = fixEolChars(inputArea.value);
+			else 
+				if (doc.selection) {
 				
-				var range = doc.selection.createRange();		// The currently selected text.
-				var fixedRange = fixEolChars(range.text);		// The currently selected text with regular newlines.
-				
-				var marker = "\x07";							// A marker for the selected text.
-				var markedRange = marker + fixedRange + marker;	// Surround the selection with a marker.
-				
-				range.text = markedRange;						// Change the selection text to marked up range.
-				
-				var inputText = fixEolChars(inputArea.value);
-				
-				range.moveStart("character", -markedRange.length);	// Move the selection start back to the beginning of the marked up text.
-				range.text = fixedRange;							// And substitute the text with the fixed newlines.
-				
-				// Start and End refer to the marked up region.
-				stateObj.start = inputText.indexOf(marker);
-				stateObj.end = inputText.lastIndexOf(marker) - marker.length;
+					stateObj.text = fixEolChars(inputArea.value);
 					
-				var len = stateObj.text.length - fixEolChars(inputArea.value).length;
-				
-				if(len){
-					range.moveStart("character", -fixedRange.length);
-					while(len--){
-						fixedRange += "\n";
-						stateObj.end += 1;
+					var range = doc.selection.createRange(); // The currently selected text.
+					var fixedRange = fixEolChars(range.text); // The currently selected text with regular newlines.
+					var marker = "\x07"; // A marker for the selected text.
+					var markedRange = marker + fixedRange + marker; // Surround the selection with a marker.
+					range.text = markedRange; // Change the selection text to marked up range.
+					var inputText = fixEolChars(inputArea.value);
+					
+					range.moveStart("character", -markedRange.length); // Move the selection start back to the beginning of the marked up text.
+					range.text = fixedRange; // And substitute the text with the fixed newlines.
+					// Start and End refer to the marked up region.
+					stateObj.start = inputText.indexOf(marker);
+					stateObj.end = inputText.lastIndexOf(marker) - marker.length;
+					
+					var len = stateObj.text.length - fixEolChars(inputArea.value).length;
+					
+					if (len) {
+						range.moveStart("character", -fixedRange.length);
+						while (len--) {
+							fixedRange += "\n";
+							stateObj.end += 1;
+						}
+						range.text = fixedRange;
 					}
-					range.text = fixedRange;
-				}
 					
-				setSelection(inputArea);
-			}
+					setSelection(inputArea);
+				}
 			
 			
 			return stateObj;
@@ -1739,13 +1750,13 @@ Attacklab.wmdBase = function(){
 		
 		// Restore this state into the input area.
 		this.restore = function(targetArea){
-			
+		
 			// The target area argument is never used so it will always
 			// be the inputArea.
-			if(!targetArea){
+			if (!targetArea) {
 				targetArea = inputArea;
 			}
-			if(stateObj.text != undefined && stateObj.text != targetArea.value){
+			if (stateObj.text != undefined && stateObj.text != targetArea.value) {
 				targetArea.value = stateObj.text;
 			}
 			setSelection(targetArea);
@@ -1754,7 +1765,7 @@ Attacklab.wmdBase = function(){
 		
 		// Gets a collection of HTML chunks from the inptut textarea.
 		this.getChunks = function(){
-			
+		
 			var chunk = new wmd.Chunks();
 			
 			chunk.before = fixEolChars(stateObj.text.substring(0, stateObj.start));
@@ -1768,12 +1779,12 @@ Attacklab.wmdBase = function(){
 		};
 		
 		this.setChunks = function(chunk){
-			
+		
 			chunk.before = chunk.before + chunk.startTag;
 			chunk.after = chunk.endTag + chunk.after;
 			
 			var isOpera = nav.userAgent.indexOf("Opera") !== -1;
-			if(isOpera){
+			if (isOpera) {
 				chunk.before = chunk.before.replace(/\n/g, "\r\n");
 				chunk.selection = chunk.selection.replace(/\n/g, "\r\n");
 				chunk.after = chunk.after.replace(/\n/g, "\r\n");
@@ -1798,44 +1809,40 @@ Attacklab.wmdBase = function(){
 	// startRegex: a regular expression to find the start tag
 	// endRegex: a regular expresssion to find the end tag
 	wmd.Chunks.prototype.findTags = function(startRegex, endRegex){
-		
+	
 		var _11e;
 		var _11f;
 		var chunkObj = this;
 		
-		if(startRegex){
+		if (startRegex) {
 			_11f = util.regexToString(startRegex);
 			_11e = new re(_11f.expression + "$", _11f.flags);
 			
-		this.before = this.before.replace(_11e,
-			function(_121){
+			this.before = this.before.replace(_11e, function(_121){
 				chunkObj.startTag = chunkObj.startTag + _121;
 				return "";
 			});
 			
-		_11e = new re("^" + _11f.expression, _11f.flags);
-		
-		this.selection = this.selection.replace(_11e,
-			function(_122){
+			_11e = new re("^" + _11f.expression, _11f.flags);
+			
+			this.selection = this.selection.replace(_11e, function(_122){
 				chunkObj.startTag = chunkObj.startTag + _122;
 				return "";
 			});
 		}
 		
-		if(endRegex){
+		if (endRegex) {
 			_11f = util.regexToString(endRegex);
 			_11e = new re(_11f.expression + "$", _11f.flags);
-			this.selection = this.selection.replace(_11e,
-				function(_123){
-					chunkObj.endTag = _123 + chunkObj.endTag;
-					return "";
-				});
+			this.selection = this.selection.replace(_11e, function(_123){
+				chunkObj.endTag = _123 + chunkObj.endTag;
+				return "";
+			});
 			_11e = new re("^" + _11f.expression, _11f.flags);
-			this.after = this.after.replace(_11e,
-				function(_124){
-					chunkObj.endTag = _124 + chunkObj.endTag;
-					return "";
-				});
+			this.after = this.after.replace(_11e, function(_124){
+				chunkObj.endTag = _124 + chunkObj.endTag;
+				return "";
+			});
 		}
 	};
 	
@@ -1848,28 +1855,28 @@ Attacklab.wmdBase = function(){
 	// The double negative sucks.  The paramater "sign" needs to be flipped
 	// or the variable eliminated.
 	wmd.Chunks.prototype.trimWhitespace = function(dontMove){
-		
+	
 		this.selection = this.selection.replace(/^(\s*)/, "");
 		
-		if(!dontMove){
+		if (!dontMove) {
 			this.before += re.$1;
 		}
 		
 		this.selection = this.selection.replace(/(\s*)$/, "");
 		
-		if(!dontMove){
+		if (!dontMove) {
 			this.after = re.$1 + this.after;
 		}
 	};
 	
 	
 	wmd.Chunks.prototype.skipLines = function(nLinesBefore, nLinesAfter, findExtraNewlines){
-		
-		if(nLinesBefore === undefined){
+	
+		if (nLinesBefore === undefined) {
 			nLinesBefore = 1;
 		}
 		
-		if(nLinesAfter === undefined){
+		if (nLinesAfter === undefined) {
 			nLinesAfter = 1;
 		}
 		
@@ -1888,30 +1895,30 @@ Attacklab.wmdBase = function(){
 		this.endTag = this.endTag.replace(/(\n*$)/, "");
 		this.after = this.after + re.$1;
 		
-		if(this.before){
-			
+		if (this.before) {
+		
 			regexText = replacementText = "";
 			
-			while(nLinesBefore--){
+			while (nLinesBefore--) {
 				regexText += "\\n?";
 				replacementText += "\n";
 			}
 			
-			if(findExtraNewlines){
+			if (findExtraNewlines) {
 				regexText = "\\n*";
 			}
 			this.before = this.before.replace(new re(regexText + "$", ""), replacementText);
 		}
 		
-		if(this.after){
-			
+		if (this.after) {
+		
 			regexText = replacementText = "";
 			
-			while(nLinesAfter--){
+			while (nLinesAfter--) {
 				regexText += "\\n?";
 				replacementText += "\n";
 			}
-			if(findExtraNewlines){
+			if (findExtraNewlines) {
 				regexText = "\\n*";
 			}
 			
@@ -1920,11 +1927,11 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// The markdown symbols - 4 spaces = code, > = blockquote, etc.
-	command.prefixes="(?:\\s{4,}|\\s*>|\\s*-\\s+|\\s*\\d+\\.|=|\\+|-|_|\\*|#|\\s*\\[[^\n]]+\\]:)";
+	command.prefixes = "(?:\\s{4,}|\\s*>|\\s*-\\s+|\\s*\\d+\\.|=|\\+|-|_|\\*|#|\\s*\\[[^\n]]+\\]:)";
 	
 	// Remove markdown symbols from the chunk selection.
 	command.unwrap = function(chunk){
-		var txt = new re("([^\\n])\\n(?!(\\n|" + command.prefixes + "))","g");
+		var txt = new re("([^\\n])\\n(?!(\\n|" + command.prefixes + "))", "g");
 		chunk.selection = chunk.selection.replace(txt, "$1 $2");
 	};
 	
@@ -1932,14 +1939,13 @@ Attacklab.wmdBase = function(){
 		command.unwrap(chunk);
 		var regex = new re("(.{1," + len + "})( +|$\\n?)", "gm");
 		
-		chunk.selection = chunk.selection.replace(regex,
-			function(line, marked){
-				if(new re("^" + command.prefixes, "").test(line)){
-					return line;
-				}
-				return marked + "\n";
-			});
-			
+		chunk.selection = chunk.selection.replace(regex, function(line, marked){
+			if (new re("^" + command.prefixes, "").test(line)) {
+				return line;
+			}
+			return marked + "\n";
+		});
+		
 		chunk.selection = chunk.selection.replace(/\s+$/, "");
 	};
 	
@@ -1959,10 +1965,10 @@ Attacklab.wmdBase = function(){
 	//
 	// This part of the control acts in some pretty weird ways.
 	command.doBorI = function(chunk, nStars, insertText){
-		
+	
 		// Get rid of whitespace and fixup newlines.
 		chunk.trimWhitespace();
-		chunk.selection = chunk.selection.replace(/\n{2,}/g,"\n");
+		chunk.selection = chunk.selection.replace(/\n{2,}/g, "\n");
 		
 		// Look for stars before and after.  Is the chunk already marked up?
 		chunk.before.search(/(\**$)/);
@@ -1974,7 +1980,7 @@ Attacklab.wmdBase = function(){
 		var prevStars = Math.min(starsBefore.length, starsAfter.length);
 		
 		// Remove stars if we have to since the button acts as a toggle.
-		if((prevStars >= nStars) && (prevStars != 2 || nStars != 1)){
+		if ((prevStars >= nStars) && (prevStars != 2 || nStars != 1)) {
 			chunk.before = chunk.before.replace(re("[*]{" + nStars + "}$", ""), "");
 			chunk.after = chunk.after.replace(re("^[*]{" + nStars + "}", ""), "");
 			return;
@@ -1982,7 +1988,7 @@ Attacklab.wmdBase = function(){
 		
 		// It's not really clear why this code is necessary.  It just moves
 		// some arbitrary stuff around.
-		if(!chunk.selection && starsAfter){
+		if (!chunk.selection && starsAfter) {
 			chunk.after = chunk.after.replace(/^([*_]*)/, "");
 			chunk.before = chunk.before.replace(/(\s?)$/, "");
 			var whitespace = re.$1;
@@ -1992,42 +1998,39 @@ Attacklab.wmdBase = function(){
 		
 		// In most cases, if you don't have any selected text and click the button
 		// you'll get a selected, marked up region with the default text inserted.
-		if(!chunk.selection && !starsAfter){
+		if (!chunk.selection && !starsAfter) {
 			chunk.selection = insertText;
 		}
 		
 		// Add the true markup.
-		var markup = nStars <= 1 ? "*" : "**";	// shouldn't the test be = ?
+		var markup = nStars <= 1 ? "*" : "**"; // shouldn't the test be = ?
 		chunk.before = chunk.before + markup;
 		chunk.after = markup + chunk.after;
 	};
 	
 	// DONE
 	command.stripLinkDefs = function(text, defsToAdd){
+	
+		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm, function(totalMatch, id, link, newlines, title){
 		
-		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm,
+			defsToAdd[id] = totalMatch.replace(/\s*$/, "");
 			
-			function(totalMatch, id, link, newlines, title){
-				
-				defsToAdd[id] = totalMatch.replace(/\s*$/, "");
-				
-				if(newlines){
-					// Strip the title and return that separately.
-					defsToAdd[id] = totalMatch.replace(/["(](.+?)[")]$/, "");
-					return newlines + title;
-				}
-				return "";
-			});
-			
+			if (newlines) {
+				// Strip the title and return that separately.
+				defsToAdd[id] = totalMatch.replace(/["(](.+?)[")]$/, "");
+				return newlines + title;
+			}
+			return "";
+		});
+		
 		return text;
 	};
 	
 	// DONE
 	command.addLinkDef = function(chunk, linkDef){
-		
-		var refNumber = 0;		// The current reference number
-		var defsToAdd = {};		//
-		
+	
+		var refNumber = 0; // The current reference number
+		var defsToAdd = {}; //
 		// Start with a clean slate by removing all previous link definitions.
 		chunk.before = command.stripLinkDefs(chunk.before, defsToAdd);
 		chunk.selection = command.stripLinkDefs(chunk.selection, defsToAdd);
@@ -2036,28 +2039,28 @@ Attacklab.wmdBase = function(){
 		var defs = "";
 		var regex = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
 		
-		var addDefNumber =  function(def){
+		var addDefNumber = function(def){
 			refNumber++;
-			def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  ["+ refNumber +"]:");
+			def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  [" + refNumber + "]:");
 			defs += "\n" + def;
 		};
 		
 		var getLink = function(wholeMatch, link, id, end){
 		
-			if(defsToAdd[id]){
+			if (defsToAdd[id]) {
 				addDefNumber(defsToAdd[id]);
 				return link + refNumber + end;
-		
+				
 			}
 			return wholeMatch;
 		};
 		
 		chunk.before = chunk.before.replace(regex, getLink);
 		
-		if(linkDef){
+		if (linkDef) {
 			addDefNumber(linkDef);
 		}
-		else{
+		else {
 			chunk.selection = chunk.selection.replace(regex, getLink);
 		}
 		
@@ -2065,10 +2068,10 @@ Attacklab.wmdBase = function(){
 		
 		chunk.after = chunk.after.replace(regex, getLink);
 		
-		if(chunk.after){
+		if (chunk.after) {
 			chunk.after = chunk.after.replace(/\n*$/, "");
 		}
-		if(!chunk.after){
+		if (!chunk.after) {
 			chunk.selection = chunk.selection.replace(/\n*$/, "");
 		}
 		
@@ -2079,20 +2082,20 @@ Attacklab.wmdBase = function(){
 	
 	// Done
 	command.doLinkOrImage = function(chunk, isImage, performAction){
-		
+	
 		chunk.trimWhitespace();
-		chunk.findTags(/\s*!?\[/,/\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
+		chunk.findTags(/\s*!?\[/, /\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
 		
-		if(chunk.endTag.length > 1){
-			
+		if (chunk.endTag.length > 1) {
+		
 			chunk.startTag = chunk.startTag.replace(/!?\[/, "");
 			chunk.endTag = "";
 			command.addLinkDef(chunk, null);
-		
-		}
-		else{
 			
-			if(/\n\n/.test(chunk.selection)){
+		}
+		else {
+		
+			if (/\n\n/.test(chunk.selection)) {
 				command.addLinkDef(chunk, null);
 				return;
 			}
@@ -2102,8 +2105,8 @@ Attacklab.wmdBase = function(){
 			// The function to be executed when you enter a link and press OK or Cancel.
 			// Marks up the link and adds the ref.
 			var callback = function(link){
-				
-				if(link !== null){
+			
+				if (link !== null) {
 				
 					chunk.startTag = chunk.endTag = "";
 					var linkDef = " [999]: " + link;
@@ -2111,12 +2114,12 @@ Attacklab.wmdBase = function(){
 					var num = command.addLinkDef(chunk, linkDef);
 					chunk.startTag = isImage ? "![" : "[";
 					chunk.endTag = "][" + num + "]";
-				
-					if(!chunk.selection){
-						if(isImage){
+					
+					if (!chunk.selection) {
+						if (isImage) {
 							chunk.selection = "alt text";
 						}
-						else{
+						else {
 							chunk.selection = "link text";
 						}
 					}
@@ -2124,10 +2127,10 @@ Attacklab.wmdBase = function(){
 				performAction();
 			};
 			
-			if(isImage){
+			if (isImage) {
 				promptForm = util.prompt("<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>", "http://", callback);
 			}
-			else{
+			else {
 				promptForm = util.prompt("<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>", "http://", callback);
 			}
 			return true;
@@ -2148,7 +2151,7 @@ Attacklab.wmdBase = function(){
 	command.italic.image = "images/italic.png";
 	command.italic.key = "i";
 	command.italic.textOp = command.doItalic;
-
+	
 	command.link = {};
 	command.link.description = "Hyperlink <a>";
 	command.link.image = "images/link.png";
@@ -2156,14 +2159,14 @@ Attacklab.wmdBase = function(){
 	command.link.textOp = function(chunk, callback){
 		return command.doLinkOrImage(chunk, false, callback);
 	};
-
+	
 	command.undo = {};
 	command.undo.description = "Undo";
 	command.undo.image = "images/undo.png";
 	command.undo.execute = function(manager){
 		manager.undo();
 	};
-
+	
 	command.redo = {};
 	command.redo.description = "Redo";
 	command.redo.image = "images/redo.png";
@@ -2171,10 +2174,10 @@ Attacklab.wmdBase = function(){
 		manager.redo();
 	};
 	
-
+	
 	// DONE - jslint clean
 	util.findPanes = function(wmdStuff){
-		
+	
 		// wmdStuff is just a non-special object that keeps our important references in
 		// one place.
 		//
@@ -2185,24 +2188,24 @@ Attacklab.wmdBase = function(){
 		wmdStuff.output = wmdStuff.output || util.getElementsByClass("wmd-output", "textarea")[0];
 		wmdStuff.output = wmdStuff.output || util.getElementsByClass("wmd-output", "div")[0];
 		
-		if(!wmdStuff.input){
-			
+		if (!wmdStuff.input) {
+		
 			var inputAreas = doc.getElementsByTagName("textarea");
 			
-			for(var i = 0; i < inputAreas.length; i++){
-				
+			for (var i = 0; i < inputAreas.length; i++) {
+			
 				var area = inputAreas[i];
 				
 				// Make sure it's not the output area or selected to ignore.
-				if(area != wmdStuff.output && !/wmd-ignore/.test(area.className.toLowerCase())){
-					
+				if (area != wmdStuff.output && !/wmd-ignore/.test(area.className.toLowerCase())) {
+				
 					// As per the documentation, the first one is the one we use.
 					wmdStuff.input = area;
 					break;
 				}
 			}
 		}
-
+		
 		return;
 	};
 	
@@ -2216,7 +2219,7 @@ Attacklab.wmdBase = function(){
 	// DONE - fixed up and jslint clean
 	util.startEditor = function(){
 	
-		if(wmd.wmd_env.autostart === false){
+		if (wmd.wmd_env.autostart === false) {
 			wmd.editorInit();
 			util.makeAPI();
 			return;
@@ -2230,33 +2233,34 @@ Attacklab.wmdBase = function(){
 		
 		// Fired after the page has fully loaded.
 		var loadListener = function(){
-			
-			try{
+		
+			try {
 				// I think the clone equality test is just a strange way to see
 				// if the panes got set/reset in findPanes().
 				var clone = util.cloneObject(wmdStuff);
 				util.findPanes(wmdStuff);
 				
-				if(!util.objectsEqual(clone, wmdStuff) && wmdStuff.input){
+				if (!util.objectsEqual(clone, wmdStuff) && wmdStuff.input) {
+				
+					if (!edit) {
 					
-					if(!edit){
-						
 						wmd.editorInit();
 						var previewRefreshCallback;
 						
-						if(wmd.previewManager !== undefined){
+						if (wmd.previewManager !== undefined) {
 							preview = new wmd.previewManager(wmdStuff);
 							previewRefreshCallback = preview.refresh;
 						}
-
+						
 						edit = new wmd.editor(wmdStuff.input, previewRefreshCallback);
 					}
-					else if(preview){
+					else 
+						if (preview) {
 							preview.refresh(true);
-					}
+						}
 				}
-			}
-			catch(e){
+			} 
+			catch (e) {
 				// Useful!
 			}
 			
@@ -2268,10 +2272,10 @@ Attacklab.wmdBase = function(){
 	
 	// DONE
 	wmd.previewManager = function(wmdStuff){
-		
+	
 		// wmdStuff stores random things we need to keep track of, like
 		// the input textarea.	
-			
+		
 		var managerObj = this;
 		var converter;
 		var poller;
@@ -2280,11 +2284,10 @@ Attacklab.wmdBase = function(){
 		var oldInputText;
 		var htmlOut;
 		var maxDelay = 3000;
-		var startType = "delayed";  // The other legal value is "manual"
-		
+		var startType = "delayed"; // The other legal value is "manual"
 		// Adds event listeners to elements and creates the input poller.
 		var setupEvents = function(inputElem, listener){
-			
+		
 			util.addEvent(inputElem, "input", listener);
 			inputElem.onpaste = listener;
 			inputElem.ondrop = listener;
@@ -2293,47 +2296,49 @@ Attacklab.wmdBase = function(){
 			util.addEvent(inputElem, "keydown", listener);
 			poller = new wmd.inputPoller(inputElem, listener);
 		};
-			
+		
 		var getDocScrollTop = function(){
-			
+		
 			var result = 0;
 			
-			if(self.innerHeight){
+			if (self.innerHeight) {
 				result = self.pageYOffset;
 			}
-			else if (doc.documentElement && doc.documentElement.scrollTop) {
-				result = doc.documentElement.scrollTop;
-			}
-			else if (doc.body) {
-				result = doc.body.scrollTop;
-			}
-
+			else 
+				if (doc.documentElement && doc.documentElement.scrollTop) {
+					result = doc.documentElement.scrollTop;
+				}
+				else 
+					if (doc.body) {
+						result = doc.body.scrollTop;
+					}
+			
 			return result;
 		};
-			
+		
 		var makePreviewHtml = function(){
-			
+		
 			// If there are no registered preview and output panels
 			// there is nothing to do.
-			if(!wmdStuff.preview && !wmdStuff.output){
+			if (!wmdStuff.preview && !wmdStuff.output) {
 				return;
 			}
 			
 			var text = wmdStuff.input.value;
-			if(text && text == oldInputText){
-				return;	// Input text hasn't changed.
+			if (text && text == oldInputText) {
+				return; // Input text hasn't changed.
 			}
-			else{
+			else {
 				oldInputText = text;
 			}
 			
 			var prevTime = new Date().getTime();
 			
-			if(!converter && wmd.showdown){
+			if (!converter && wmd.showdown) {
 				converter = new wmd.showdown.converter();
 			}
 			
-			if(converter){
+			if (converter) {
 				text = converter.makeHtml(text);
 			}
 			
@@ -2345,55 +2350,57 @@ Attacklab.wmdBase = function(){
 			pushPreviewHtml(text);
 			htmlOut = text;
 		};
-			
+		
 		// setTimeout is already used.  Used as an event listener.
 		var applyTimeout = function(){
-			
-			if(timeout){
+		
+			if (timeout) {
 				self.clearTimeout(timeout);
 				timeout = undefined;
 			}
 			
-			if(startType !== "manual"){
-				
+			if (startType !== "manual") {
+			
 				var delay = 0;
 				
-				if(startType === "delayed"){
+				if (startType === "delayed") {
 					delay = elapsedTime;
 				}
 				
-				if(delay > maxDelay){
+				if (delay > maxDelay) {
 					delay = maxDelay;
 				}
 				timeout = self.setTimeout(makePreviewHtml, delay);
 			}
 		};
-
+		
 		var getScaleFactor = function(panel){
-			if(panel.scrollHeight <= panel.clientHeight){
+			if (panel.scrollHeight <= panel.clientHeight) {
 				return 1;
 			}
 			return panel.scrollTop / (panel.scrollHeight - panel.clientHeight);
 		};
 		
 		var setPanelScrollTops = function(){
-			
-			if(wmdStuff.preview){
-				wmdStuff.preview.scrollTop = (wmdStuff.preview.scrollHeight - wmdStuff.preview.clientHeight) * getScaleFactor(wmdStuff.preview);;
+		
+			if (wmdStuff.preview) {
+				wmdStuff.preview.scrollTop = (wmdStuff.preview.scrollHeight - wmdStuff.preview.clientHeight) * getScaleFactor(wmdStuff.preview);
+				;
 			}
 			
-			if(wmdStuff.output){
-				wmdStuff.output.scrollTop = (wmdStuff.output.scrollHeight - wmdStuff.output.clientHeight) * getScaleFactor(wmdStuff.output);;
+			if (wmdStuff.output) {
+				wmdStuff.output.scrollTop = (wmdStuff.output.scrollHeight - wmdStuff.output.clientHeight) * getScaleFactor(wmdStuff.output);
+				;
 			}
 		};
 		
 		this.refresh = function(requiresRefresh){
-			
-			if(requiresRefresh){
+		
+			if (requiresRefresh) {
 				oldInputText = "";
 				makePreviewHtml();
 			}
-			else{
+			else {
 				applyTimeout();
 			}
 		};
@@ -2416,67 +2423,488 @@ Attacklab.wmdBase = function(){
 		var isFirstTimeFilled = true;
 		
 		var pushPreviewHtml = function(text){
-			
+		
 			var emptyTop = position.getTop(wmdStuff.input) - getDocScrollTop();
 			
 			// Send the encoded HTML to the output textarea/div.
-			if(wmdStuff.output){
+			if (wmdStuff.output) {
 				// The value property is only defined if the output is a textarea.
-				if(wmdStuff.output.value !== undefined){
+				if (wmdStuff.output.value !== undefined) {
 					wmdStuff.output.value = text;
 					wmdStuff.output.readOnly = true;
 				}
 				// Otherwise we are just replacing the text in a div.
 				// Send the HTML wrapped in <pre><code>
-				else{
+				else {
 					var newText = text.replace(/&/g, "&amp;");
 					newText = newText.replace(/</g, "&lt;");
 					wmdStuff.output.innerHTML = "<pre><code>" + newText + "</code></pre>";
 				}
 			}
 			
-			if(wmdStuff.preview){
+			if (wmdStuff.preview) {
 				wmdStuff.preview.innerHTML = text;
 			}
 			
 			setPanelScrollTops();
 			
-			if(isFirstTimeFilled){
+			if (isFirstTimeFilled) {
 				isFirstTimeFilled = false;
 				return;
 			}
 			
 			var fullTop = position.getTop(wmdStuff.input) - getDocScrollTop();
 			
-			if(nav.userAgent.indexOf("MSIE") != -1){
-				self.setTimeout(function(){self.scrollBy(0, fullTop - emptyTop);}, 0);
+			if (nav.userAgent.indexOf("MSIE") != -1) {
+				self.setTimeout(function(){
+					self.scrollBy(0, fullTop - emptyTop);
+				}, 0);
 			}
-			else{
+			else {
 				self.scrollBy(0, fullTop - emptyTop);
 			}
 		};
 		
 		var init = function(){
-			
+		
 			setupEvents(wmdStuff.input, applyTimeout);
 			makePreviewHtml();
 			
-			if(wmdStuff.preview){
+			if (wmdStuff.preview) {
 				wmdStuff.preview.scrollTop = 0;
 			}
-			if(wmdStuff.output){
+			if (wmdStuff.output) {
 				wmdStuff.output.scrollTop = 0;
 			}
 		};
 		
 		this.destroy = function(){
-			if(poller){
+			if (poller) {
 				poller.destroy();
 			}
 		};
 		
 		init();
 	};
+	
+};
+
+Attacklab.wmdPlus=function(){
+	
+	var self = top;
+	var wmd = self["Attacklab"];
+	var doc = self["document"];
+	var re = self["RegExp"];
+	var nav = self["navigator"];
+	
+	var util = wmd.Util;
+	var position = wmd.Position;
+	var command = wmd.Command;
+
+	// DONE
+	command.doAutoindent = function(chunk){
+		
+		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
+		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
+		chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+		if(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]+.*\n$/.test(chunk.before)){
+			if(command.doList){
+				command.doList(chunk);
+			}
+		}
+		if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)){
+			if(command.doBlockquote){
+				command.doBlockquote(chunk);
+			}
+		}
+		if(/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)){
+			if(command.doCode){
+				command.doCode(chunk);
+			}
+		}
+	};
+	
+	// DONE
+	command.doBlockquote = function(chunk){
+		
+		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
+			function(totalMatch, newlinesBefore, text, newlinesAfter){
+				chunk.before += newlinesBefore;
+				chunk.after = newlinesAfter + chunk.after;
+				return text;
+			});
+			
+		chunk.before = chunk.before.replace(/(>[ \t]*)$/,
+			function(totalMatch, blankLine){
+				chunk.selection = blankLine + chunk.selection;
+				return "";
+			});
+			
+		chunk.selection = chunk.selection.replace(/^(\s|>)+$/ ,"");
+		chunk.selection = chunk.selection || "Blockquote";
+		
+		if(chunk.before){
+			chunk.before = chunk.before.replace(/\n?$/,"\n");
+		}
+		if(chunk.after){
+			chunk.after = chunk.after.replace(/^\n?/,"\n");
+		}
+		
+		chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
+			function(totalMatch){
+				chunk.startTag = totalMatch;
+				return "";
+			});
+			
+		chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
+			function(totalMatch){
+				chunk.endTag = totalMatch;
+				return "";
+			});
+		
+		var replaceBlanksInTags = function(useBracket){
+			
+			var replacement = useBracket ? "> " : "";
+			
+			if(chunk.startTag){
+				chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/,
+					function(totalMatch, markdown){
+						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+					});
+			}
+			if(chunk.endTag){
+				chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/,
+					function(totalMatch, markdown){
+						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+					});
+			}
+		};
+		
+		if(/^(?![ ]{0,3}>)/m.test(chunk.selection)){
+			command.wrap(chunk, wmd.wmd_env.lineLength - 2);
+			chunk.selection = chunk.selection.replace(/^/gm, "> ");
+			replaceBlanksInTags(true);
+			chunk.skipLines();
+		}
+		else{
+			chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
+			command.unwrap(chunk);
+			replaceBlanksInTags(false);
+			
+			if(!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag){
+				chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
+			}
+			
+			if(!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag){
+				chunk.endTag=chunk.endTag.replace(/^\n{0,2}/, "\n\n");
+			}
+		}
+		
+		if(!/\n/.test(chunk.selection)){
+			chunk.selection = chunk.selection.replace(/^(> *)/,
+			function(wholeMatch, blanks){
+				chunk.startTag += blanks;
+				return "";
+			});
+		}
+	};
+
+	// DONE
+	command.doCode = function(chunk){
+		
+		var hasTextBefore = /\S[ ]*$/.test(chunk.before);
+		var hasTextAfter = /^[ ]*\S/.test(chunk.after);
+		
+		// Use 'four space' markdown if the selection is on its own
+		// line or is multiline.
+		if((!hasTextAfter && !hasTextBefore) || /\n/.test(chunk.selection)){
+			
+			chunk.before = chunk.before.replace(/[ ]{4}$/,
+				function(totalMatch){
+					chunk.selection = totalMatch + chunk.selection;
+					return "";
+				});
+				
+			var nLinesBack = 1;
+			var nLinesForward = 1;
+			
+			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before)){
+				nLinesBack = 0;
+			}
+			if(/^\n(\t|[ ]{4,})/.test(chunk.after)){
+				nLinesForward = 0;
+			}
+			
+			chunk.skipLines(nLinesBack, nLinesForward);
+			
+			if(!chunk.selection){
+				chunk.startTag = "    ";
+				chunk.selection = "enter code here";
+				return;
+			}
+			
+			if(/^[ ]{0,3}\S/m.test(chunk.selection)){
+				chunk.selection = chunk.selection.replace(/^/gm, "    ");
+			}
+			else{
+				chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+			}
+		}
+		else{
+			
+			// Use backticks (`) to delimit the code block.
+			
+			chunk.trimWhitespace();
+			chunk.findTags(/`/,/`/);
+			
+			if(!chunk.startTag && !chunk.endTag){
+				chunk.startTag = chunk.endTag="`";
+				if(!chunk.selection){
+					chunk.selection = "enter code here";
+				}
+			}
+			else if(chunk.endTag && !chunk.startTag){
+				chunk.before += chunk.endTag;
+				chunk.endTag = "";
+			}
+			else{
+				chunk.startTag = chunk.endTag="";
+			}
+		}
+	};
+	
+	command.autoindent={};
+	command.autoindent.textOp = command.doAutoindent;
+	command.blockquote = {};
+	command.blockquote.description = "Blockquote <blockquote>";
+	command.blockquote.image = "images/blockquote.png";
+	command.blockquote.key = ".";
+	//command.blockquote.keyCode = 190;
+	command.blockquote.textOp = function(chunk){
+		return command.doBlockquote(chunk);
+	};
+	
+	command.code = {};
+	command.code.description = "Code Sample <pre><code>";
+	command.code.image = "images/code.png";
+	command.code.key = "k";
+	command.code.textOp = command.doCode;
+	
+	command.img = {};
+	command.img.description = "Image <img>";
+	command.img.image = "images/img.png";
+	command.img.key = "g";
+	command.img.textOp = function(chunk, callback){
+		return command.doLinkOrImage(chunk, true, callback);
+	};
+	
+	// DONE
+	command.doList = function(chunk, isNumberedList){
+		
+		var listItemRegex = /(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
+		var bulletSymbol = "";
+		var num = 1;	// The number in a numbered list.
+		
+		// Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
+		var getItemPrefix = function(){
+			var prefix;
+			if(isNumberedList){
+				prefix = " " + num + ". ";
+				num++;
+			}
+			else{
+				var bullet = bulletSymbol || "-";
+				prefix = " " + bullet + " ";
+			}
+			return prefix;
+		};
+		
+		// Does two things, which is kind of dumb.
+		// 1. Decides if we have a numbered list or not if the flag isn't set.
+		// 2. Makes the list item prefixes uniform.
+		var fixPrefixes = function(text){
+			
+			// Why on EARTH would this variable not be set?
+			// Javascript is, without a doubt, the SLOPPIEST language I've encountered in a LONG time.
+			if(isNumberedList === undefined){
+				isNumberedList = /^\s*\d/.test(text);
+			}
+			
+			text = text.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
+				function(totalSelection){
+					return getItemPrefix();
+				});
+				
+			return text;
+		};
+		
+		// Finds and fixes up the list items after this item.
+		// Used when we are editing inside a list.
+		var fixLaterItems = function(){
+			
+			// regexThing is that weird, non-string thing that regexToString returns.
+			regexThing = util.regexToString(listItemRegex);
+			regexThing.expression = "^\n*" + regexThing.expression;
+			var regex = util.stringToRegex(regexThing);
+			
+			chunk.after = chunk.after.replace(regex, fixPrefixes);
+		};
+		
+		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
+		
+		if(chunk.before && !/\n$/.test(chunk.before) && !/^\n/.test(chunk.startTag)){
+			chunk.before += chunk.startTag;
+			chunk.startTag = "";
+		}
+		
+		if(chunk.startTag){
+			
+			var hasDigits = /\d+[.]/.test(chunk.startTag);
+			chunk.startTag = "";
+			chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
+			command.unwrap(chunk);
+			chunk.skipLines();
+			
+			if(hasDigits){
+				fixLaterItems();
+			}
+			if(isNumberedList == hasDigits){
+				return;
+			}
+		}
+		
+		var nLinesUp = 1;
+		
+		var regexThing = util.regexToString(listItemRegex);
+		regexThing.expression = "(\\n|^)" + regexThing.expression + "$";
+		var regex = util.stringToRegex(regexThing);
+		
+		chunk.before = chunk.before.replace(regex,
+			function(wholeMatch){
+				if(/^\s*([*+-])/.test(wholeMatch)){
+					bulletSymbol = re.$1;
+				}
+				nLinesUp = /[^\n]\n\n[^\n]/.test(wholeMatch) ? 1 : 0;
+				return fixPrefixes(wholeMatch);
+			});
+			
+		if(!chunk.selection){
+			chunk.selection = "List item";
+		}
+		
+		var prefix = getItemPrefix();
+		
+		var nLinesDown = 1;
+		regexThing = util.regexToString(listItemRegex);
+		regexThing.expression = "^\n*" + regexThing.expression;
+		regex = util.stringToRegex(regexThing);
+		
+		chunk.after = chunk.after.replace(regex,
+			function(wholeMatch){
+				nLinesDown = /[^\n]\n\n[^\n]/.test(wholeMatch) ? 1 : 0;
+				return fixPrefixes(wholeMatch);
+			});
+			
+		chunk.trimWhitespace(true);
+		chunk.skipLines(nLinesUp, nLinesDown, true);
+		chunk.startTag = prefix;
+		var spaces = prefix.replace(/./g, " ");
+		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
+		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
+	};
+	
+	// DONE
+	command.doHeading = function(chunk){
+		
+		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
+		chunk.selection = chunk.selection.replace(/\s+/g, " ");
+		chunk.selection = chunk.selection.replace(/(^\s+|\s+$)/g, "");
+		
+		// If we clicked the button with no selected text, we just
+		// make a level 2 hash header around some default text.
+		if(!chunk.selection){
+			chunk.startTag = "## ";
+			chunk.selection = "Heading";
+			chunk.endTag = " ##";
+			return;
+		}
+		
+		var headerLevel = 0;		// The existing header level of the selected text.
+		
+		// Remove any existing hash heading markdown and save the header level.
+		chunk.findTags(/#+[ ]*/, /[ ]*#+/);
+		if(/#+/.test(chunk.startTag)){
+			headerLevel = re.lastMatch.length;
+		}
+		chunk.startTag = chunk.endTag = "";
+		
+		// Try to get the current header level by looking for - and = in the line
+		// below the selection.
+		chunk.findTags(null, /\s?(-+|=+)/);
+		if(/=+/.test(chunk.endTag)){
+			headerLevel = 1;
+		}
+		if(/-+/.test(chunk.endTag)){
+			headerLevel = 2;
+		}
+		
+		// Skip to the next line so we can create the header markdown.
+		chunk.startTag = chunk.endTag = "";
+		chunk.skipLines(1, 1);
+
+		// We make a level 2 header if there is no current header.
+		// If there is a header level, we substract one from the header level.
+		// If it's already a level 1 header, it's removed.
+		var headerLevelToCreate = headerLevel == 0 ? 2 : headerLevel - 1;
+		
+		if(headerLevelToCreate > 0){
+			
+			// The button only creates level 1 and 2 underline headers.
+			// Why not have it iterate over hash header levels?  Wouldn't that be easier and cleaner?
+			var headerChar = headerLevelToCreate >= 2 ? "-" : "=";
+			var len = chunk.selection.length;
+			if(len > wmd.wmd_env.lineLength){
+				len = wmd.wmd_env.lineLength;
+			}
+			chunk.endTag = "\n";
+			while(len--){
+				chunk.endTag += headerChar;
+			}
+		}
+	};
+	
+	command.ol = {};
+	command.ol.description = "Numbered List <ol>";
+	command.ol.image = "images/ol.png";
+	command.ol.key = "o";
+	command.ol.textOp = function(chunk){
+		command.doList(chunk, true);
+	};
+	
+	command.ul = {};
+	command.ul.description = "Bulleted List <ul>";
+	command.ul.image = "images/ul.png";
+	command.ul.key = "u";
+	command.ul.textOp = function(chunk){
+		command.doList(chunk, false);
+	};
+	
+	command.h1 = {};
+	command.h1.description = "Heading <h1>/<h2>";
+	command.h1.image = "images/h1.png";
+	command.h1.key = "h";
+	command.h1.textOp = command.doHeading;
+	
+	command.hr = {};
+	command.hr.description = "Horizontal Rule <hr>";
+	command.hr.image = "images/hr.png";
+	command.hr.key = "r";
+	command.hr.textOp = function(chunk){	
+		chunk.startTag = "----------\n";
+		chunk.selection = "";
+		chunk.skipLines(2, 1, true);
+	};
+
 };
 
 if(Attacklab.fileLoaded){

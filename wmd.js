@@ -33,7 +33,7 @@ if(!Attacklab.wmd)
 		};
 		Attacklab.loadEnv();
 		
-		var codeFiles = ["showdown.js", "wmd-base.js", "wmd-plus.js"];
+		var codeFiles = ["showdown.js", "wmd-base.js"];
 		
 		// This is a roundabout way of making sure the editor isn't
 		// invoked until all the code files have been read in.  Each
