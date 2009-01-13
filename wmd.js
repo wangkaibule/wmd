@@ -895,6 +895,7 @@ Attacklab.wmdBase = function(){
 		var mainSpan;
 		
 		var div; // used in the _dc function.  I should rename this.
+		
 		// Used to cancel recurring events from setInterval.
 		var resizePollHandle;
 		var creationHandle;
@@ -903,6 +904,7 @@ Attacklab.wmdBase = function(){
 		var undoImage; // The image on the undo button
 		var redoImage; // The image on the redo button
 		var buttonCallbacks = []; // Callbacks for the buttons at the top of the input area
+		
 		// Saves the input state at the time of button click and performs the button function.
 		// The parameter is the function performed when this function is called.
 		var saveStateDoButtonAction = function(callback){
@@ -1012,10 +1014,10 @@ Attacklab.wmdBase = function(){
 		
 		// Creates a separator in the button row at the top of the input area.
 		var makeButtonSeparator = function(){
-		
+			
 			var sepImage = util.createImage("images/separator.png", 20, 20);
 			sepImage.className = "wmd-button-separator";
-			mainSpan.appendChild(sepImage);
+			doc.getElementById("wmd-button-bar").appendChild(sepImage);
 			
 		};
 		
@@ -1052,7 +1054,7 @@ Attacklab.wmdBase = function(){
 					doClick(button);
 					return false;
 				};
-				mainSpan.appendChild(btnImage);
+				doc.getElementById("wmd-button-bar").appendChild(btnImage);
 				return btnImage;
 			}
 			
@@ -1181,7 +1183,6 @@ Attacklab.wmdBase = function(){
 				});
 			}
 			
-			var unused = inputBox.parentNode; // Delete this.  Not used anywhere.
 			mainDiv = doc.createElement("div");
 			mainDiv.style.display = "block";
 			mainDiv.style.zIndex = 100;
@@ -1206,6 +1207,7 @@ Attacklab.wmdBase = function(){
 			mainDiv.appendChild(mainSpan);
 			
 			// The autoindent callback always exists, even though there's no actual button for it.
+			// It's only called when shift-enter is pressed and we're making a list.
 			addButtonCallback(command.autoindent);
 			
 			setButtonCallbacks();
@@ -1222,15 +1224,14 @@ Attacklab.wmdBase = function(){
 					undoImage.title += " - Ctrl+Z";
 					redoImage.title += " - Ctrl+Y";
 				}
-				else 
-					if (/mac/.test(platform)) {
-						undoImage.title += " - Ctrl+Z";
-						redoImage.title += " - Ctrl+Shift+Z";
-					}
-					else {
-						undoImage.title += " - Ctrl+Z";
-						redoImage.title += " - Ctrl+Shift+Z";
-					}
+				else if (/mac/.test(platform)) {
+					undoImage.title += " - Ctrl+Z";
+					redoImage.title += " - Ctrl+Shift+Z";
+				}
+				else {
+					undoImage.title += " - Ctrl+Z";
+					redoImage.title += " - Ctrl+Shift+Z";
+				}
 			}
 			
 			var keyEvent = "keydown";
@@ -1333,7 +1334,7 @@ Attacklab.wmdBase = function(){
 			return true;
 		};
 		
-		// Sets up the WMD button at the upper right of the input area.
+		// Sets up the WMD help button at the upper right of the input area.
 		var setupWmdButton = function(){
 		
 			var div = doc.createElement("div");
@@ -1358,7 +1359,6 @@ Attacklab.wmdBase = function(){
 			style.height = "25px";
 			
 			var normalImage = util.createImage("images/wmd.png");
-			var _fd = util.createImage("images/wmd-on.png"); // Not used.  Typo?
 			anchor.appendChild(normalImage);
 			
 			anchor.onmouseover = function(){
@@ -1963,37 +1963,16 @@ Attacklab.wmdBase = function(){
 	
 
 	// DONE - jslint clean
-	util.findPanes = function(wmdStuff){
+	util.findPanels = function(){
 	
-		// wmdStuff is just a non-special object that keeps our important references in
-		// one place.
-		//
-		// Any div with a class of "wmd-preview" is sent the translated HTML for previewing.
-		// Ditto for "wmd-output" --> HTML output.  The first element is selected, as per
-		// the WMD documentation.
-		wmdStuff.preview = wmdStuff.preview || util.getElementsByClass("wmd-preview", "div")[0];
-		wmdStuff.output = wmdStuff.output || util.getElementsByClass("wmd-output", "textarea")[0];
-		wmdStuff.output = wmdStuff.output || util.getElementsByClass("wmd-output", "div")[0];
-		
-		if (!wmdStuff.input) {
-		
-			var inputAreas = doc.getElementsByTagName("textarea");
+		var wmdPanels = {};
 			
-			for (var i = 0; i < inputAreas.length; i++) {
-			
-				var area = inputAreas[i];
-				
-				// Make sure it's not the output area or selected to ignore.
-				if (area != wmdStuff.output && !/wmd-ignore/.test(area.className.toLowerCase())) {
-				
-					// As per the documentation, the first one is the one we use.
-					wmdStuff.input = area;
-					break;
-				}
-			}
-		}
+		wmdPanels.buttonBar = doc.getElementById("wmd-button-bar");
+		wmdPanels.preview = doc.getElementById("wmd-preview");
+		wmdPanels.output = doc.getElementById("wmd-output");
+		wmdPanels.input = doc.getElementById("wmd-input");
 		
-		return;
+		return wmdPanels;
 	};
 	
 	// DONE - jslint clean
@@ -2014,7 +1993,7 @@ Attacklab.wmdBase = function(){
 		// wmdStuff is just an empty object that we'll fill with references
 		// to the various important parts of the library.  e.g. the 
 		// input and output textareas/divs.
-		var wmdStuff = {};
+		var wmdStuff;
 		var edit, preview;
 		
 		// Fired after the page has fully loaded.
@@ -2024,7 +2003,7 @@ Attacklab.wmdBase = function(){
 				// I think the clone equality test is just a strange way to see
 				// if the panes got set/reset in findPanes().
 				var clone = util.cloneObject(wmdStuff);
-				util.findPanes(wmdStuff);
+				wmdStuff = util.findPanels();
 				
 				if (!util.objectsEqual(clone, wmdStuff) && wmdStuff.input) {
 				
