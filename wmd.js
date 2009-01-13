@@ -83,26 +83,38 @@ Attacklab.wmdBase = function(){
 		}
 	};
 
-	
-	// UNFINISHED
-	// Um, this doesn't look like it really makes a string...
-	// Maybe strings (plural)?
-	util.regexToString = function(regex){
-		var result = {};
-		var str = regex.toString();
-		result.expression = str.replace(/\/([gim]*)$/, "");
-		result.flags = re.$1;
-		result.expression = result.expression.replace(/(^\/|\/$)/g, "");
-		return result;
-	};
-	
-	// UNFINISHED
-	// Um, this doesn't look like it really takes a string...
-	// Maybe strings (plural)?
-	util.stringToRegex = function(str){
-		return new re(str.expression, str.flags);
-	};
-	
+	// Extends a regular expression.  Returns a new RegExp
+	// using pre + regex + post as the expression.
+	// Used in a few functions where we have a base
+	// expression and we want to pre- or append some
+	// conditions to it (e.g. adding "$" to the end).
+	// The flags are unchanged.
+	//
+	// regex is a RegExp, pre and post are strings.
+	util.extendRegExp = function(regex, pre, post){
+		
+		if (pre === null || pre === undefined)
+		{
+			pre = "";
+		}
+		if(post === null || post === undefined)
+		{
+			post = "";
+		}
+		
+		var pattern = regex.toString();
+		var flags;
+		
+		// Replace the flags with empty space and store them.
+		pattern = pattern.replace(/\/([gim]*)$/, "");
+		flags = re.$1;
+		
+		// Remove the slash delimiters on the regular expression.
+		pattern = pattern.replace(/(^\/|\/$)/g, "");
+		pattern = pre + pattern + post;
+		
+		return new re(pattern, flags);
+	}
 	
 	// DONE - jslint clean
 	// Check to see if a node is not a parent and not hidden.
@@ -1596,44 +1608,45 @@ Attacklab.wmdBase = function(){
 	// endRegex: a regular expresssion to find the end tag
 	wmd.Chunks.prototype.findTags = function(startRegex, endRegex){
 	
-		var preRegex;
-		var postRegex;
-		var _11e;
-		var _11f;
 		var chunkObj = this;
+		var regex;
 		
 		if (startRegex) {
 			
-			_11f = util.regexToString(startRegex);
-			_11e = new re(_11f.expression + "$", _11f.flags);
+			regex = util.extendRegExp(startRegex, "", "$");
 			
-			this.before = this.before.replace(_11e, 
-				function(_121){
-					chunkObj.startTag = chunkObj.startTag + _121;
+			this.before = this.before.replace(regex, 
+				function(match){
+					chunkObj.startTag = chunkObj.startTag + match;
 					return "";
 				});
 			
-			_11e = new re("^" + _11f.expression, _11f.flags);
+			regex = util.extendRegExp(startRegex, "^", "");
 			
-			this.selection = this.selection.replace(_11e, 
-				function(_122){
-					chunkObj.startTag = chunkObj.startTag + _122;
+			this.selection = this.selection.replace(regex, 
+				function(match){
+					chunkObj.startTag = chunkObj.startTag + match;
 					return "";
 				});
 		}
 		
 		if (endRegex) {
-			_11f = util.regexToString(endRegex);
-			_11e = new re(_11f.expression + "$", _11f.flags);
-			this.selection = this.selection.replace(_11e, function(_123){
-				chunkObj.endTag = _123 + chunkObj.endTag;
-				return "";
-			});
-			_11e = new re("^" + _11f.expression, _11f.flags);
-			this.after = this.after.replace(_11e, function(_124){
-				chunkObj.endTag = _124 + chunkObj.endTag;
-				return "";
-			});
+			
+			regex = util.extendRegExp(endRegex, "", "$");
+			
+			this.selection = this.selection.replace(regex,
+				function(match){
+					chunkObj.endTag = match + chunkObj.endTag;
+					return "";
+				});
+
+			regex = util.extendRegExp(endRegex, "^", "");
+			
+			this.after = this.after.replace(regex,
+				function(match){
+					chunkObj.endTag = match + chunkObj.endTag;
+					return "";
+				});
 		}
 	};
 	
@@ -2549,7 +2562,7 @@ Attacklab.wmdBase = function(){
 		
 		var nLinesUp = 1;
 		
-		chunk.before = chunk.before.replace( /*regex*/ previousItemsRegex,
+		chunk.before = chunk.before.replace(previousItemsRegex,
 			function(wholeMatch){
 				if(/^\s*([*+-])/.test(wholeMatch)){
 					bulletSymbol = re.$1;
