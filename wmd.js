@@ -1014,8 +1014,7 @@ Attacklab.wmdBase = function(){
 		var makeButtonSeparator = function(){
 		
 			var sepImage = util.createImage("images/separator.png", 20, 20);
-			sepImage.style.padding = "4px";
-			sepImage.style.paddingTop = "0px";
+			sepImage.className = "wmd-button-separator";
 			mainSpan.appendChild(sepImage);
 			
 		};
@@ -1045,16 +1044,16 @@ Attacklab.wmdBase = function(){
 				style.marginBottom = "5px";
 				
 				btnImage.onmouseout();
-				var img = btnImage; // Why is this being aliased?
-				img.onclick = function(){
-					if (img.onmouseout) {
-						img.onmouseout();
+				
+				btnImage.onclick = function(){
+					if (btnImage.onmouseout) {
+						btnImage.onmouseout();
 					}
 					doClick(button);
 					return false;
 				};
-				mainSpan.appendChild(img);
-				return img;
+				mainSpan.appendChild(btnImage);
+				return btnImage;
 			}
 			
 			return;
@@ -1208,10 +1207,6 @@ Attacklab.wmdBase = function(){
 			
 			// The autoindent callback always exists, even though there's no actual button for it.
 			addButtonCallback(command.autoindent);
-			
-			// Neither of these variables is uesd anywhere and the createImage() function has no side effects.
-			var bgImage = util.createImage("images/bg.png");
-			var bgFillImage = util.createImage("images/bg-fill.png");
 			
 			setButtonCallbacks();
 			makeButtonRow();

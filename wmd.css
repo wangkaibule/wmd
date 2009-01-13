@@ -6,6 +6,34 @@
 
 .wmd-output { width:50%; background-color:Pink; }
 
+.wmd-button
+{
+	background-color:transparent;
+	border:1px solid transparent;
+	display:inline;
+	margin:0px;
+	margin-top:7px;
+	margin-bottom:5px;
+	padding:1px;
+	opacity:1.0;
+}
+
+.wmd-button:hover
+{
+	background-color:LightBlue;
+	border-width:1px solid Blue;
+	opacity:0.4;
+}
+
+.wmd-button-separator
+{
+	height:20px;
+	width:20px;
+	padding:4px;
+	padding-top:0px;
+}
+
+
 .wmd-prompt-background
 {
 	position:absolute;
@@ -23,7 +51,7 @@
 
 .wmd-prompt-dialog
 {
-	border:3px solid #333;
+	border-width:3px solid #333;
 	border-left:3px solid white;
 	border-top:3px solid white;
 	background-color:#ccc;
