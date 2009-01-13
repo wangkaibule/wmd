@@ -20,7 +20,8 @@ Attacklab.wmdBase = function(){
 	wmd.Util.oldIE = (nav.userAgent.indexOf("MSIE 6.") != -1 || nav.userAgent.indexOf("MSIE 5.") != -1);
 	wmd.Util.newIE = !wmd.Util.oldIE && (nav.userAgent.indexOf("MSIE") != -1);
 	
-	// Returns true if the element is visible, false if it's hidden.
+	// Returns true if the DOM element is visible, false if it's hidden.
+	// Checks if display is anything other than none.
 	util.isVisible = function (elem) {
 	
 	    if (window.getComputedStyle) {
@@ -33,8 +34,9 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	// DONE - cleaned up - jslint clean
-	// Like getElementsByTagName() but searches for a class.
+	// Like getElementsByTagName() but searches for a CSS class
+	// instead of a tag name.
+	// If searchTag is not specified, all tags will be searched.
 	util.getElementsByClass = function(searchClass, searchTag){
 	
 		var results = [];
@@ -55,7 +57,8 @@ Attacklab.wmdBase = function(){
 		return results;
 	};
 	
-	// DONE - jslint clean
+	// Adds a listener callback to a DOM element which is fired on a specified
+	// event.
 	util.addEvent = function(elem, event, listener){
 		if (elem.attachEvent) {
 			// IE only.  The "on" is mandatory.
@@ -67,7 +70,8 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	// DONE - jslint clean
+	// Removes a listener callback from a DOM element which is fired on a specified
+	// event.
 	util.removeEvent = function(elem, event, listener){
 		if (elem.detachEvent) {
 			// IE only.  The "on" is mandatory.
@@ -78,6 +82,7 @@ Attacklab.wmdBase = function(){
 			elem.removeEventListener(event, listener, false);
 		}
 	};
+
 	
 	// UNFINISHED
 	// Um, this doesn't look like it really makes a string...
@@ -97,6 +102,7 @@ Attacklab.wmdBase = function(){
 	util.stringToRegex = function(str){
 		return new re(str.expression, str.flags);
 	};
+	
 	
 	// DONE - jslint clean
 	// Check to see if a node is not a parent and not hidden.
@@ -171,6 +177,8 @@ Attacklab.wmdBase = function(){
 		return elem;
 	};
 	
+	// TODO: Clean up dialog creation code, perhaps in a real constructor.
+	//
 	// This is the thing that pops up and asks for the URL when you click the hyperlink button.
 	// text: The html for the input box.
 	// defaultInputText: The default value that appears in the input box.
@@ -220,13 +228,14 @@ Attacklab.wmdBase = function(){
 		
 			background = doc.createElement("div");
 			background.className = "wmd-prompt-background";
-			doc.body.appendChild(background);
 			
 			// Some versions of Konqueror don't support transparent colors
 			// so we make the whole window transparent, frustrating the users.
 			if (/konqueror/.test(nav.userAgent.toLowerCase())){
 				background.style.backgroundColor = "transparent";
 			}
+			
+			doc.body.appendChild(background);
 		};
 		
 		// Create the text input box form/window.
@@ -271,7 +280,7 @@ Attacklab.wmdBase = function(){
 			};
 			cancelButton.value = "Cancel";
 
-			
+			// The order of these buttons is different on macs.
 			if (/mac/.test(nav.platform.toLowerCase())) {
 				form.appendChild(cancelButton);
 				form.appendChild(okButton);
@@ -283,7 +292,7 @@ Attacklab.wmdBase = function(){
 			
 			
 			if (wmd.Util.oldIE) {
-				// Move to CSS in conditional comment.
+				// Might want to move to CSS in conditional comment.
 				dialog.style.position = "absolute";
 				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
 			}
@@ -1587,25 +1596,30 @@ Attacklab.wmdBase = function(){
 	// endRegex: a regular expresssion to find the end tag
 	wmd.Chunks.prototype.findTags = function(startRegex, endRegex){
 	
+		var preRegex;
+		var postRegex;
 		var _11e;
 		var _11f;
 		var chunkObj = this;
 		
 		if (startRegex) {
+			
 			_11f = util.regexToString(startRegex);
 			_11e = new re(_11f.expression + "$", _11f.flags);
 			
-			this.before = this.before.replace(_11e, function(_121){
-				chunkObj.startTag = chunkObj.startTag + _121;
-				return "";
-			});
+			this.before = this.before.replace(_11e, 
+				function(_121){
+					chunkObj.startTag = chunkObj.startTag + _121;
+					return "";
+				});
 			
 			_11e = new re("^" + _11f.expression, _11f.flags);
 			
-			this.selection = this.selection.replace(_11e, function(_122){
-				chunkObj.startTag = chunkObj.startTag + _122;
-				return "";
-			});
+			this.selection = this.selection.replace(_11e, 
+				function(_122){
+					chunkObj.startTag = chunkObj.startTag + _122;
+					return "";
+				});
 		}
 		
 		if (endRegex) {
@@ -2461,8 +2475,12 @@ Attacklab.wmdBase = function(){
 	
 	// DONE
 	command.doList = function(chunk, isNumberedList){
+			
+		// These are identical except at the very beginning and end.
+		// Should probably use the regex extension function to make this clearer.
+		var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
+		var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
 		
-		var listItemRegex = /(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
 		var bulletSymbol = "";
 		var num = 1;	// The number in a numbered list.
 		
@@ -2503,12 +2521,7 @@ Attacklab.wmdBase = function(){
 		// Used when we are editing inside a list.
 		var fixLaterItems = function(){
 			
-			// regexThing is that weird, non-string thing that regexToString returns.
-			regexThing = util.regexToString(listItemRegex);
-			regexThing.expression = "^\n*" + regexThing.expression;
-			var regex = util.stringToRegex(regexThing);
-			
-			chunk.after = chunk.after.replace(regex, fixPrefixes);
+			chunk.after = chunk.after.replace(nextItemsRegex, fixPrefixes);
 		};
 		
 		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
@@ -2536,11 +2549,7 @@ Attacklab.wmdBase = function(){
 		
 		var nLinesUp = 1;
 		
-		var regexThing = util.regexToString(listItemRegex);
-		regexThing.expression = "(\\n|^)" + regexThing.expression + "$";
-		var regex = util.stringToRegex(regexThing);
-		
-		chunk.before = chunk.before.replace(regex,
+		chunk.before = chunk.before.replace( /*regex*/ previousItemsRegex,
 			function(wholeMatch){
 				if(/^\s*([*+-])/.test(wholeMatch)){
 					bulletSymbol = re.$1;
@@ -2556,11 +2565,8 @@ Attacklab.wmdBase = function(){
 		var prefix = getItemPrefix();
 		
 		var nLinesDown = 1;
-		regexThing = util.regexToString(listItemRegex);
-		regexThing.expression = "^\n*" + regexThing.expression;
-		regex = util.stringToRegex(regexThing);
 		
-		chunk.after = chunk.after.replace(regex,
+		chunk.after = chunk.after.replace(nextItemsRegex,
 			function(wholeMatch){
 				nLinesDown = /[^\n]\n\n[^\n]/.test(wholeMatch) ? 1 : 0;
 				return fixPrefixes(wholeMatch);
