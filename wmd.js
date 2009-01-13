@@ -1255,15 +1255,13 @@ Attacklab.wmdBase = function(){
 				}
 			});
 			
-			// Auto-indent on carriage return (code 13)
+			// Auto-indent on shift-enter
 			util.addEvent(inputBox, "keyup", function(key){
 				if (key.shiftKey && !key.ctrlKey && !key.metaKey) {
 					var keyCode = key.charCode || key.keyCode;
-					switch (keyCode) {
-						// Character 13 is Enter
-						case 13:
-							doClick(command.autoindent); // Yay for the switch/case with one case...
-							break;
+					// Character 13 is Enter
+					if (keyCode === 13) {
+						doClick(command.autoindent);
 					}
 				}
 			});
@@ -1941,44 +1939,7 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	// Note that these commands either have a textOp callback which is executed on button
-	// click OR they have an execute function which performs non-text work.
-	
-	command.bold = {};
-	command.bold.description = "Strong <strong>";
-	command.bold.image = "images/bold.png";
-	command.bold.key = "b";
-	command.bold.textOp = command.doBold;
-	
-	command.italic = {};
-	command.italic.description = "Emphasis <em>";
-	command.italic.image = "images/italic.png";
-	command.italic.key = "i";
-	command.italic.textOp = command.doItalic;
-	
-	command.link = {};
-	command.link.description = "Hyperlink <a>";
-	command.link.image = "images/link.png";
-	command.link.key = "l";
-	command.link.textOp = function(chunk, callback){
-		return command.doLinkOrImage(chunk, false, callback);
-	};
-	
-	command.undo = {};
-	command.undo.description = "Undo";
-	command.undo.image = "images/undo.png";
-	command.undo.execute = function(manager){
-		manager.undo();
-	};
-	
-	command.redo = {};
-	command.redo.description = "Redo";
-	command.redo.image = "images/redo.png";
-	command.redo.execute = function(manager){
-		manager.redo();
-	};
-	
-	
+
 	// DONE - jslint clean
 	util.findPanes = function(wmdStuff){
 	
@@ -2289,12 +2250,14 @@ Attacklab.wmdBase = function(){
 		init();
 	};
 
-	// DONE
+	// When making a list, hitting shift-enter will put your cursor on the next line
+	// at the current indent level.
 	command.doAutoindent = function(chunk){
 		
 		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
 		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
 		chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+		
 		if(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]+.*\n$/.test(chunk.before)){
 			if(command.doList){
 				command.doList(chunk);
@@ -2461,43 +2424,20 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	command.autoindent={};
-	command.autoindent.textOp = command.doAutoindent;
-	command.blockquote = {};
-	command.blockquote.description = "Blockquote <blockquote>";
-	command.blockquote.image = "images/blockquote.png";
-	command.blockquote.key = ".";
-	//command.blockquote.keyCode = 190;
-	command.blockquote.textOp = function(chunk){
-		return command.doBlockquote(chunk);
-	};
-	
-	command.code = {};
-	command.code.description = "Code Sample <pre><code>";
-	command.code.image = "images/code.png";
-	command.code.key = "k";
-	command.code.textOp = command.doCode;
-	
-	command.img = {};
-	command.img.description = "Image <img>";
-	command.img.image = "images/img.png";
-	command.img.key = "g";
-	command.img.textOp = function(chunk, callback){
-		return command.doLinkOrImage(chunk, true, callback);
-	};
-	
 	// List processing callback.
 	//
 	// isNumberedList will be undefined if we're reprocessing the list and
 	// this function gets called internally, outside of a button click.
 	command.doList = function(chunk, isNumberedList){
-			
+				
 		// These are identical except at the very beginning and end.
 		// Should probably use the regex extension function to make this clearer.
 		var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
 		var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
 		
 		// The default bullet is a dash but others are possible.
+		// This has nothing to do with the particular HTML bullet,
+		// it's just a markdown bullet.
 		var bullet = "-";
 		
 		// The number in a numbered list.
@@ -2648,6 +2588,68 @@ Attacklab.wmdBase = function(){
 				chunk.endTag += headerChar;
 			}
 		}
+	};	
+	
+	// Note that these commands either have a textOp callback which is executed on button
+	// click OR they have an execute function which performs non-text work.
+	
+	command.bold = {};
+	command.bold.description = "Strong <strong>";
+	command.bold.image = "images/bold.png";
+	command.bold.key = "b";
+	command.bold.textOp = command.doBold;
+	
+	command.italic = {};
+	command.italic.description = "Emphasis <em>";
+	command.italic.image = "images/italic.png";
+	command.italic.key = "i";
+	command.italic.textOp = command.doItalic;
+	
+	command.link = {};
+	command.link.description = "Hyperlink <a>";
+	command.link.image = "images/link.png";
+	command.link.key = "l";
+	command.link.textOp = function(chunk, callback){
+		return command.doLinkOrImage(chunk, false, callback);
+	};
+	
+	command.undo = {};
+	command.undo.description = "Undo";
+	command.undo.image = "images/undo.png";
+	command.undo.execute = function(manager){
+		manager.undo();
+	};
+	
+	command.redo = {};
+	command.redo.description = "Redo";
+	command.redo.image = "images/redo.png";
+	command.redo.execute = function(manager){
+		manager.redo();
+	};	
+	
+	command.autoindent={};
+	command.autoindent.textOp = command.doAutoindent;
+	
+	command.blockquote = {};
+	command.blockquote.description = "Blockquote <blockquote>";
+	command.blockquote.image = "images/blockquote.png";
+	command.blockquote.key = ".";
+	command.blockquote.textOp = function(chunk){
+		return command.doBlockquote(chunk);
+	};
+	
+	command.code = {};
+	command.code.description = "Code Sample <pre><code>";
+	command.code.image = "images/code.png";
+	command.code.key = "k";
+	command.code.textOp = command.doCode;
+	
+	command.img = {};
+	command.img.description = "Image <img>";
+	command.img.image = "images/img.png";
+	command.img.key = "g";
+	command.img.textOp = function(chunk, callback){
+		return command.doLinkOrImage(chunk, true, callback);
 	};
 	
 	command.ol = {};
@@ -2681,7 +2683,6 @@ Attacklab.wmdBase = function(){
 		chunk.selection = "";
 		chunk.skipLines(2, 1, true);
 	};
-
 };
 
 
