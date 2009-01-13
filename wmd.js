@@ -20,6 +20,28 @@ Attacklab.wmdBase = function(){
 	wmd.Util.oldIE = (nav.userAgent.indexOf("MSIE 6.") != -1 || nav.userAgent.indexOf("MSIE 5.") != -1);
 	wmd.Util.newIE = !wmd.Util.oldIE && (nav.userAgent.indexOf("MSIE") != -1);
 	
+	// -------------------------------------------------------------------
+	//  CHANGES
+	//
+	// As much as possible, I've tried to localize the things you are
+	// likely to change to this area.
+	// -------------------------------------------------------------------
+	
+	// The text that appears on the upper part of the dialog box when
+	// entering links.
+	var imageDialogText = "<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>";
+	var linkDialogText = "<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>";
+	
+	// The default text that appears in the dialog input box when entering
+	// links.
+	var imageDefaultText = "http://";
+	var linkDefaultText = "http://";
+	
+	
+	
+
+	// -------------------------------------------------------------------
+	
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
 	util.isVisible = function (elem) {
@@ -33,6 +55,7 @@ Attacklab.wmdBase = function(){
 			return elem.currentStyle["display"] !== "none";
 		}
 	};
+	
 	
 	// Like getElementsByTagName() but searches for a CSS class
 	// instead of a tag name.
@@ -57,6 +80,7 @@ Attacklab.wmdBase = function(){
 		return results;
 	};
 	
+	
 	// Adds a listener callback to a DOM element which is fired on a specified
 	// event.
 	util.addEvent = function(elem, event, listener){
@@ -69,6 +93,7 @@ Attacklab.wmdBase = function(){
 			elem.addEventListener(event, listener, false);
 		}
 	};
+
 	
 	// Removes a listener callback from a DOM element which is fired on a specified
 	// event.
@@ -82,6 +107,7 @@ Attacklab.wmdBase = function(){
 			elem.removeEventListener(event, listener, false);
 		}
 	};
+
 
 	// Extends a regular expression.  Returns a new RegExp
 	// using pre + regex + post as the expression.
@@ -116,8 +142,9 @@ Attacklab.wmdBase = function(){
 		return new re(pattern, flags);
 	}
 	
-	// DONE - jslint clean
+	
 	// Check to see if a node is not a parent and not hidden.
+	// OK for what???
 	util.elementOk = function(elem){
 		if (!elem || !elem.parentNode) {
 			return false;
@@ -125,6 +152,7 @@ Attacklab.wmdBase = function(){
 		
 		return util.isVisible(elem);
 	};
+	
 	
 	// DONE - cleaned up - jslint clean
 	// Sets the image for a "button" on the WMD editor.
@@ -1813,17 +1841,16 @@ Attacklab.wmdBase = function(){
 	// DONE
 	command.stripLinkDefs = function(text, defsToAdd){
 	
-		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm, function(totalMatch, id, link, newlines, title){
-		
-			defsToAdd[id] = totalMatch.replace(/\s*$/, "");
-			
-			if (newlines) {
-				// Strip the title and return that separately.
-				defsToAdd[id] = totalMatch.replace(/["(](.+?)[")]$/, "");
-				return newlines + title;
-			}
-			return "";
-		});
+		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm, 
+			function(totalMatch, id, link, newlines, title){	
+				defsToAdd[id] = totalMatch.replace(/\s*$/, "");
+				if (newlines) {
+					// Strip the title and return that separately.
+					defsToAdd[id] = totalMatch.replace(/["(](.+?)[")]$/, "");
+					return newlines + title;
+				}
+				return "";
+			});
 		
 		return text;
 	};
@@ -1930,10 +1957,10 @@ Attacklab.wmdBase = function(){
 			};
 			
 			if (isImage) {
-				promptForm = util.prompt("<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>", "http://", callback);
+				promptForm = util.prompt(imageDialogText, imageDefaultText, callback);
 			}
 			else {
-				promptForm = util.prompt("<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>", "http://", callback);
+				promptForm = util.prompt(linkDialogText, linkDefaultText, callback);
 			}
 			return true;
 		}
