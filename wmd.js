@@ -2486,7 +2486,10 @@ Attacklab.wmdBase = function(){
 		return command.doLinkOrImage(chunk, true, callback);
 	};
 	
-	// DONE
+	// List processing callback.
+	//
+	// isNumberedList will be undefined if we're reprocessing the list and
+	// this function gets called internally, outside of a button click.
 	command.doList = function(chunk, isNumberedList){
 			
 		// These are identical except at the very beginning and end.
@@ -2494,8 +2497,11 @@ Attacklab.wmdBase = function(){
 		var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
 		var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
 		
-		var bulletSymbol = "";
-		var num = 1;	// The number in a numbered list.
+		// The default bullet is a dash but others are possible.
+		var bullet = "-";
+		
+		// The number in a numbered list.
+		var num = 1;
 		
 		// Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
 		var getItemPrefix = function(){
@@ -2505,36 +2511,26 @@ Attacklab.wmdBase = function(){
 				num++;
 			}
 			else{
-				var bullet = bulletSymbol || "-";
 				prefix = " " + bullet + " ";
 			}
 			return prefix;
 		};
 		
-		// Does two things, which is kind of dumb.
-		// 1. Decides if we have a numbered list or not if the flag isn't set.
-		// 2. Makes the list item prefixes uniform.
-		var fixPrefixes = function(text){
-			
-			// Why on EARTH would this variable not be set?
-			// Javascript is, without a doubt, the SLOPPIEST language I've encountered in a LONG time.
+		// Fixes the prefixes of the other list items.
+		var getPrefixedItem = function(itemText){
+		
+			// The numbering flag is unset when called internally.
 			if(isNumberedList === undefined){
-				isNumberedList = /^\s*\d/.test(text);
+				isNumberedList = /^\s*\d/.test(itemText);
 			}
 			
-			text = text.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
-				function(totalSelection){
+			// Renumber/bullet the list element.
+			itemText = itemText.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
+				function( _ ){
 					return getItemPrefix();
 				});
 				
-			return text;
-		};
-		
-		// Finds and fixes up the list items after this item.
-		// Used when we are editing inside a list.
-		var fixLaterItems = function(){
-			
-			chunk.after = chunk.after.replace(nextItemsRegex, fixPrefixes);
+			return itemText;
 		};
 		
 		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
@@ -2553,7 +2549,8 @@ Attacklab.wmdBase = function(){
 			chunk.skipLines();
 			
 			if(hasDigits){
-				fixLaterItems();
+				// Have to renumber the bullet points if this is a numbered list.
+				chunk.after = chunk.after.replace(nextItemsRegex, getPrefixedItem);
 			}
 			if(isNumberedList == hasDigits){
 				return;
@@ -2563,12 +2560,12 @@ Attacklab.wmdBase = function(){
 		var nLinesUp = 1;
 		
 		chunk.before = chunk.before.replace(previousItemsRegex,
-			function(wholeMatch){
-				if(/^\s*([*+-])/.test(wholeMatch)){
-					bulletSymbol = re.$1;
+			function(itemText){
+				if(/^\s*([*+-])/.test(itemText)){
+					bullet = re.$1;
 				}
-				nLinesUp = /[^\n]\n\n[^\n]/.test(wholeMatch) ? 1 : 0;
-				return fixPrefixes(wholeMatch);
+				nLinesUp = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+				return getPrefixedItem(itemText);
 			});
 			
 		if(!chunk.selection){
@@ -2580,9 +2577,9 @@ Attacklab.wmdBase = function(){
 		var nLinesDown = 1;
 		
 		chunk.after = chunk.after.replace(nextItemsRegex,
-			function(wholeMatch){
-				nLinesDown = /[^\n]\n\n[^\n]/.test(wholeMatch) ? 1 : 0;
-				return fixPrefixes(wholeMatch);
+			function(itemText){
+				nLinesDown = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+				return getPrefixedItem(itemText);
 			});
 			
 		chunk.trimWhitespace(true);
