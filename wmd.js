@@ -1782,53 +1782,26 @@ Attacklab.wmdBase = function(){
 			util.makeAPI();
 			return;
 		}
-		
-		// wmdPanels is just an empty object that we'll fill with references
-		// to the various important parts of the library.  e.g. the 
-		// input and output textareas/divs.
-		var wmdPanels;
-		var edit, preview;
+
+		var wmdPanels;	// A collection of all the important WMD regions on the page.
+		var edit;		// The editor (buttons + input + outputs) - the main object.
+		var previewMgr;	// The preview manager.
 		
 		// Fired after the page has fully loaded.
 		var loadListener = function(){
 		
-			try {
-				
-				// The try-catch and weird clone behavior is to catch IE issues.
-				//
-				// If you remove the try-catch, IE7 will throw some exceptions and
-				// ask if you want to debug.
-				//
-				// If you remove the clone / equal code, IE7 will fill the button bar
-				// with an infinite number of buttons.
-				var clone = util.cloneObject(wmdPanels);
-				wmdPanels = util.findPanels();
-				
-				if (!util.objectsEqual(clone, wmdPanels) && wmdPanels.input) {
-				
-					if (!edit) {
-					
-						var previewRefreshCallback;
+			wmdPanels = util.findPanels();
+			
+			previewMgr = new wmd.previewManager(wmdPanels);
+			var previewRefreshCallback = previewMgr.refresh;
 						
-						if (wmd.previewManager !== undefined) {
-							preview = new wmd.previewManager(wmdPanels);
-							previewRefreshCallback = preview.refresh;
-						}
-						
-						edit = new wmd.editor(wmdPanels.input, previewRefreshCallback);
-					}
-					else if (preview) {
-						preview.refresh(true);
-					}
-				}
-			} 
-				catch (e) {
-			}
+			edit = new wmd.editor(wmdPanels.input, previewRefreshCallback);
+			
+			previewMgr.refresh(true);
 			
 		};
 		
 		util.addEvent(top, "load", loadListener);
-		var ignored = top.setInterval(loadListener, 100);
 	};
 	
 	// DONE
