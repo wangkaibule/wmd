@@ -2,29 +2,36 @@ var Attacklab = Attacklab || {};
 
 Attacklab.wmdBase = function(){
 
-	var self = top;
-	var wmd = self["Attacklab"];
-	var doc = self["document"];
-	var re = self["RegExp"];
-	var nav = self["navigator"];
+	// A few handy aliases for readability.
+	var wmd  = top.Attacklab;
+	var doc  = top.document;
+	var re   = top.RegExp;
+	var nav  = top.navigator;
 	
+	// Some namespaces.
 	wmd.Util = {};
 	wmd.Position = {};
 	wmd.Command = {};
+	wmd.Global = {};
 	
 	var util = wmd.Util;
 	var position = wmd.Position;
 	var command = wmd.Command;
+	var global = wmd.Global;
 	
-	wmd.Util.IE = (nav.userAgent.indexOf("MSIE") != -1);
-	wmd.Util.oldIE = (nav.userAgent.indexOf("MSIE 6.") != -1 || nav.userAgent.indexOf("MSIE 5.") != -1);
-	wmd.Util.newIE = !wmd.Util.oldIE && (nav.userAgent.indexOf("MSIE") != -1);
+	// Used to work around some browser bugs where we can't use feature testing.
+	global.isIE 		= /msie/.test(nav.userAgent.toLowerCase());
+	global.isIE_5or6 	= /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase());
+	global.isIE_7plus 	= global.isIE && !global.isIE_5or6;
+	global.isOpera 		= /opera/.test(nav.userAgent.toLowerCase());
+	global.isKonqueror 	= /konqueror/.test(nav.userAgent.toLowerCase());
+	
 	
 	// -------------------------------------------------------------------
-	//  CHANGES
+	//  YOUR CHANGES GO HERE
 	//
-	// As much as possible, I've tried to localize the things you are
-	// likely to change to this area.
+	// I've tried to localize the things you are likely to change to 
+	// this area.
 	// -------------------------------------------------------------------
 	
 	// The text that appears on the upper part of the dialog box when
@@ -40,10 +47,10 @@ Attacklab.wmdBase = function(){
 	// The location of your button images relative to the base directory.
 	var imageDirectory = "images/";
 	
-	
-	
-
 	// -------------------------------------------------------------------
+	//  END OF YOUR CHANGES
+	// -------------------------------------------------------------------
+	
 	
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
@@ -129,7 +136,7 @@ Attacklab.wmdBase = function(){
 		
 		var imgPath = imageDirectory + img;
 		
-		if (nav.userAgent.indexOf("MSIE") != -1) {
+		if (global.isIE) {
 			// Internet Explorer
 			// Fixes alpha transparency issues with IE.
 			elem.firstChild.style.filter 
@@ -153,7 +160,7 @@ Attacklab.wmdBase = function(){
 		var elem;
 		
 		
-		if (nav.userAgent.indexOf("MSIE") !== -1) {
+		if (global.isIE) {
 		
 			// IE-specific
 			elem = doc.createElement("span");
@@ -244,7 +251,7 @@ Attacklab.wmdBase = function(){
 			
 			// Some versions of Konqueror don't support transparent colors
 			// so we make the whole window transparent, frustrating the users.
-			if (/konqueror/.test(nav.userAgent.toLowerCase())){
+			if (global.isKonqueror){
 				background.style.backgroundColor = "transparent";
 			}
 			
@@ -304,7 +311,7 @@ Attacklab.wmdBase = function(){
 			}
 			
 			
-			if (wmd.Util.oldIE) {
+			if (global.isIE_5or6) {
 				// Might want to move to CSS in conditional comment.
 				dialog.style.position = "absolute";
 				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
@@ -322,7 +329,7 @@ Attacklab.wmdBase = function(){
 		// Why isn't this stuff all in one place?
 		createBackground();
 		
-		self.setTimeout(function(){
+		top.setTimeout(function(){
 		
 			createDialog();
 			
@@ -377,9 +384,9 @@ Attacklab.wmdBase = function(){
 		var innerWidth, innerHeight;
 		
 		// It's not very clear which blocks work with which browsers.
-		if (self.innerHeight && self.scrollMaxY) {
+		if (top.innerHeight && top.scrollMaxY) {
 			scrollWidth = doc.body.scrollWidth;
-			scrollHeight = self.innerHeight + self.scrollMaxY;
+			scrollHeight = top.innerHeight + top.scrollMaxY;
 		}
 		else 
 			if (doc.body.scrollHeight > doc.body.offsetHeight) {
@@ -391,10 +398,10 @@ Attacklab.wmdBase = function(){
 				scrollHeight = doc.body.offsetHeight;
 			}
 		
-		if (self.innerHeight) {
+		if (top.innerHeight) {
 			// Non-IE browser
-			innerWidth = self.innerWidth;
-			innerHeight = self.innerHeight;
+			innerWidth = top.innerWidth;
+			innerHeight = top.innerHeight;
 		}
 		else 
 			if (doc.documentElement && doc.documentElement.clientHeight) {
@@ -511,8 +518,8 @@ Attacklab.wmdBase = function(){
 	
 	// DONE - copied from cky
 	position.getWindowHeight = function(){
-		if (self.innerHeight) {
-			return self.innerHeight;
+		if (top.innerHeight) {
+			return top.innerHeight;
 		}
 		else 
 			if (doc.documentElement && doc.documentElement.clientHeight) {
@@ -581,11 +588,11 @@ Attacklab.wmdBase = function(){
 			if (interval === undefined) {
 				interval = 500;
 			}
-			killHandle = self.setInterval(doTickCallback, interval);
+			killHandle = top.setInterval(doTickCallback, interval);
 		};
 		
 		this.destroy = function(){
-			self.clearInterval(killHandle);
+			top.clearInterval(killHandle);
 		};
 		
 		assignInterval();
@@ -615,8 +622,8 @@ Attacklab.wmdBase = function(){
 				}
 			}
 			
-			if (!wmd.Util.IE || mode != "moving") {
-				timer = self.setTimeout(refreshState, 1);
+			if (!global.isIE || mode != "moving") {
+				timer = top.setTimeout(refreshState, 1);
 			}
 			else {
 				inputStateObj = null;
@@ -633,7 +640,7 @@ Attacklab.wmdBase = function(){
 		this.setCommandMode = function(){
 			mode = "command";
 			saveState();
-			timer = self.setTimeout(refreshState, 0);
+			timer = top.setTimeout(refreshState, 0);
 		};
 		
 		this.canUndo = function(){
@@ -748,8 +755,8 @@ Attacklab.wmdBase = function(){
 				if (event.preventDefault) {
 					event.preventDefault();
 				}
-				if (self.event) {
-					self.event.returnValue = false;
+				if (top.event) {
+					top.event.returnValue = false;
 				}
 				return;
 			}
@@ -806,7 +813,7 @@ Attacklab.wmdBase = function(){
 			});
 			
 			var handlePaste = function(){
-				if (wmd.Util.IE || (inputStateObj && inputStateObj.text != elem.value)) {
+				if (global.isIE || (inputStateObj && inputStateObj.text != elem.value)) {
 					if (timer == undefined) {
 						mode = "paste";
 						saveState();
@@ -934,10 +941,10 @@ Attacklab.wmdBase = function(){
 			if (isEnabled) {
 				style.opacity = "1.0";
 				style.KHTMLOpacity = "1.0";
-				if (wmd.Util.newIE) {
+				if (global.isIE_7plus) {
 					style.filter = "";
 				}
-				if (wmd.Util.oldIE) {
+				if (global.isIE_5or6) {
 					style.filter = "chroma(color=fuchsia)";
 				}
 				style.cursor = "pointer";
@@ -952,7 +959,7 @@ Attacklab.wmdBase = function(){
 				elem.onmouseout = function(){
 					style.backgroundColor = "";
 					style.border = "1px solid transparent";
-					if (wmd.Util.oldIE) {
+					if (global.isIE_5or6) {
 						style.borderColor = "fuchsia";
 						style.filter = "chroma(color=fuchsia)" + style.filter;
 					}
@@ -961,10 +968,10 @@ Attacklab.wmdBase = function(){
 			else {
 				style.opacity = "0.4";
 				style.KHTMLOpacity = "0.4";
-				if (wmd.Util.oldIE) {
+				if (global.isIE_5or6) {
 					style.filter = "chroma(color=fuchsia) alpha(opacity=40)";
 				}
-				if (wmd.Util.newIE) {
+				if (global.isIE_7plus) {
 					style.filter = "alpha(opacity=40)";
 				}
 				style.cursor = "";
@@ -1207,7 +1214,7 @@ Attacklab.wmdBase = function(){
 			}
 			
 			var keyEvent = "keydown";
-			if (nav.userAgent.indexOf("Opera") != -1) {
+			if (global.isOpera) {
 				keyEvent = "keypress";
 			}
 			
@@ -1245,8 +1252,8 @@ Attacklab.wmdBase = function(){
 					if (key.preventDefault) {
 						key.preventDefault();
 					}
-					if (self.event) {
-						self.event.returnValue = false;
+					if (top.event) {
+						top.event.returnValue = false;
 					}
 				}
 			});
@@ -1263,15 +1270,15 @@ Attacklab.wmdBase = function(){
 			});
 			
 			if (!createEditor()) {
-				creationHandle = self.setInterval(function(){
+				creationHandle = top.setInterval(function(){
 					if (createEditor()) {
-						self.clearInterval(creationHandle);
+						top.clearInterval(creationHandle);
 					}
 				}, 100);
 			}
 			
-			util.addEvent(self, "resize", setDimensions);
-			resizePollHandle = self.setInterval(setDimensions, 100);
+			util.addEvent(top, "resize", setDimensions);
+			resizePollHandle = top.setInterval(setDimensions, 100);
 			if (inputBox.form) {
 				var submitCallback = inputBox.form.onsubmit;
 				inputBox.form.onsubmit = function(){
@@ -1300,7 +1307,7 @@ Attacklab.wmdBase = function(){
 			if (!/markdown/.test(wmd.wmd_env.output.toLowerCase())) {
 				if (markdownConverter) {
 					inputBox.value = markdownConverter.makeHtml(text);
-					self.setTimeout(callback, 0);
+					top.setTimeout(callback, 0);
 				}
 			}
 			return true;
@@ -1424,8 +1431,8 @@ Attacklab.wmdBase = function(){
 			if (inputBox) {
 				inputBox.style.marginTop = "";
 			}
-			self.clearInterval(resizePollHandle);
-			self.clearInterval(creationHandle);
+			top.clearInterval(resizePollHandle);
+			top.clearInterval(creationHandle);
 		};
 		
 		init();
@@ -1444,9 +1451,7 @@ Attacklab.wmdBase = function(){
 				return;
 			}
 			
-			var isOpera = nav.userAgent.indexOf("Opera") != -1;
-			
-			if (targetArea.selectionStart !== undefined && !isOpera) {
+			if (targetArea.selectionStart !== undefined && !global.isOpera) {
 			
 				targetArea.focus();
 				targetArea.selectionStart = stateObj.start;
@@ -1574,8 +1579,7 @@ Attacklab.wmdBase = function(){
 			chunk.before = chunk.before + chunk.startTag;
 			chunk.after = chunk.endTag + chunk.after;
 			
-			var isOpera = nav.userAgent.indexOf("Opera") !== -1;
-			if (isOpera) {
+			if (global.isOpera) {
 				chunk.before = chunk.before.replace(/\n/g, "\r\n");
 				chunk.selection = chunk.selection.replace(/\n/g, "\r\n");
 				chunk.after = chunk.after.replace(/\n/g, "\r\n");
@@ -2006,8 +2010,8 @@ Attacklab.wmdBase = function(){
 			
 		};
 		
-		util.addEvent(self, "load", loadListener);
-		var ignored = self.setInterval(loadListener, 100);
+		util.addEvent(top, "load", loadListener);
+		var ignored = top.setInterval(loadListener, 100);
 	};
 	
 	// DONE
@@ -2042,8 +2046,8 @@ Attacklab.wmdBase = function(){
 		
 			var result = 0;
 			
-			if (self.innerHeight) {
-				result = self.pageYOffset;
+			if (top.innerHeight) {
+				result = top.pageYOffset;
 			}
 			else 
 				if (doc.documentElement && doc.documentElement.scrollTop) {
@@ -2096,7 +2100,7 @@ Attacklab.wmdBase = function(){
 		var applyTimeout = function(){
 		
 			if (timeout) {
-				self.clearTimeout(timeout);
+				top.clearTimeout(timeout);
 				timeout = undefined;
 			}
 			
@@ -2111,7 +2115,7 @@ Attacklab.wmdBase = function(){
 				if (delay > maxDelay) {
 					delay = maxDelay;
 				}
-				timeout = self.setTimeout(makePreviewHtml, delay);
+				timeout = top.setTimeout(makePreviewHtml, delay);
 			}
 		};
 		
@@ -2196,13 +2200,13 @@ Attacklab.wmdBase = function(){
 			
 			var fullTop = position.getTop(wmdPanels.input) - getDocScrollTop();
 			
-			if (nav.userAgent.indexOf("MSIE") != -1) {
-				self.setTimeout(function(){
-					self.scrollBy(0, fullTop - emptyTop);
+			if (global.isIE) {
+				top.setTimeout(function(){
+					top.scrollBy(0, fullTop - emptyTop);
 				}, 0);
 			}
 			else {
-				self.scrollBy(0, fullTop - emptyTop);
+				top.scrollBy(0, fullTop - emptyTop);
 			}
 		};
 		
