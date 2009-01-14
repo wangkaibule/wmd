@@ -157,43 +157,18 @@ Attacklab.wmdBase = function(){
 		
 		var imgPath = imageDirectory + img;
 		
-		var elem;
-		
-		if (global.isIE) {
-		
-			// IE-specific
-			elem = doc.createElement("span");
-			var style = elem.style;
-			style.display = "inline-block";
-			style.height = "1px";
-			style.width = "1px";
-			elem.unselectable = "on";
-			
-			var span = doc.createElement("span");
-			style = span.style;
-			style.display = "inline-block";
-			style.height = "1px";
-			style.width = "1px";
-			style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + imgPath + "')";
-			span.unselectable = "on";
-			elem.appendChild(span);
-		}
-		else {
-			// Rest of the world
-			elem = doc.createElement("img");
-			elem.style.display = "inline";
-			elem.src = imgPath;
-		}
-		
-		elem.style.border = "none";
-		elem.border = "0";
-		
+		var elem = doc.createElement("img");
+		elem.className = "wmd-button";
+		elem.src = imgPath;
+
 		return elem;
 	};
 	
 	// TODO: Clean up dialog creation code, perhaps in a real constructor.
 	//
-	// This is the thing that pops up and asks for the URL when you click the hyperlink button.
+	// This is the thing that pops up and asks for the URL when you click the hyperlink
+	// or image buttons.
+	//
 	// text: The html for the input box.
 	// defaultInputText: The default value that appears in the input box.
 	// callback: The function which is executed when the prompt is dismissed, either via OK or Cancel
@@ -415,7 +390,8 @@ Attacklab.wmdBase = function(){
 		return [maxWidth, maxHeight, innerWidth, innerHeight];
 	};
 	
-	// DONE - jslint clean
+	// Gets the numerical value of a string that looks like
+	// "23px".
 	position.getPixelVal = function(val){
 		if (val && /^(-?\d+(\.\d*)?)px$/.test(val)) {
 			return re.$1;
@@ -515,14 +491,12 @@ Attacklab.wmdBase = function(){
 		if (top.innerHeight) {
 			return top.innerHeight;
 		}
-		else 
-			if (doc.documentElement && doc.documentElement.clientHeight) {
-				return doc.documentElement.clientHeight;
-			}
-			else 
-				if (doc.body) {
-					return doc.body.clientHeight;
-				}
+		else if (doc.documentElement && doc.documentElement.clientHeight) {
+			return doc.documentElement.clientHeight;
+		}
+		else if (doc.body) {
+			return doc.body.clientHeight;
+		}
 	};
 	
 	// DONE - slightly improved - jslint clean
