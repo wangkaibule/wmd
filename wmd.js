@@ -390,15 +390,6 @@ Attacklab.wmdBase = function(){
 		return [maxWidth, maxHeight, innerWidth, innerHeight];
 	};
 	
-	// Gets the numerical value of a string that looks like
-	// "23px".
-	position.getPixelVal = function(val){
-		if (val && /^(-?\d+(\.\d*)?)px$/.test(val)) {
-			return re.$1;
-		}
-		return undefined;
-	};
-	
 	// UNFINISHED
 	// The assignment in the while loop makes jslint cranky.
 	// I'll change it to a for loop later.
@@ -410,93 +401,6 @@ Attacklab.wmdBase = function(){
 			}
 		}
 		return result;
-	};
-	
-	// DONE - updated
-	position.setTop = function(elem, newTop, isInner){
-		var curTop = position.getPixelVal(elem.style.top);
-		if (curTop === undefined) {
-			elem.style.top = newTop + "px";
-			curTop = newTop;
-		}
-		
-		var offset = position.getTop(elem, isInner) - curTop;
-		elem.style.top = (newTop - offset) + "px";
-	};
-	
-	// UNFINISHED
-	// The assignment in the while loop makes jslint cranky.
-	// I'll change it to a for loop later.
-	position.getLeft = function(elem, isInner){
-		var result = elem.offsetLeft;
-		if (!isInner) {
-			while (elem = elem.offsetParent) {
-				result += elem.offsetLeft;
-			}
-		}
-		return result;
-	};
-	
-	// DONE - updated
-	position.setLeft = function(elem, newLeft, isInner){
-		var curLeft = position.getPixelVal(elem.style.left);
-		if (curLeft === undefined) {
-			elem.style.left = newLeft + "px";
-			curLeft = newLeft;
-		}
-		var offset = position.getLeft(elem, isInner) - curLeft;
-		elem.style.left = (newLeft - offset) + "px";
-	};
-	
-	// DONE - copied from cky (simplified)
-	position.getHeight = function(elem){
-		return elem.offsetHeight || elem.scrollHeight;
-	};
-	
-	// DONE - copied from cky
-	position.setHeight = function(elem, newHeight){
-		var curHeight = position.getPixelVal(elem.style.height);
-		if (curHeight == undefined) {
-			elem.style.height = newHeight + "px";
-			curHeight = newHeight;
-		}
-		var offset = position.getHeight(elem) - curHeight;
-		if (offset > newHeight) {
-			offset = newHeight;
-		}
-		elem.style.height = (newHeight - offset) + "px";
-	};
-	
-	// DONE - copied from cky (simplified)
-	position.getWidth = function(elem){
-		return elem.offsetWidth || elem.scrollWidth;
-	};
-	
-	// DONE - copied from cky
-	position.setWidth = function(elem, newWidth){
-		var curWidth = position.getPixelVal(elem.style.width);
-		if (curWidth == undefined) {
-			elem.style.width = newWidth + "px";
-			curWidth = newWidth;
-		}
-		var offset = position.getWidth(elem) - curWidth;
-		if (offset > newWidth) {
-			offset = newWidth;
-		}
-		elem.style.width = (newWidth - offset) + "px";
-	};
-	
-	// DONE - copied from cky
-	position.getWindowHeight = function(){
-		if (top.innerHeight) {
-			return top.innerHeight;
-		}
-		else if (doc.documentElement && doc.documentElement.clientHeight) {
-			return doc.documentElement.clientHeight;
-		}
-		else if (doc.body) {
-			return doc.body.clientHeight;
-		}
 	};
 	
 	// DONE - slightly improved - jslint clean
@@ -844,7 +748,6 @@ Attacklab.wmdBase = function(){
 		var div; // used in the _dc function.  I should rename this.
 		
 		// Used to cancel recurring events from setInterval.
-		var resizePollHandle;
 		var creationHandle;
 		
 		var undoMgr; // The undo manager
@@ -1058,7 +961,7 @@ Attacklab.wmdBase = function(){
 				//setupWmdButton();
 				inputBox.parentNode.insertBefore(div, inputBox);
 				
-				setDimensions();
+				//setDimensions();
 				
 				style.visibility = "visible";
 				
@@ -1245,8 +1148,6 @@ Attacklab.wmdBase = function(){
 				}, 100);
 			}
 			
-			util.addEvent(top, "resize", setDimensions);
-			resizePollHandle = top.setInterval(setDimensions, 100);
 			if (inputBox.form) {
 				var submitCallback = inputBox.form.onsubmit;
 				inputBox.form.onsubmit = function(){
@@ -1319,57 +1220,6 @@ Attacklab.wmdBase = function(){
 			mainDiv.appendChild(anchor);
 		};
 		
-		// Calculates and sets dimensions for the input region.
-		// The button bar is inside the input region so it's complicated.
-		var setDimensions = function(){
-		
-			if (!util.isVisible(inputBox)) {
-				mainDiv.style.display = "none";
-				return;
-			}
-			if (mainDiv.style.display == "none") {
-				mainDiv.style.display = "block";
-			}
-			
-			var inputWidth = position.getWidth(inputBox);
-			var inputHeight = position.getHeight(inputBox);
-			var inputLeft = position.getLeft(inputBox);
-			
-			// Check for resize.
-			if (mainDiv.style.width == (inputWidth + "px") && (savedHeight == inputHeight) && (savedLeft == inputLeft)) {
-				if (position.getTop(mainDiv) < position.getTop(inputBox)) {
-					return;
-				}
-			}
-			
-			savedHeight = inputHeight;
-			savedLeft = inputLeft;
-			
-			var minWidth = 100; // This could be calculated based on the width of the button bar.
-			mainDiv.style.width = Math.max(inputWidth, minWidth) + "px";
-			
-			var root = mainDiv.offsetParent;
-			
-			var spanHeight = position.getHeight(mainSpan);
-			var inputHeight = spanHeight - btnBarHeight + "px";
-			mainDiv.style.height = inputHeight;
-			
-			if (util.fillers) {
-				util.fillers[0].style.height = util.fillers[1].style.height = inputHeight;
-			}
-			
-			var magicThreePx = 3; // Why do we pick 3?  Some sort of overlap to cover the border?
-			inputBox.style.marginTop = spanHeight + magicThreePx + offsetHeight + "px";
-			
-			var inputTop = position.getTop(inputBox);
-			inputLeft = position.getLeft(inputBox); // Originally redefined with var
-			position.setTop(root, inputTop - spanHeight - magicThreePx);
-			position.setLeft(root, inputLeft);
-			
-			mainDiv.style.opacity = mainDiv.style.opacity || 0.999;
-			
-			return;
-		};
 		
 		this.undo = function(){
 			if (undoMgr) {
@@ -1399,7 +1249,6 @@ Attacklab.wmdBase = function(){
 			if (inputBox) {
 				inputBox.style.marginTop = "";
 			}
-			top.clearInterval(resizePollHandle);
 			top.clearInterval(creationHandle);
 		};
 		
