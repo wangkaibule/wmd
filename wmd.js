@@ -56,6 +56,7 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
+	
 	// Adds a listener callback to a DOM element which is fired on a specified
 	// event.
 	util.addEvent = function(elem, event, listener){
@@ -119,6 +120,8 @@ Attacklab.wmdBase = function(){
 	
 	
 	// Sets the image for a button on the WMD editor.
+	// Returns the element passed in but with the image attached.
+	// ONLY USED BY WMD BUTTON FOR MOUSE EFFECTS
 	util.setImage = function(elem, imgPath){
 	
 		imgPath = wmd.basePath + imgPath;
@@ -137,10 +140,12 @@ Attacklab.wmdBase = function(){
 		return elem;
 	};
 	
-	// DONE - reworked slightly and jslint clean
-	util.createImage = function(img, width, height){
+	// Sets the image for a button passed to the WMD editor.
+	// Returns the element passed in but with the image attached.
+	// Adds several style properties to the image.
+	util.createImage = function(imgPath, width, height){
 	
-		img = wmd.basePath + img;
+		imgPath = wmd.basePath + imgPath;
 		var elem;
 		
 		if (nav.userAgent.indexOf("MSIE") !== -1) {
@@ -158,7 +163,7 @@ Attacklab.wmdBase = function(){
 			style.display = "inline-block";
 			style.height = "1px";
 			style.width = "1px";
-			style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + img + "')";
+			style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + imgPath + "')";
 			span.unselectable = "on";
 			elem.appendChild(span);
 		}
@@ -167,7 +172,7 @@ Attacklab.wmdBase = function(){
 			// Rest of the world
 			elem = doc.createElement("img");
 			elem.style.display = "inline";
-			elem.src = img;
+			elem.src = imgPath;
 		}
 		
 		elem.style.border = "none";
@@ -204,7 +209,7 @@ Attacklab.wmdBase = function(){
 		};
 		
 		// Dismisses the hyperlink input box.
-		// isCancel is true if don't care about the input text.
+		// isCancel is true if we don't care about the input text.
 		// isCancel is false if we are going to keep the text.
 		var close = function(isCancel){
 			util.removeEvent(doc.body, "keydown", checkEscape);
@@ -1070,7 +1075,7 @@ Attacklab.wmdBase = function(){
 				
 				offsetHeight = height1 - height2;
 				
-				setupWmdButton();
+				//setupWmdButton();
 				inputBox.parentNode.insertBefore(div, inputBox);
 				
 				setDimensions();
@@ -1952,42 +1957,46 @@ Attacklab.wmdBase = function(){
 			return;
 		}
 		
-		// wmdStuff is just an empty object that we'll fill with references
+		// wmdPanels is just an empty object that we'll fill with references
 		// to the various important parts of the library.  e.g. the 
 		// input and output textareas/divs.
-		var wmdStuff;
+		var wmdPanels;
 		var edit, preview;
 		
 		// Fired after the page has fully loaded.
 		var loadListener = function(){
 		
 			try {
-				// I think the clone equality test is just a strange way to see
-				// if the panes got set/reset in findPanes().
-				var clone = util.cloneObject(wmdStuff);
-				wmdStuff = util.findPanels();
 				
-				if (!util.objectsEqual(clone, wmdStuff) && wmdStuff.input) {
+				// The try-catch and weird clone behavior is to catch IE issues.
+				//
+				// If you remove the try-catch, IE7 will throw some exceptions and
+				// ask if you want to debug.
+				//
+				// If you remove the clone / equal code, IE7 will fill the button bar
+				// with an infinite number of buttons.
+				var clone = util.cloneObject(wmdPanels);
+				wmdPanels = util.findPanels();
+				
+				if (!util.objectsEqual(clone, wmdPanels) && wmdPanels.input) {
 				
 					if (!edit) {
 					
 						var previewRefreshCallback;
 						
 						if (wmd.previewManager !== undefined) {
-							preview = new wmd.previewManager(wmdStuff);
+							preview = new wmd.previewManager(wmdPanels);
 							previewRefreshCallback = preview.refresh;
 						}
 						
-						edit = new wmd.editor(wmdStuff.input, previewRefreshCallback);
+						edit = new wmd.editor(wmdPanels.input, previewRefreshCallback);
 					}
-					else 
-						if (preview) {
-							preview.refresh(true);
-						}
+					else if (preview) {
+						preview.refresh(true);
+					}
 				}
 			} 
-			catch (e) {
-				// Useful!
+				catch (e) {
 			}
 			
 		};
@@ -1997,9 +2006,9 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// DONE
-	wmd.previewManager = function(wmdStuff){
+	wmd.previewManager = function(wmdPanels){
 	
-		// wmdStuff stores random things we need to keep track of, like
+		// wmdPanels stores random things we need to keep track of, like
 		// the input textarea.	
 		
 		var managerObj = this;
@@ -2047,11 +2056,11 @@ Attacklab.wmdBase = function(){
 		
 			// If there are no registered preview and output panels
 			// there is nothing to do.
-			if (!wmdStuff.preview && !wmdStuff.output) {
+			if (!wmdPanels.preview && !wmdPanels.output) {
 				return;
 			}
 			
-			var text = wmdStuff.input.value;
+			var text = wmdPanels.input.value;
 			if (text && text == oldInputText) {
 				return; // Input text hasn't changed.
 			}
@@ -2110,13 +2119,13 @@ Attacklab.wmdBase = function(){
 		
 		var setPanelScrollTops = function(){
 		
-			if (wmdStuff.preview) {
-				wmdStuff.preview.scrollTop = (wmdStuff.preview.scrollHeight - wmdStuff.preview.clientHeight) * getScaleFactor(wmdStuff.preview);
+			if (wmdPanels.preview) {
+				wmdPanels.preview.scrollTop = (wmdPanels.preview.scrollHeight - wmdPanels.preview.clientHeight) * getScaleFactor(wmdPanels.preview);
 				;
 			}
 			
-			if (wmdStuff.output) {
-				wmdStuff.output.scrollTop = (wmdStuff.output.scrollHeight - wmdStuff.output.clientHeight) * getScaleFactor(wmdStuff.output);
+			if (wmdPanels.output) {
+				wmdPanels.output.scrollTop = (wmdPanels.output.scrollHeight - wmdPanels.output.clientHeight) * getScaleFactor(wmdPanels.output);
 				;
 			}
 		};
@@ -2151,26 +2160,26 @@ Attacklab.wmdBase = function(){
 		
 		var pushPreviewHtml = function(text){
 		
-			var emptyTop = position.getTop(wmdStuff.input) - getDocScrollTop();
+			var emptyTop = position.getTop(wmdPanels.input) - getDocScrollTop();
 			
 			// Send the encoded HTML to the output textarea/div.
-			if (wmdStuff.output) {
+			if (wmdPanels.output) {
 				// The value property is only defined if the output is a textarea.
-				if (wmdStuff.output.value !== undefined) {
-					wmdStuff.output.value = text;
-					wmdStuff.output.readOnly = true;
+				if (wmdPanels.output.value !== undefined) {
+					wmdPanels.output.value = text;
+					wmdPanels.output.readOnly = true;
 				}
 				// Otherwise we are just replacing the text in a div.
 				// Send the HTML wrapped in <pre><code>
 				else {
 					var newText = text.replace(/&/g, "&amp;");
 					newText = newText.replace(/</g, "&lt;");
-					wmdStuff.output.innerHTML = "<pre><code>" + newText + "</code></pre>";
+					wmdPanels.output.innerHTML = "<pre><code>" + newText + "</code></pre>";
 				}
 			}
 			
-			if (wmdStuff.preview) {
-				wmdStuff.preview.innerHTML = text;
+			if (wmdPanels.preview) {
+				wmdPanels.preview.innerHTML = text;
 			}
 			
 			setPanelScrollTops();
@@ -2180,7 +2189,7 @@ Attacklab.wmdBase = function(){
 				return;
 			}
 			
-			var fullTop = position.getTop(wmdStuff.input) - getDocScrollTop();
+			var fullTop = position.getTop(wmdPanels.input) - getDocScrollTop();
 			
 			if (nav.userAgent.indexOf("MSIE") != -1) {
 				self.setTimeout(function(){
@@ -2194,14 +2203,14 @@ Attacklab.wmdBase = function(){
 		
 		var init = function(){
 		
-			setupEvents(wmdStuff.input, applyTimeout);
+			setupEvents(wmdPanels.input, applyTimeout);
 			makePreviewHtml();
 			
-			if (wmdStuff.preview) {
-				wmdStuff.preview.scrollTop = 0;
+			if (wmdPanels.preview) {
+				wmdPanels.preview.scrollTop = 0;
 			}
-			if (wmdStuff.output) {
-				wmdStuff.output.scrollTop = 0;
+			if (wmdPanels.output) {
+				wmdPanels.output.scrollTop = 0;
 			}
 		};
 		
