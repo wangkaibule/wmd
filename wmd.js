@@ -153,12 +153,11 @@ Attacklab.wmdBase = function(){
 	// Sets the image for a button passed to the WMD editor.
 	// Returns a new element with the image attached.
 	// Adds several style properties to the image.
-	util.createImage = function(img, width, height){
+	util.createImage = function(img){
 		
 		var imgPath = imageDirectory + img;
 		
 		var elem;
-		
 		
 		if (global.isIE) {
 		
@@ -180,7 +179,6 @@ Attacklab.wmdBase = function(){
 			elem.appendChild(span);
 		}
 		else {
-		
 			// Rest of the world
 			elem = doc.createElement("img");
 			elem.style.display = "inline";
@@ -190,10 +188,6 @@ Attacklab.wmdBase = function(){
 		elem.style.border = "none";
 		elem.border = "0";
 		
-		if (width && height) {
-			elem.style.width = width + "px";
-			elem.style.height = height + "px";
-		}
 		return elem;
 	};
 	
@@ -994,7 +988,7 @@ Attacklab.wmdBase = function(){
 		// Creates a separator in the button row at the top of the input area.
 		var makeButtonSeparator = function(){
 			
-			var sepImage = util.createImage("separator.png", 20, 20);
+			var sepImage = util.createImage("separator.png");
 			sepImage.className = "wmd-button-separator";
 			doc.getElementById("wmd-button-bar").appendChild(sepImage);
 			
@@ -1005,7 +999,7 @@ Attacklab.wmdBase = function(){
 			if (button.image) {
 			
 				// Create the image and add properties.
-				var btnImage = util.createImage(button.image, 16, 16);
+				var btnImage = util.createImage(button.image);
 				btnImage.border = 0;
 				if (button.description) {
 					var desc = button.description;
