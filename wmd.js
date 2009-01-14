@@ -37,6 +37,9 @@ Attacklab.wmdBase = function(){
 	var imageDefaultText = "http://";
 	var linkDefaultText = "http://";
 	
+	// The location of your button images relative to the base directory.
+	var imageDirectory = "images/";
+	
 	
 	
 
@@ -122,9 +125,9 @@ Attacklab.wmdBase = function(){
 	// Sets the image for a button on the WMD editor.
 	// Returns the element passed in but with the image attached.
 	// ONLY USED BY WMD BUTTON FOR MOUSE EFFECTS
-	util.setImage = function(elem, imgPath){
-	
-		imgPath = wmd.basePath + imgPath;
+	util.setImage = function(elem, img){
+		
+		var imgPath = imageDirectory + img;
 		
 		if (nav.userAgent.indexOf("MSIE") != -1) {
 			// Internet Explorer
@@ -141,12 +144,14 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// Sets the image for a button passed to the WMD editor.
-	// Returns the element passed in but with the image attached.
+	// Returns a new element with the image attached.
 	// Adds several style properties to the image.
-	util.createImage = function(imgPath, width, height){
-	
-		imgPath = wmd.basePath + imgPath;
+	util.createImage = function(img, width, height){
+		
+		var imgPath = imageDirectory + img;
+		
 		var elem;
+		
 		
 		if (nav.userAgent.indexOf("MSIE") !== -1) {
 		
@@ -982,7 +987,7 @@ Attacklab.wmdBase = function(){
 		// Creates a separator in the button row at the top of the input area.
 		var makeButtonSeparator = function(){
 			
-			var sepImage = util.createImage("images/separator.png", 20, 20);
+			var sepImage = util.createImage("separator.png", 20, 20);
 			sepImage.className = "wmd-button-separator";
 			doc.getElementById("wmd-button-bar").appendChild(sepImage);
 			
@@ -1325,15 +1330,15 @@ Attacklab.wmdBase = function(){
 			style.width = "50px";
 			style.height = "25px";
 			
-			var normalImage = util.createImage("images/wmd.png");
+			var normalImage = util.createImage("wmd.png");
 			anchor.appendChild(normalImage);
 			
 			anchor.onmouseover = function(){
-				util.setImage(normalImage, "images/wmd-on.png"); // The dark WMD
+				util.setImage(normalImage, "wmd-on.png"); // The dark WMD
 				anchor.style.cursor = "pointer";
 			};
 			anchor.onmouseout = function(){
-				util.setImage(normalImage, "images/wmd.png"); // The light WMD
+				util.setImage(normalImage, "wmd.png"); // The light WMD
 			};
 			
 			mainDiv.appendChild(anchor);
@@ -2568,19 +2573,19 @@ Attacklab.wmdBase = function(){
 	
 	command.bold = {};
 	command.bold.description = "Strong <strong>";
-	command.bold.image = "images/bold.png";
+	command.bold.image = "bold.png";
 	command.bold.key = "b";
 	command.bold.textOp = command.doBold;
 	
 	command.italic = {};
 	command.italic.description = "Emphasis <em>";
-	command.italic.image = "images/italic.png";
+	command.italic.image = "italic.png";
 	command.italic.key = "i";
 	command.italic.textOp = command.doItalic;
 	
 	command.link = {};
 	command.link.description = "Hyperlink <a>";
-	command.link.image = "images/link.png";
+	command.link.image = "link.png";
 	command.link.key = "l";
 	command.link.textOp = function(chunk, callback){
 		return command.doLinkOrImage(chunk, false, callback);
@@ -2588,14 +2593,14 @@ Attacklab.wmdBase = function(){
 	
 	command.undo = {};
 	command.undo.description = "Undo";
-	command.undo.image = "images/undo.png";
+	command.undo.image = "undo.png";
 	command.undo.execute = function(manager){
 		manager.undo();
 	};
 	
 	command.redo = {};
 	command.redo.description = "Redo";
-	command.redo.image = "images/redo.png";
+	command.redo.image = "redo.png";
 	command.redo.execute = function(manager){
 		manager.redo();
 	};	
@@ -2605,7 +2610,7 @@ Attacklab.wmdBase = function(){
 	
 	command.blockquote = {};
 	command.blockquote.description = "Blockquote <blockquote>";
-	command.blockquote.image = "images/blockquote.png";
+	command.blockquote.image = "blockquote.png";
 	command.blockquote.key = ".";
 	command.blockquote.textOp = function(chunk){
 		return command.doBlockquote(chunk);
@@ -2613,13 +2618,13 @@ Attacklab.wmdBase = function(){
 	
 	command.code = {};
 	command.code.description = "Code Sample <pre><code>";
-	command.code.image = "images/code.png";
+	command.code.image = "code.png";
 	command.code.key = "k";
 	command.code.textOp = command.doCode;
 	
 	command.img = {};
 	command.img.description = "Image <img>";
-	command.img.image = "images/img.png";
+	command.img.image = "img.png";
 	command.img.key = "g";
 	command.img.textOp = function(chunk, callback){
 		return command.doLinkOrImage(chunk, true, callback);
@@ -2627,7 +2632,7 @@ Attacklab.wmdBase = function(){
 	
 	command.ol = {};
 	command.ol.description = "Numbered List <ol>";
-	command.ol.image = "images/ol.png";
+	command.ol.image = "ol.png";
 	command.ol.key = "o";
 	command.ol.textOp = function(chunk){
 		command.doList(chunk, true);
@@ -2635,7 +2640,7 @@ Attacklab.wmdBase = function(){
 	
 	command.ul = {};
 	command.ul.description = "Bulleted List <ul>";
-	command.ul.image = "images/ul.png";
+	command.ul.image = "ul.png";
 	command.ul.key = "u";
 	command.ul.textOp = function(chunk){
 		command.doList(chunk, false);
@@ -2643,13 +2648,13 @@ Attacklab.wmdBase = function(){
 	
 	command.h1 = {};
 	command.h1.description = "Heading <h1>/<h2>";
-	command.h1.image = "images/h1.png";
+	command.h1.image = "h1.png";
 	command.h1.key = "h";
 	command.h1.textOp = command.doHeading;
 	
 	command.hr = {};
 	command.hr.description = "Horizontal Rule <hr>";
-	command.hr.image = "images/hr.png";
+	command.hr.image = "hr.png";
 	command.hr.key = "r";
 	command.hr.textOp = function(chunk){	
 		chunk.startTag = "----------\n";
@@ -2691,22 +2696,6 @@ if(!Attacklab.wmd)
 			Attacklab.wmd_env.buttons = Attacklab.wmd_env.buttons || defaultButtons;
 		};
 		Attacklab.loadEnv();
-		
-		var getPrefix = function(name)
-		{
-			var re = RegExp("(.*)" + name + "(\\?(.+))?$", "g");
-			var elements = document.getElementsByTagName("script");
-			
-			for(var i = 0; i < elements.length; i++)
-			{
-				if(re.test(elements[i].src))
-				{
-					return RegExp.$1;
-				}
-			}
-		};
-		
-		Attacklab.basePath = getPrefix("wmd.js");
 
 	};
 	
