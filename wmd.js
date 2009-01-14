@@ -300,74 +300,6 @@ Attacklab.wmdBase = function(){
 		}, 0);
 	};
 	
-	// UNFINISHED - almost a direct copy of original function
-	// except that I use !== and flip a and b in the second test block.
-	util.objectsEqual = function(a, b){
-		for (var key in a) {
-			if (a[key] !== b[key]) {
-				return false;
-			}
-		}
-		for (key in b) {
-			if (b[key] !== a[key]) {
-				return false;
-			}
-		}
-		return true;
-	};
-	
-	// UNFINISHED - direct copy of the original function
-	util.cloneObject = function(obj){
-		var result = {};
-		for (var key in obj) {
-			result[key] = obj[key];
-		}
-		return result;
-	};
-	
-	// DONE - updated - jslint clean
-	position.getPageSize = function(){
-	
-		var scrollWidth, scrollHeight;
-		var innerWidth, innerHeight;
-		
-		// It's not very clear which blocks work with which browsers.
-		if (top.innerHeight && top.scrollMaxY) {
-			scrollWidth = doc.body.scrollWidth;
-			scrollHeight = top.innerHeight + top.scrollMaxY;
-		}
-		else 
-			if (doc.body.scrollHeight > doc.body.offsetHeight) {
-				scrollWidth = doc.body.scrollWidth;
-				scrollHeight = doc.body.scrollHeight;
-			}
-			else {
-				scrollWidth = doc.body.offsetWidth;
-				scrollHeight = doc.body.offsetHeight;
-			}
-		
-		if (top.innerHeight) {
-			// Non-IE browser
-			innerWidth = top.innerWidth;
-			innerHeight = top.innerHeight;
-		}
-		else 
-			if (doc.documentElement && doc.documentElement.clientHeight) {
-				// Some versions of IE (IE 6 w/ a DOCTYPE declaration)
-				innerWidth = doc.documentElement.clientWidth;
-				innerHeight = doc.documentElement.clientHeight;
-			}
-			else 
-				if (doc.body) {
-					// Other versions of IE
-					innerWidth = doc.body.clientWidth;
-					innerHeight = doc.body.clientHeight;
-				}
-		
-		var maxWidth = Math.max(scrollWidth, innerWidth);
-		var maxHeight = Math.max(scrollHeight, innerHeight);
-		return [maxWidth, maxHeight, innerWidth, innerHeight];
-	};
 	
 	// UNFINISHED
 	// The assignment in the while loop makes jslint cranky.
@@ -1404,23 +1336,21 @@ Attacklab.wmdBase = function(){
 	
 	// DONE - jslint clean
 	//
-	// If the argument is false, the whitespace is transferred
-	// to the before/after borders.
-	// If the argument is true, the whitespace disappears.
+	// If remove is false, the whitespace is transferred
+	// to the before/after regions.
 	//
-	// The double negative sucks.  The paramater "sign" needs to be flipped
-	// or the variable eliminated.
-	wmd.Chunks.prototype.trimWhitespace = function(dontMove){
+	// If remove is true, the whitespace disappears.
+	wmd.Chunks.prototype.trimWhitespace = function(remove){
 	
 		this.selection = this.selection.replace(/^(\s*)/, "");
 		
-		if (!dontMove) {
+		if (!remove) {
 			this.before += re.$1;
 		}
 		
 		this.selection = this.selection.replace(/(\s*)$/, "");
 		
-		if (!dontMove) {
+		if (!remove) {
 			this.after = re.$1 + this.after;
 		}
 	};
@@ -2136,8 +2066,7 @@ Attacklab.wmdBase = function(){
 	
 	// List processing callback.
 	//
-	// isNumberedList will be undefined if we're reprocessing the list and
-	// this function gets called internally, outside of a button click.
+	// isNumberedList will be undefined if this function is called by autoindent.
 	command.doList = function(chunk, isNumberedList){
 				
 		// These are identical except at the very beginning and end.
@@ -2169,7 +2098,7 @@ Attacklab.wmdBase = function(){
 		// Fixes the prefixes of the other list items.
 		var getPrefixedItem = function(itemText){
 		
-			// The numbering flag is unset when called internally.
+			// The numbering flag is unset when called by autoindent.
 			if(isNumberedList === undefined){
 				isNumberedList = /^\s*\d/.test(itemText);
 			}
@@ -2300,8 +2229,9 @@ Attacklab.wmdBase = function(){
 		}
 	};	
 	
-	// Note that these commands either have a textOp callback which is executed on button
-	// click OR they have an execute function which performs non-text work.
+	// Note that these commands either have a textOp callback which is
+	// executed on button click OR they have an execute function which
+	// performs non-text work (undo/redo only).
 	
 	command.bold = {};
 	command.bold.description = "Strong <strong>";
