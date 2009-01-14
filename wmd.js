@@ -118,28 +118,16 @@ Attacklab.wmdBase = function(){
 	}
 	
 	
-	// Check to see if a node is not a parent and not hidden.
-	// OK for what???
-	util.elementOk = function(elem){
-		if (!elem || !elem.parentNode) {
-			return false;
-		}
-		
-		return util.isVisible(elem);
-	};
-	
-	
-	// DONE - cleaned up - jslint clean
-	// Sets the image for a "button" on the WMD editor.
+	// Sets the image for a button on the WMD editor.
 	util.setImage = function(elem, imgPath){
 	
 		imgPath = wmd.basePath + imgPath;
 		
 		if (nav.userAgent.indexOf("MSIE") != -1) {
 			// Internet Explorer
-			var child = elem.firstChild;
-			var style = child.style;
-			style.filter = "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + imgPath + "')";
+			// Fixes alpha transparency issues with IE.
+			elem.firstChild.style.filter 
+				= "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + imgPath + "')";
 		}
 		else {
 			// Regular browser
@@ -544,8 +532,7 @@ Attacklab.wmdBase = function(){
 		// If so, it runs the callback.
 		this.tick = function(){
 		
-			// Silently die if the input area is hidden, etc.
-			if (!util.elementOk(inputArea)) {
+			if (!util.isVisible(inputArea)) {
 				return;
 			}
 			
@@ -1351,7 +1338,7 @@ Attacklab.wmdBase = function(){
 		// The button bar is inside the input region so it's complicated.
 		var setDimensions = function(){
 		
-			if (!util.elementOk(inputBox)) {
+			if (!util.isVisible(inputBox)) {
 				mainDiv.style.display = "none";
 				return;
 			}
