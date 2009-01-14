@@ -56,31 +56,6 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	
-	// Like getElementsByTagName() but searches for a CSS class
-	// instead of a tag name.
-	// If searchTag is not specified, all tags will be searched.
-	util.getElementsByClass = function(searchClass, searchTag){
-	
-		var results = [];
-		
-		if (searchTag === null) {
-			searchTag = "*";
-		}
-		
-		var elements = doc.getElementsByTagName(searchTag);
-		var regex = new re("(^|\\s)" + searchClass + "(\\s|$)");
-		
-		for (var i = 0; i < elements.length; i++) {
-			if (regex.test(elements[i].className.toLowerCase())) {
-				results.push(elements[i]);
-			}
-		}
-		
-		return results;
-	};
-	
-	
 	// Adds a listener callback to a DOM element which is fired on a specified
 	// event.
 	util.addEvent = function(elem, event, listener){
@@ -2049,6 +2024,7 @@ Attacklab.wmdBase = function(){
 		var htmlOut;
 		var maxDelay = 3000;
 		var startType = "delayed"; // The other legal value is "manual"
+		
 		// Adds event listeners to elements and creates the input poller.
 		var setupEvents = function(inputElem, listener){
 		
