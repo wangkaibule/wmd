@@ -127,28 +127,7 @@ Attacklab.wmdBase = function(){
 		
 		return new re(pattern, flags);
 	}
-	
-	
-	// Sets the image for a button on the WMD editor.
-	// Returns the element passed in but with the image attached.
-	// ONLY USED BY WMD BUTTON FOR MOUSE EFFECTS
-	util.setImage = function(elem, img){
-		
-		var imgPath = imageDirectory + img;
-		
-		if (global.isIE) {
-			// Internet Explorer
-			// Fixes alpha transparency issues with IE.
-			elem.firstChild.style.filter 
-				= "progid:DXImageTransform.Microsoft." + "AlphaImageLoader(src='" + imgPath + "')";
-		}
-		else {
-			// Regular browser
-			elem.src = imgPath;
-		}
-		
-		return elem;
-	};
+
 	
 	// Sets the image for a button passed to the WMD editor.
 	// Returns a new element with the image attached.
@@ -958,10 +937,7 @@ Attacklab.wmdBase = function(){
 				
 				offsetHeight = height1 - height2;
 				
-				//setupWmdButton();
 				inputBox.parentNode.insertBefore(div, inputBox);
-				
-				//setDimensions();
 				
 				style.visibility = "visible";
 				
@@ -1180,44 +1156,6 @@ Attacklab.wmdBase = function(){
 				}
 			}
 			return true;
-		};
-		
-		// Sets up the WMD help button at the upper right of the input area.
-		var setupWmdButton = function(){
-		
-			var div = doc.createElement("div");
-			div.unselectable = "on";
-			var style = div.style;
-			style.paddingRight = "15px";
-			style.height = "100%";
-			style.display = "block";
-			style.position = "absolute";
-			style.right = "0";
-			
-			var anchor = doc.createElement("a");
-			anchor.href = "http://www.wmd-editor.com/";
-			anchor.target = "_blank";
-			anchor.title = "WMD: The Wysiwym Markdown Editor";
-			style = anchor.style;
-			style.position = "absolute";
-			style.right = "10px";
-			style.top = "5px";
-			style.display = "inline";
-			style.width = "50px";
-			style.height = "25px";
-			
-			var normalImage = util.createImage("wmd.png");
-			anchor.appendChild(normalImage);
-			
-			anchor.onmouseover = function(){
-				util.setImage(normalImage, "wmd-on.png"); // The dark WMD
-				anchor.style.cursor = "pointer";
-			};
-			anchor.onmouseout = function(){
-				util.setImage(normalImage, "wmd.png"); // The light WMD
-			};
-			
-			mainDiv.appendChild(anchor);
 		};
 		
 		
