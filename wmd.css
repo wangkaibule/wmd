@@ -8,14 +8,14 @@
 
 .wmd-button
 {
-	background-color:transparent;
-	border:1px solid transparent;
+	//background-color:transparent;
+	//border:1px solid transparent;
 	display:inline;
 	margin:0px;
 	margin-top:7px;
 	margin-bottom:5px;
 	padding:1px;
-	opacity:1.0;
+	zoom:1
 }
 
 .wmd-button:hover

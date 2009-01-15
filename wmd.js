@@ -303,7 +303,7 @@ Attacklab.wmdBase = function(){
 	
 	// UNFINISHED
 	// The assignment in the while loop makes jslint cranky.
-	// I'll change it to a for loop later.
+	// I'll change it to a better loop later.
 	position.getTop = function(elem, isInner){
 		var result = elem.offsetTop;
 		if (!isInner) {
@@ -640,23 +640,14 @@ Attacklab.wmdBase = function(){
 			};
 		}
 		
-		// Width and height of the button bar for the util.skin function.
-		// Why are they hard-coded here?
-		var btnBarHeight = 28;
-		var btnBarWidth = 4076;
-		
 		var offsetHeight = 0;
-		
-		// These saved values are used to see if the editor has been resized.
-		var savedHeight;
-		var savedLeft;
 		
 		var editObj = this;
 		
 		var mainDiv;
 		var mainSpan;
 		
-		var div; // used in the _dc function.  I should rename this.
+		var div; // This name is pretty ambiguous.  I should rename this.
 		
 		// Used to cancel recurring events from setInterval.
 		var creationHandle;
@@ -721,43 +712,43 @@ Attacklab.wmdBase = function(){
 			var style = elem.style;
 			
 			if (isEnabled) {
-				style.opacity = "1.0";
-				style.KHTMLOpacity = "1.0";
-				if (global.isIE_7plus) {
-					style.filter = "";
-				}
-				if (global.isIE_5or6) {
-					style.filter = "chroma(color=fuchsia)";
-				}
-				style.cursor = "pointer";
+//				style.opacity = "1.0";
+//				style.KHTMLOpacity = "1.0";
+//				if (global.isIE_7plus) {
+//					style.filter = "";
+//				}
+//				if (global.isIE_5or6) {
+//					style.filter = "chroma(color=fuchsia)";
+//				}
+//				style.cursor = "pointer";
 				
 				// Creates the highlight box.
 				elem.onmouseover = function(){
-					style.backgroundColor = "lightblue";
-					style.border = "1px solid blue";
+//					style.backgroundColor = "lightblue";
+//					style.border = "1px solid blue";
 				};
 				
 				// Removes the highlight box.
 				elem.onmouseout = function(){
-					style.backgroundColor = "";
-					style.border = "1px solid transparent";
-					if (global.isIE_5or6) {
-						style.borderColor = "fuchsia";
-						style.filter = "chroma(color=fuchsia)" + style.filter;
-					}
+//					style.backgroundColor = "";
+//					style.border = "1px solid transparent";
+//					if (global.isIE_5or6) {
+//						style.borderColor = "fuchsia";
+//						style.filter = "chroma(color=fuchsia)" + style.filter;
+//					}
 				};
 			}
 			else {
-				style.opacity = "0.4";
-				style.KHTMLOpacity = "0.4";
-				if (global.isIE_5or6) {
-					style.filter = "chroma(color=fuchsia) alpha(opacity=40)";
-				}
-				if (global.isIE_7plus) {
-					style.filter = "alpha(opacity=40)";
-				}
-				style.cursor = "";
-				style.backgroundColor = "";
+//				style.opacity = "0.4";
+//				style.KHTMLOpacity = "0.4";
+//				if (global.isIE_5or6) {
+//					style.filter = "chroma(color=fuchsia) alpha(opacity=40)";
+//				}
+//				if (global.isIE_7plus) {
+//					style.filter = "alpha(opacity=40)";
+//				}
+//				style.cursor = "";
+//				style.backgroundColor = "";
 				if (elem.onmouseout) {
 					elem.onmouseout();
 				}
@@ -800,11 +791,11 @@ Attacklab.wmdBase = function(){
 				
 				// Set the button's style.
 				setStyle(btnImage, true);
-				var style = btnImage.style;
-				style.margin = "0px";
-				style.padding = "1px";
-				style.marginTop = "7px";
-				style.marginBottom = "5px";
+				//var style = btnImage.style;
+				//style.margin = "0px";
+				//style.padding = "1px";
+				//style.marginTop = "7px";
+				//style.marginBottom = "5px";
 				
 				btnImage.onmouseout();
 				
