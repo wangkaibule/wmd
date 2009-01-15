@@ -174,6 +174,10 @@ Attacklab.wmdBase = function(){
 		var close = function(isCancel){
 			util.removeEvent(doc.body, "keydown", checkEscape);
 			var text = input.value;
+			
+			// Fixes a common pasting error.
+			text = text.replace('http://http://', 'http://');
+			
 			if (isCancel) {
 				text = null;
 			}
