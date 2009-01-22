@@ -1158,25 +1158,6 @@ Attacklab.wmdBase = function(){
 				}
 		};
 		
-		this.init = function(targetArea){
-		
-			// Normally the argument is not passed so the arguemnt passed to constructor
-			// is used as the input area.
-			if (targetArea) {
-				inputArea = targetArea;
-			}
-			
-			if (!util.isVisible(inputArea)) {
-				return;
-			}
-			
-			setStartEnd();
-			stateObj.scrollTop = inputArea.scrollTop;
-			if (!stateObj.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
-				stateObj.text = inputArea.value;
-			}
-		};
-		
 		var fixEolChars = function(text){
 			text = text.replace(/\r\n/g, "\n");
 			text = text.replace(/\r/g, "\n");
@@ -1272,8 +1253,21 @@ Attacklab.wmdBase = function(){
 			stateObj.text = chunk.before + chunk.selection + chunk.after;
 			stateObj.scrollTop = chunk.scrollTop;
 		};
+
+
 		
-		this.init();
+
+			
+		if (!util.isVisible(inputArea)) {
+			return;
+		}
+			
+		setStartEnd();
+		stateObj.scrollTop = inputArea.scrollTop;
+		if (!stateObj.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
+			stateObj.text = inputArea.value;
+		}
+
 	};
 	
 	// DONE - empty
