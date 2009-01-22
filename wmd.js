@@ -175,8 +175,14 @@ Attacklab.wmdBase = function(){
 			util.removeEvent(doc.body, "keydown", checkEscape);
 			var text = input.value;
 			
-			// Fixes a common pasting error.
+			// Fixes common pasting errors.
 			text = text.replace('http://http://', 'http://');
+			text = text.replace('http://https://', 'https://');
+			text = text.replace('http://ftp://', 'ftp://');
+			
+			if (text.indexOf('http://') === -1 && text.indexOf('ftp://') === -1) {
+				text = 'http://' + text;
+			}
 			
 			if (isCancel) {
 				text = null;
