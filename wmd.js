@@ -667,49 +667,43 @@ Attacklab.wmdBase = function(){
 		var redoImage; // The image on the redo button
 		var buttonCallbacks = []; // Callbacks for the buttons at the top of the input area
 		
-		// Saves the input state at the time of button click and performs the button function.
-		// The parameter is the function performed when this function is called.
-		var saveStateDoButtonAction = function(callback){
-		
-			if (undoMgr) {
-				undoMgr.setCommandMode();
-			}
-			
-			var state = new wmd.textareaState(inputBox);
-			
-			if (!state) {
-				return;
-			}
-			
-			var chunks = state.getChunks();
-			
-			// This seems like a very convoluted way of performing the action.
-			var performAction = function(){
-			
-				inputBox.focus();
-				
-				if (chunks) {
-					state.setChunks(chunks);
-				}
-				
-				state.restore();
-				previewRefreshCallback();
-			};
-			
-			var action = callback(chunks, performAction);
-			
-			if (!action) {
-				performAction();
-			}
-		};
-		
 		// Perform the button's action.
 		var doClick = function(button){
 		
 			inputBox.focus();
 			
 			if (button.textOp) {
-				saveStateDoButtonAction(button.textOp);
+				
+				if (undoMgr) {
+					undoMgr.setCommandMode();
+				}
+				
+				var state = new wmd.textareaState(inputBox);
+				
+				if (!state) {
+					return;
+				}
+				
+				var chunks = state.getChunks();
+				
+				// This seems like a very convoluted way of performing the action.
+				var performAction = function(){
+				
+					inputBox.focus();
+					
+					if (chunks) {
+						state.setChunks(chunks);
+					}
+					
+					state.restore();
+					previewRefreshCallback();
+				};
+				
+				var action = button.textOp(chunks, performAction);
+				
+				if (!action) {
+					performAction();
+				}
 			}
 			
 			if (button.execute) {
