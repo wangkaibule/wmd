@@ -386,7 +386,7 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// DONE
-	// Handles pushing and popping textareaStates for undo/redo commands.
+	// Handles pushing and popping TextareaStates for undo/redo commands.
 	// I should rename the stack variables to list.
 	wmd.undoManager = function(elem, callback){
 	
@@ -419,7 +419,7 @@ Attacklab.wmdBase = function(){
 		
 		// Force a stack addition and the poller to process.
 		var refreshState = function(){
-			inputStateObj = new wmd.textareaState(elem);
+			inputStateObj = new wmd.TextareaState(elem);
 			poller.tick();
 			timer = undefined;
 		};
@@ -451,7 +451,7 @@ Attacklab.wmdBase = function(){
 					lastState = null;
 				}
 				else {
-					undoStack[stackPtr] = new wmd.textareaState(elem);
+					undoStack[stackPtr] = new wmd.TextareaState(elem);
 					undoStack[--stackPtr].restore();
 					
 					if (callback) {
@@ -485,7 +485,7 @@ Attacklab.wmdBase = function(){
 		// Push the input area state to the stack.
 		var saveState = function(){
 		
-			var currState = inputStateObj || new wmd.textareaState(elem);
+			var currState = inputStateObj || new wmd.TextareaState(elem);
 			
 			if (!currState) {
 				return false;
@@ -669,7 +669,7 @@ Attacklab.wmdBase = function(){
 				undoMgr.setCommandMode();
 			}
 			
-			var state = new wmd.textareaState(inputBox);
+			var state = new wmd.TextareaState(inputBox);
 			
 			if (!state) {
 				return;
@@ -1123,7 +1123,7 @@ Attacklab.wmdBase = function(){
 	// DONE
 	// The textarea state/contents.
 	// This is only used to implement undo/redo by the undo manager.
-	wmd.textareaState = function(inputArea){
+	wmd.TextareaState = function(inputArea){
 	
 		var stateObj = this;
 		
