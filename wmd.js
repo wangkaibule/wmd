@@ -1264,6 +1264,7 @@ Attacklab.wmdBase = function(){
 			return chunk;
 		};
 		
+		// Sets the TextareaState properties given a chunk of markdown.
 		this.setChunks = function(chunk){
 		
 			chunk.before = chunk.before + chunk.startTag;
