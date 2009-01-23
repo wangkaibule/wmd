@@ -1275,10 +1275,10 @@ Attacklab.wmdBase = function(){
 				chunk.after = chunk.after.replace(/\n/g, "\r\n");
 			}
 			
-			stateObj.start = chunk.before.length;
-			stateObj.end = chunk.before.length + chunk.selection.length;
-			stateObj.text = chunk.before + chunk.selection + chunk.after;
-			stateObj.scrollTop = chunk.scrollTop;
+			this.start = chunk.before.length;
+			this.end = chunk.before.length + chunk.selection.length;
+			this.text = chunk.before + chunk.selection + chunk.after;
+			this.scrollTop = chunk.scrollTop;
 		};
 
 		this.init();
