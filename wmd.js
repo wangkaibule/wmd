@@ -178,6 +178,12 @@ Attacklab.wmdBase = function(){
 		var background;		// The background beind the dialog box.
 		var input;			// The text box where you enter the hyperlink.
 		
+		// Shouldn't this go someplace else?
+		// Like maybe at the top?
+		if (defaultInputText === undefined) {
+			defaultInputText = "";
+		}
+		
 		// Used as a keydown event handler. Esc dismisses the prompt.
 		// Key code 27 is ESC.
 		var checkEscape = function(key){
@@ -211,12 +217,6 @@ Attacklab.wmdBase = function(){
 			makeLinkMarkdown(text);
 			return false;
 		};
-		
-		// Shouldn't this go someplace else?
-		// Like maybe at the top?
-		if (defaultInputText === undefined) {
-			defaultInputText = "";
-		}
 		
 		// Creates the background behind the hyperlink text entry box.
 		// Most of this has been moved to CSS but the div creation and
