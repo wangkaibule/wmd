@@ -1147,9 +1147,10 @@ Attacklab.wmdBase = function(){
 	// This is only used to implement undo/redo by the undo manager.
 	wmd.TextareaState = function(){
 	
+		// Aliases
 		var stateObj = this;
-		
 		var inputArea = wmd.panels.input;
+		
 		
 		var setSelection = function(){
 		
@@ -1157,27 +1158,12 @@ Attacklab.wmdBase = function(){
 				return;
 			}
 			
-			if (inputArea.selectionStart !== undefined && !global.isOpera) {
+			if (inputArea.selectionStart !== undefined) {
 			
 				inputArea.focus();
 				inputArea.selectionStart = stateObj.start;
 				inputArea.selectionEnd = stateObj.end;
 				inputArea.scrollTop = stateObj.scrollTop;
-				
-			}
-			else if (doc.selection) {
-				
-				if (doc.activeElement && doc.activeElement !== inputArea) {
-					return;
-				}
-					
-				inputArea.focus();
-				var range = inputArea.createTextRange();
-				range.moveStart("character", -inputArea.value.length);
-				range.moveEnd("character", -inputArea.value.length);
-				range.moveEnd("character", stateObj.end);
-				range.moveStart("character", stateObj.start);
-				range.select();
 			}
 		};
 		
