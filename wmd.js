@@ -54,7 +54,7 @@ Attacklab.wmdBase = function(){
 	
 	// A collection of the important regions on the page.
 	// Cached so we don't have to keep traversing the DOM.
-	var PanelCollection = function(){
+	wmd.PanelCollection = function(){
 		this.buttonBar = doc.getElementById("wmd-button-bar");
 		this.preview = doc.getElementById("wmd-preview");
 		this.output = doc.getElementById("wmd-output");
@@ -63,7 +63,7 @@ Attacklab.wmdBase = function(){
 	
 	// This PanelCollection object can't be filled until after the page
 	// has loaded.
-	var panels = undefined;
+	wmd.panels = undefined;
 	
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
@@ -432,7 +432,7 @@ Attacklab.wmdBase = function(){
 		
 		// Force a stack addition and the poller to process.
 		var refreshState = function(){
-			inputStateObj = new wmd.TextareaState(elem);
+			inputStateObj = new wmd.TextareaState();
 			poller.tick();
 			timer = undefined;
 		};
@@ -464,7 +464,7 @@ Attacklab.wmdBase = function(){
 					lastState = null;
 				}
 				else {
-					undoStack[stackPtr] = new wmd.TextareaState(elem);
+					undoStack[stackPtr] = new wmd.TextareaState();
 					undoStack[--stackPtr].restore();
 					
 					if (callback) {
@@ -498,7 +498,7 @@ Attacklab.wmdBase = function(){
 		// Push the input area state to the stack.
 		var saveState = function(){
 		
-			var currState = inputStateObj || new wmd.TextareaState(elem);
+			var currState = inputStateObj || new wmd.TextareaState();
 			
 			if (!currState) {
 				return false;
@@ -682,7 +682,7 @@ Attacklab.wmdBase = function(){
 				undoMgr.setCommandMode();
 			}
 			
-			var state = new wmd.TextareaState(inputBox);
+			var state = new wmd.TextareaState();
 			
 			if (!state) {
 				return;
@@ -1136,39 +1136,40 @@ Attacklab.wmdBase = function(){
 	// DONE
 	// The textarea state/contents.
 	// This is only used to implement undo/redo by the undo manager.
-	wmd.TextareaState = function(inputArea){
+	wmd.TextareaState = function(){
 	
 		var stateObj = this;
 		
-		var setSelection = function(targetArea){
+		var inputArea = wmd.panels.input;
+		
+		var setSelection = function(){
 		
 			if (!util.isVisible(inputArea)) {
 				return;
 			}
 			
-			if (targetArea.selectionStart !== undefined && !global.isOpera) {
+			if (inputArea.selectionStart !== undefined && !global.isOpera) {
 			
-				targetArea.focus();
-				targetArea.selectionStart = stateObj.start;
-				targetArea.selectionEnd = stateObj.end;
-				targetArea.scrollTop = stateObj.scrollTop;
+				inputArea.focus();
+				inputArea.selectionStart = stateObj.start;
+				inputArea.selectionEnd = stateObj.end;
+				inputArea.scrollTop = stateObj.scrollTop;
 				
 			}
-			else 
-				if (doc.selection) {
+			else if (doc.selection) {
 				
-					if (doc.activeElement && doc.activeElement !== inputArea) {
-						return;
-					}
-					
-					targetArea.focus();
-					var range = targetArea.createTextRange();
-					range.moveStart("character", -targetArea.value.length);
-					range.moveEnd("character", -targetArea.value.length);
-					range.moveEnd("character", stateObj.end);
-					range.moveStart("character", stateObj.start);
-					range.select();
+				if (doc.activeElement && doc.activeElement !== inputArea) {
+					return;
 				}
+					
+				inputArea.focus();
+				var range = inputArea.createTextRange();
+				range.moveStart("character", -inputArea.value.length);
+				range.moveEnd("character", -inputArea.value.length);
+				range.moveEnd("character", stateObj.end);
+				range.moveStart("character", stateObj.start);
+				range.select();
+			}
 		};
 		
 		var fixEolChars = function(text){
@@ -1184,55 +1185,49 @@ Attacklab.wmdBase = function(){
 				stateObj.start = inputArea.selectionStart;
 				stateObj.end = inputArea.selectionEnd;
 			}
-			else 
-				if (doc.selection) {
+			else if (doc.selection) {
 				
-					stateObj.text = fixEolChars(inputArea.value);
+				stateObj.text = fixEolChars(inputArea.value);
 					
-					var range = doc.selection.createRange(); // The currently selected text.
-					var fixedRange = fixEolChars(range.text); // The currently selected text with regular newlines.
-					var marker = "\x07"; // A marker for the selected text.
-					var markedRange = marker + fixedRange + marker; // Surround the selection with a marker.
-					range.text = markedRange; // Change the selection text to marked up range.
-					var inputText = fixEolChars(inputArea.value);
+				var range = doc.selection.createRange(); // The currently selected text.
+				var fixedRange = fixEolChars(range.text); // The currently selected text with regular newlines.
+				var marker = "\x07"; // A marker for the selected text.
+				var markedRange = marker + fixedRange + marker; // Surround the selection with a marker.
+				range.text = markedRange; // Change the selection text to marked up range.
+				var inputText = fixEolChars(inputArea.value);
 					
-					range.moveStart("character", -markedRange.length); // Move the selection start back to the beginning of the marked up text.
-					range.text = fixedRange; // And substitute the text with the fixed newlines.
-					// Start and End refer to the marked up region.
-					stateObj.start = inputText.indexOf(marker);
-					stateObj.end = inputText.lastIndexOf(marker) - marker.length;
+				range.moveStart("character", -markedRange.length); // Move the selection start back to the beginning of the marked up text.
+				range.text = fixedRange; // And substitute the text with the fixed newlines.
+				// Start and End refer to the marked up region.
+				stateObj.start = inputText.indexOf(marker);
+				stateObj.end = inputText.lastIndexOf(marker) - marker.length;
 					
-					var len = stateObj.text.length - fixEolChars(inputArea.value).length;
+				var len = stateObj.text.length - fixEolChars(inputArea.value).length;
 					
-					if (len) {
-						range.moveStart("character", -fixedRange.length);
-						while (len--) {
-							fixedRange += "\n";
-							stateObj.end += 1;
-						}
-						range.text = fixedRange;
+				if (len) {
+					range.moveStart("character", -fixedRange.length);
+					while (len--) {
+						fixedRange += "\n";
+						stateObj.end += 1;
 					}
-					
-					setSelection(inputArea);
+					range.text = fixedRange;
 				}
+					
+				setSelection(inputArea);
+			}
 			
 			
 			return stateObj;
 		};
 		
 		// Restore this state into the input area.
-		this.restore = function(targetArea){
+		this.restore = function(){
 		
-			// The target area argument is never used so it will always
-			// be the inputArea.
-			if (!targetArea) {
-				targetArea = inputArea;
+			if (stateObj.text != undefined && stateObj.text != inputArea.value) {
+				inputArea.value = stateObj.text;
 			}
-			if (stateObj.text != undefined && stateObj.text != targetArea.value) {
-				targetArea.value = stateObj.text;
-			}
-			setSelection(targetArea);
-			targetArea.scrollTop = stateObj.scrollTop;
+			setSelection(inputArea);
+			inputArea.scrollTop = stateObj.scrollTop;
 		};
 		
 		// Gets a collection of HTML chunks from the inptut textarea.
@@ -1266,10 +1261,6 @@ Attacklab.wmdBase = function(){
 			stateObj.text = chunk.before + chunk.selection + chunk.after;
 			stateObj.scrollTop = chunk.scrollTop;
 		};
-
-
-		
-
 			
 		if (!util.isVisible(inputArea)) {
 			return;
@@ -1645,12 +1636,12 @@ Attacklab.wmdBase = function(){
 		// Fired after the page has fully loaded.
 		var loadListener = function(){
 		
-			panels = new PanelCollection();
+			wmd.panels = new wmd.PanelCollection();
 			
-			previewMgr = new wmd.previewManager(panels);
+			previewMgr = new wmd.previewManager(wmd.panels);
 			var previewRefreshCallback = previewMgr.refresh;
 						
-			edit = new wmd.editor(panels.input, previewRefreshCallback);
+			edit = new wmd.editor(wmd.panels.input, previewRefreshCallback);
 			
 			previewMgr.refresh(true);
 			
