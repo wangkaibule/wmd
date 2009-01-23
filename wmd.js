@@ -410,7 +410,7 @@ Attacklab.wmdBase = function(){
 	// DONE
 	// Handles pushing and popping TextareaStates for undo/redo commands.
 	// I should rename the stack variables to list.
-	wmd.undoManager = function(elem, callback){
+	wmd.undoManager = function(callback){
 	
 		var undoObj = this;
 		var undoStack = []; // A stack of undo states
@@ -483,7 +483,7 @@ Attacklab.wmdBase = function(){
 			}
 			
 			mode = "none";
-			elem.focus();
+			wmd.panels.input.focus();
 			refreshState();
 		};
 		
@@ -500,7 +500,7 @@ Attacklab.wmdBase = function(){
 			}
 			
 			mode = "none";
-			elem.focus();
+			wmd.panels.input.focus();
 			refreshState();
 		};
 		
@@ -613,7 +613,7 @@ Attacklab.wmdBase = function(){
 		
 		var setEventHandlers = function(){
 		
-			util.addEvent(elem, "keypress", function(event){
+			util.addEvent(wmd.panels.input, "keypress", function(event){
 				// keyCode 89: y
 				// keyCode 90: z
 				if ((event.ctrlKey || event.metaKey) && (event.keyCode == 89 || event.keyCode == 90)) {
@@ -622,7 +622,7 @@ Attacklab.wmdBase = function(){
 			});
 			
 			var handlePaste = function(){
-				if (global.isIE || (inputStateObj && inputStateObj.text != elem.value)) {
+				if (global.isIE || (inputStateObj && inputStateObj.text != wmd.panels.input.value)) {
 					if (timer == undefined) {
 						mode = "paste";
 						saveState();
@@ -631,16 +631,16 @@ Attacklab.wmdBase = function(){
 				}
 			};
 			
-			poller = new wmd.inputPoller(elem, handlePaste, 100);
+			poller = new wmd.inputPoller(wmd.panels.input, handlePaste, 100);
 			
-			util.addEvent(elem, "keydown", handleCtrlYZ);
-			util.addEvent(elem, "keydown", handleModeChange);
+			util.addEvent(wmd.panels.input, "keydown", handleCtrlYZ);
+			util.addEvent(wmd.panels.input, "keydown", handleModeChange);
 			
-			util.addEvent(elem, "mousedown", function(){
+			util.addEvent(wmd.panels.input, "mousedown", function(){
 				setMode("moving");
 			});
-			elem.onpaste = handlePaste;
-			elem.ondrop = handlePaste;
+			wmd.panels.input.onpaste = handlePaste;
+			wmd.panels.input.ondrop = handlePaste;
 		};
 		
 		var init = function(){
@@ -953,7 +953,7 @@ Attacklab.wmdBase = function(){
 			}
 			
 			if (!wmd.nativeUndo) {
-				undoMgr = new wmd.undoManager(inputBox, function(){
+				undoMgr = new wmd.undoManager(function(){
 					previewRefreshCallback();
 					setupUndoRedo();
 				});
