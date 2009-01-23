@@ -916,6 +916,8 @@ Attacklab.wmdBase = function(){
 			
 			
 			// Add onclick event handling to buttons.
+			// This is NOT very efficient.  I should store the buttons in a list
+			// and iterate over them instead.
 			var buttons = document.getElementsByTagName("li");
 			for (var i = 0; i < buttons.length; i++) {
 				
@@ -930,6 +932,14 @@ Attacklab.wmdBase = function(){
 					btn.onmouseout = function(){
 						this.style.backgroundPosition = this.XShift + " " + normalYShift;
 					};
+					
+					btn.onclick = function() {
+					
+						if (this.onmouseout) {
+							this.onmouseout();
+						}
+			
+					}
 				}
 			}
 			
@@ -1662,8 +1672,6 @@ Attacklab.wmdBase = function(){
 				return;
 			}
 			
-			var promptForm;
-			
 			// The function to be executed when you enter a link and press OK or Cancel.
 			// Marks up the link and adds the ref.
 			var callback = function(link){
@@ -1690,10 +1698,10 @@ Attacklab.wmdBase = function(){
 			};
 			
 			if (isImage) {
-				promptForm = util.prompt(imageDialogText, imageDefaultText, callback);
+				util.prompt(imageDialogText, imageDefaultText, callback);
 			}
 			else {
-				promptForm = util.prompt(linkDialogText, linkDefaultText, callback);
+				util.prompt(linkDialogText, linkDefaultText, callback);
 			}
 			return true;
 		}
