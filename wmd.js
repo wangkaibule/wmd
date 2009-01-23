@@ -107,6 +107,12 @@ Attacklab.wmdBase = function(){
 		}
 	};
 
+	// Converts \r\n and \r to \n.
+	util.fixEolChars = function(text){
+		text = text.replace(/\r\n/g, "\n");
+		text = text.replace(/\r/g, "\n");
+		return text;
+	};
 
 	// Extends a regular expression.  Returns a new RegExp
 	// using pre + regex + post as the expression.
@@ -1181,12 +1187,6 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		var fixEolChars = function(text){
-			text = text.replace(/\r\n/g, "\n");
-			text = text.replace(/\r/g, "\n");
-			return text;
-		};
-		
 		this.setStartEnd = function(){
 		
 			if (inputArea.selectionStart || inputArea.selectionStart === 0) {
@@ -1196,14 +1196,14 @@ Attacklab.wmdBase = function(){
 			}
 			else if (doc.selection) {
 				
-				stateObj.text = fixEolChars(inputArea.value);
+				stateObj.text = util.fixEolChars(inputArea.value);
 					
 				var range = doc.selection.createRange();
-				var fixedRange = fixEolChars(range.text);
+				var fixedRange = util.fixEolChars(range.text);
 				var marker = "\x07";
 				var markedRange = marker + fixedRange + marker;
 				range.text = markedRange;
-				var inputText = fixEolChars(inputArea.value);
+				var inputText = util.fixEolChars(inputArea.value);
 					
 				range.moveStart("character", -markedRange.length);
 				range.text = fixedRange;
@@ -1211,7 +1211,7 @@ Attacklab.wmdBase = function(){
 				stateObj.start = inputText.indexOf(marker);
 				stateObj.end = inputText.lastIndexOf(marker) - marker.length;
 					
-				var len = stateObj.text.length - fixEolChars(inputArea.value).length;
+				var len = stateObj.text.length - util.fixEolChars(inputArea.value).length;
 					
 				if (len) {
 					range.moveStart("character", -fixedRange.length);
@@ -1241,11 +1241,11 @@ Attacklab.wmdBase = function(){
 		
 			var chunk = new wmd.Chunks();
 			
-			chunk.before = fixEolChars(stateObj.text.substring(0, stateObj.start));
+			chunk.before = util.fixEolChars(stateObj.text.substring(0, stateObj.start));
 			chunk.startTag = "";
-			chunk.selection = fixEolChars(stateObj.text.substring(stateObj.start, stateObj.end));
+			chunk.selection = util.fixEolChars(stateObj.text.substring(stateObj.start, stateObj.end));
 			chunk.endTag = "";
-			chunk.after = fixEolChars(stateObj.text.substring(stateObj.end));
+			chunk.after = util.fixEolChars(stateObj.text.substring(stateObj.end));
 			chunk.scrollTop = stateObj.scrollTop;
 			
 			return chunk;
