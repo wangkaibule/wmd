@@ -742,18 +742,6 @@ Attacklab.wmdBase = function(){
 			callback && buttonCallbacks.push(callback);
 		};
 		
-		var addButtonSeparator = function(){
-			buttonCallbacks.push("|");
-		};
-		
-		// Creates a separator in the button row at the top of the input area.
-		var makeButtonSeparator = function(){
-			
-			var sepImage = util.createImage("separator.png");
-			sepImage.className = "wmd-button-separator";
-			doc.getElementById("wmd-button-bar").appendChild(sepImage);
-			
-		};
 		
 		var makeButton = function(button){
 		
@@ -792,13 +780,7 @@ Attacklab.wmdBase = function(){
 		var makeButtonRow = function(){
 		
 			for (var callback in buttonCallbacks) {
-			
-				if (buttonCallbacks[callback] == "|") {
-					makeButtonSeparator();
-				}
-				else {
-					makeButton(buttonCallbacks[callback]);
-				}
+				makeButton(buttonCallbacks[callback]);
 			}
 		};
 		
@@ -844,9 +826,6 @@ Attacklab.wmdBase = function(){
 			for (var btn in buttons) {
 			
 				switch (buttons[btn]) {
-					case "|":
-						addButtonSeparator();
-						break;
 					case "bold":
 						addButtonCallback(command.bold);
 						break;
@@ -931,7 +910,6 @@ Attacklab.wmdBase = function(){
 			
 			// Create the undo/redo buttons.
 			if (undoMgr) {
-				makeButtonSeparator();
 				undoImage = makeButton(command.undo);
 				redoImage = makeButton(command.redo);
 				
@@ -2274,7 +2252,7 @@ if(!Attacklab.wmd)
 			mergeEnv(top["wmd_options"]);
 			Attacklab.full = true;
 			
-			var defaultButtons = "bold italic | link blockquote code image | ol ul heading hr";
+			var defaultButtons = "bold italic link blockquote code image ol ul heading hr";
 			Attacklab.wmd_env.buttons = Attacklab.wmd_env.buttons || defaultButtons;
 		};
 		Attacklab.loadEnv();
