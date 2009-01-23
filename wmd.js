@@ -659,12 +659,13 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// I think my understanding of how the buttons and callbacks are stored in the array is incomplete.
-	wmd.editor = function(inputBox, previewRefreshCallback){
+	wmd.editor = function(previewRefreshCallback){
 	
 		if (!previewRefreshCallback) {
-			previewRefreshCallback = function(){
-			};
+			previewRefreshCallback = function(){};
 		}
+		
+		var inputBox = wmd.panels.input;
 		
 		var offsetHeight = 0;
 		
@@ -1646,10 +1647,10 @@ Attacklab.wmdBase = function(){
 		
 			wmd.panels = new wmd.PanelCollection();
 			
-			previewMgr = new wmd.previewManager(wmd.panels);
+			previewMgr = new wmd.previewManager();
 			var previewRefreshCallback = previewMgr.refresh;
 						
-			edit = new wmd.editor(wmd.panels.input, previewRefreshCallback);
+			edit = new wmd.editor(previewRefreshCallback);
 			
 			previewMgr.refresh(true);
 			
@@ -1659,10 +1660,7 @@ Attacklab.wmdBase = function(){
 	};
 	
 	// DONE
-	wmd.previewManager = function(wmdPanels){
-	
-		// wmdPanels stores random things we need to keep track of, like
-		// the input textarea.	
+	wmd.previewManager = function(){
 		
 		var managerObj = this;
 		var converter;
@@ -1709,11 +1707,11 @@ Attacklab.wmdBase = function(){
 		
 			// If there are no registered preview and output panels
 			// there is nothing to do.
-			if (!wmdPanels.preview && !wmdPanels.output) {
+			if (!wmd.panels.preview && !wmd.panels.output) {
 				return;
 			}
 			
-			var text = wmdPanels.input.value;
+			var text = wmd.panels.input.value;
 			if (text && text == oldInputText) {
 				return; // Input text hasn't changed.
 			}
@@ -1772,13 +1770,13 @@ Attacklab.wmdBase = function(){
 		
 		var setPanelScrollTops = function(){
 		
-			if (wmdPanels.preview) {
-				wmdPanels.preview.scrollTop = (wmdPanels.preview.scrollHeight - wmdPanels.preview.clientHeight) * getScaleFactor(wmdPanels.preview);
+			if (wmd.panels.preview) {
+				wmd.panels.preview.scrollTop = (wmd.panels.preview.scrollHeight - wmd.panels.preview.clientHeight) * getScaleFactor(wmd.panels.preview);
 				;
 			}
 			
-			if (wmdPanels.output) {
-				wmdPanels.output.scrollTop = (wmdPanels.output.scrollHeight - wmdPanels.output.clientHeight) * getScaleFactor(wmdPanels.output);
+			if (wmd.panels.output) {
+				wmd.panels.output.scrollTop = (wmd.panels.output.scrollHeight - wmd.panels.output.clientHeight) * getScaleFactor(wmd.panels.output);
 				;
 			}
 		};
@@ -1813,26 +1811,26 @@ Attacklab.wmdBase = function(){
 		
 		var pushPreviewHtml = function(text){
 		
-			var emptyTop = position.getTop(wmdPanels.input) - getDocScrollTop();
+			var emptyTop = position.getTop(wmd.panels.input) - getDocScrollTop();
 			
 			// Send the encoded HTML to the output textarea/div.
-			if (wmdPanels.output) {
+			if (wmd.panels.output) {
 				// The value property is only defined if the output is a textarea.
-				if (wmdPanels.output.value !== undefined) {
-					wmdPanels.output.value = text;
-					wmdPanels.output.readOnly = true;
+				if (wmd.panels.output.value !== undefined) {
+					wmd.panels.output.value = text;
+					wmd.panels.output.readOnly = true;
 				}
 				// Otherwise we are just replacing the text in a div.
 				// Send the HTML wrapped in <pre><code>
 				else {
 					var newText = text.replace(/&/g, "&amp;");
 					newText = newText.replace(/</g, "&lt;");
-					wmdPanels.output.innerHTML = "<pre><code>" + newText + "</code></pre>";
+					wmd.panels.output.innerHTML = "<pre><code>" + newText + "</code></pre>";
 				}
 			}
 			
-			if (wmdPanels.preview) {
-				wmdPanels.preview.innerHTML = text;
+			if (wmd.panels.preview) {
+				wmd.panels.preview.innerHTML = text;
 			}
 			
 			setPanelScrollTops();
@@ -1842,7 +1840,7 @@ Attacklab.wmdBase = function(){
 				return;
 			}
 			
-			var fullTop = position.getTop(wmdPanels.input) - getDocScrollTop();
+			var fullTop = position.getTop(wmd.panels.input) - getDocScrollTop();
 			
 			if (global.isIE) {
 				top.setTimeout(function(){
@@ -1856,14 +1854,14 @@ Attacklab.wmdBase = function(){
 		
 		var init = function(){
 		
-			setupEvents(wmdPanels.input, applyTimeout);
+			setupEvents(wmd.panels.input, applyTimeout);
 			makePreviewHtml();
 			
-			if (wmdPanels.preview) {
-				wmdPanels.preview.scrollTop = 0;
+			if (wmd.panels.preview) {
+				wmd.panels.preview.scrollTop = 0;
 			}
-			if (wmdPanels.output) {
-				wmdPanels.output.scrollTop = 0;
+			if (wmd.panels.output) {
+				wmd.panels.output.scrollTop = 0;
 			}
 		};
 		
