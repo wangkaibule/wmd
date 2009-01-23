@@ -1171,7 +1171,7 @@ Attacklab.wmdBase = function(){
 		
 		// Sets the selected text in the input box after we've performed an
 		// operation.
-		this.setInputAreaSelectedText = function(){
+		this.setInputAreaSelection = function(){
 		
 			if (!util.isVisible(inputArea)) {
 				return;
@@ -1235,7 +1235,7 @@ Attacklab.wmdBase = function(){
 					range.text = fixedRange;
 				}
 					
-				this.setInputAreaSelectedText();
+				this.setInputAreaSelection();
 			}
 		};
 		
@@ -1245,7 +1245,7 @@ Attacklab.wmdBase = function(){
 			if (stateObj.text != undefined && stateObj.text != inputArea.value) {
 				inputArea.value = stateObj.text;
 			}
-			this.setInputAreaSelectedText();
+			this.setInputAreaSelection();
 			inputArea.scrollTop = stateObj.scrollTop;
 		};
 		
