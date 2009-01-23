@@ -738,55 +738,6 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		var setStyle = function(elem, isEnabled){
-		
-			var style = elem.style;
-			
-			if (isEnabled) {
-//				style.opacity = "1.0";
-//				style.KHTMLOpacity = "1.0";
-//				if (global.isIE_7plus) {
-//					style.filter = "";
-//				}
-//				if (global.isIE_5or6) {
-//					style.filter = "chroma(color=fuchsia)";
-//				}
-//				style.cursor = "pointer";
-				
-				// Creates the highlight box.
-				elem.onmouseover = function(){
-//					style.backgroundColor = "lightblue";
-//					style.border = "1px solid blue";
-				};
-				
-				// Removes the highlight box.
-				elem.onmouseout = function(){
-//					style.backgroundColor = "";
-//					style.border = "1px solid transparent";
-//					if (global.isIE_5or6) {
-//						style.borderColor = "fuchsia";
-//						style.filter = "chroma(color=fuchsia)" + style.filter;
-//					}
-				};
-			}
-			else {
-//				style.opacity = "0.4";
-//				style.KHTMLOpacity = "0.4";
-//				if (global.isIE_5or6) {
-//					style.filter = "chroma(color=fuchsia) alpha(opacity=40)";
-//				}
-//				if (global.isIE_7plus) {
-//					style.filter = "alpha(opacity=40)";
-//				}
-//				style.cursor = "";
-//				style.backgroundColor = "";
-				if (elem.onmouseout) {
-					elem.onmouseout();
-				}
-				elem.onmouseover = elem.onmouseout = null;
-			}
-		};
-		
 		var addButtonCallback = function(callback){
 			callback && buttonCallbacks.push(callback);
 		};
@@ -820,15 +771,8 @@ Attacklab.wmdBase = function(){
 					btnImage.title = desc;
 				}
 				
-				// Set the button's style.
-				setStyle(btnImage, true);
-				//var style = btnImage.style;
-				//style.margin = "0px";
-				//style.padding = "1px";
-				//style.marginTop = "7px";
-				//style.marginBottom = "5px";
-				
-				btnImage.onmouseout();
+				btnImage.onmouseover = function(){};
+				btnImage.onmouseout = function(){};
 				
 				btnImage.onclick = function(){
 					if (btnImage.onmouseout) {
@@ -855,13 +799,6 @@ Attacklab.wmdBase = function(){
 				else {
 					makeButton(buttonCallbacks[callback]);
 				}
-			}
-		};
-		
-		var setupUndoRedo = function(){
-			if (undoMgr) {
-				setStyle(undoImage, undoMgr.canUndo());
-				setStyle(redoImage, undoMgr.canRedo());
 			}
 		};
 		
@@ -959,7 +896,6 @@ Attacklab.wmdBase = function(){
 			if (!wmd.nativeUndo) {
 				undoMgr = new wmd.undoManager(function(){
 					previewRefreshCallback();
-					setupUndoRedo();
 				});
 			}
 			
@@ -1087,8 +1023,6 @@ Attacklab.wmdBase = function(){
 					}
 				};
 			}
-			
-			setupUndoRedo();
 		};
 		
 		// Convert the contents of the input textarea to HTML in the output/preview panels.
