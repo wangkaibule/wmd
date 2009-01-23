@@ -438,7 +438,6 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		// Force a stack addition and the poller to process.
 		var refreshState = function(){
 			inputStateObj = new wmd.TextareaState();
 			poller.tick();
@@ -1142,9 +1141,8 @@ Attacklab.wmdBase = function(){
 		init();
 	};
 	
-	// DONE
-	// The textarea state/contents.
-	// This is only used to implement undo/redo by the undo manager.
+	// The input textarea state/contents.
+	// This is used to implement undo/redo by the undo manager.
 	wmd.TextareaState = function(){
 	
 		// Aliases
@@ -1154,7 +1152,7 @@ Attacklab.wmdBase = function(){
 		// Sets the selected text in the input box after we've performed an
 		// operation.
 		// This should probably be moved to the editor.
-		var setInputAreaSelectedText = function(){
+		this.setInputAreaSelectedText = function(){
 		
 			if (!util.isVisible(inputArea)) {
 				return;
@@ -1189,7 +1187,7 @@ Attacklab.wmdBase = function(){
 			return text;
 		};
 		
-		var setStartEnd = function(){
+		this.setStartEnd = function(){
 		
 			if (inputArea.selectionStart || inputArea.selectionStart === 0) {
 			
@@ -1224,7 +1222,7 @@ Attacklab.wmdBase = function(){
 					range.text = fixedRange;
 				}
 					
-				setInputAreaSelectedText();
+				this.setInputAreaSelectedText();
 			}
 		};
 		
@@ -1234,7 +1232,7 @@ Attacklab.wmdBase = function(){
 			if (stateObj.text != undefined && stateObj.text != inputArea.value) {
 				inputArea.value = stateObj.text;
 			}
-			setInputAreaSelectedText();
+			this.setInputAreaSelectedText();
 			inputArea.scrollTop = stateObj.scrollTop;
 		};
 		
@@ -1274,7 +1272,7 @@ Attacklab.wmdBase = function(){
 			return;
 		}
 			
-		setStartEnd();
+		this.setStartEnd();
 		this.scrollTop = inputArea.scrollTop;
 		if (!this.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
 			this.text = inputArea.value;
