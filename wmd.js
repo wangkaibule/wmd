@@ -339,14 +339,13 @@ Attacklab.wmdBase = function(){
 		return elem.offsetWidth || elem.scrollWidth;
 	};
 
-	
-	// DONE - slightly improved - jslint clean
-	//
+
 	// Watches the input textarea, polling at an interval and runs
 	// a callback function if anything has changed.
-	wmd.inputPoller = function(inputArea, callback, interval){
+	wmd.inputPoller = function(callback, interval){
 	
 		var pollerObj = this;
+		var inputArea = wmd.panels.input;
 		
 		// Stored start, end and text.  Used to see if there are changes to the input.
 		var lastStart;
@@ -631,7 +630,7 @@ Attacklab.wmdBase = function(){
 				}
 			};
 			
-			poller = new wmd.inputPoller(wmd.panels.input, handlePaste, 100);
+			poller = new wmd.inputPoller(handlePaste, 100);
 			
 			util.addEvent(wmd.panels.input, "keydown", handleCtrlYZ);
 			util.addEvent(wmd.panels.input, "keydown", handleModeChange);
@@ -1681,7 +1680,7 @@ Attacklab.wmdBase = function(){
 			
 			util.addEvent(inputElem, "keypress", listener);
 			util.addEvent(inputElem, "keydown", listener);
-			poller = new wmd.inputPoller(inputElem, listener);
+			poller = new wmd.inputPoller(listener);
 		};
 		
 		var getDocScrollTop = function(){
