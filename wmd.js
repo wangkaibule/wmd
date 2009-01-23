@@ -1263,9 +1263,9 @@ Attacklab.wmdBase = function(){
 		}
 			
 		setStartEnd();
-		stateObj.scrollTop = inputArea.scrollTop;
-		if (!stateObj.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
-			stateObj.text = inputArea.value;
+		this.scrollTop = inputArea.scrollTop;
+		if (!this.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
+			this.text = inputArea.value;
 		}
 
 	};
