@@ -169,8 +169,8 @@ Attacklab.wmdBase = function(){
 	//
 	// text: The html for the input box.
 	// defaultInputText: The default value that appears in the input box.
-	// callback: The function which is executed when the prompt is dismissed, either via OK or Cancel
-	util.prompt = function(text, defaultInputText, callback){
+	// makeLinkMarkdown: The function which is executed when the prompt is dismissed, either via OK or Cancel
+	util.prompt = function(text, defaultInputText, makeLinkMarkdown){
 	
 		// These variables need to be declared at this level since they are used
 		// in multiple functions.
@@ -208,7 +208,7 @@ Attacklab.wmdBase = function(){
 			}
 			dialog.parentNode.removeChild(dialog);
 			background.parentNode.removeChild(background);
-			callback(text);
+			makeLinkMarkdown(text);
 			return false;
 		};
 		
@@ -1674,7 +1674,7 @@ Attacklab.wmdBase = function(){
 			
 			// The function to be executed when you enter a link and press OK or Cancel.
 			// Marks up the link and adds the ref.
-			var callback = function(link){
+			var makeLinkMarkdown = function(link){
 			
 				if (link !== null) {
 				
@@ -1698,10 +1698,10 @@ Attacklab.wmdBase = function(){
 			};
 			
 			if (isImage) {
-				util.prompt(imageDialogText, imageDefaultText, callback);
+				util.prompt(imageDialogText, imageDefaultText, makeLinkMarkdown);
 			}
 			else {
-				util.prompt(linkDialogText, linkDefaultText, callback);
+				util.prompt(linkDialogText, linkDefaultText, makeLinkMarkdown);
 			}
 			return true;
 		}
