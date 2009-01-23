@@ -1212,9 +1212,6 @@ Attacklab.wmdBase = function(){
 					
 				setInputAreaSelectedText();
 			}
-			
-			
-			return stateObj;
 		};
 		
 		// Restore this state into the input area.
