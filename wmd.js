@@ -800,14 +800,16 @@ Attacklab.wmdBase = function(){
 			var boldButton = document.createElement("li");
 			boldButton.className = "new-button";
 			boldButton.id = "wmd-bold-button";
-			boldButton.title = "Bold";
+			boldButton.title = "Strong <strong> Ctrl-B";
+			boldButton.key = "b";
 			boldButton.XShift = "0px";
 			buttonRow.appendChild(boldButton);
 			
 			var italicButton = document.createElement("li");
 			italicButton.className = "new-button";
 			italicButton.id = "wmd-italic-button";
-			italicButton.title = "Italic";
+			italicButton.title = "Emphasis <em> Ctrl-I";
+			italicButton.key = "i";
 			italicButton.XShift = "-20px";
 			buttonRow.appendChild(italicButton);
 
@@ -819,28 +821,32 @@ Attacklab.wmdBase = function(){
 			var linkButton = document.createElement("li");
 			linkButton.className = "new-button";
 			linkButton.id = "wmd-link-button";
-			linkButton.title = "Hyperlink";
+			linkButton.title = "Hyperlink <a> Ctrl-L";
+			linkButton.key = "l";
 			linkButton.XShift = "-40px";
 			buttonRow.appendChild(linkButton);
 
 			var quoteButton = document.createElement("li");
 			quoteButton.className = "new-button";
 			quoteButton.id = "wmd-quote-button";
-			quoteButton.title = "Blockquote";
+			quoteButton.title = "Blockquote <blockquote> Ctrl-.";
+			quoteButton.key = ".";
 			quoteButton.XShift = "-60px";
 			buttonRow.appendChild(quoteButton);
 			
 			var codeButton = document.createElement("li");
 			codeButton.className = "new-button";
 			codeButton.id = "wmd-code-button";
-			codeButton.title = "Code";
+			codeButton.title = "Code Sample <pre><code> Ctrl-K";
+			codeButton.key = "k";
 			codeButton.XShift = "-80px";
 			buttonRow.appendChild(codeButton);
 
 			var imageButton = document.createElement("li");
 			imageButton.className = "new-button";
 			imageButton.id = "wmd-image-button";
-			imageButton.title = "Image";
+			imageButton.title = "Image <img> Ctrl-G";
+			imageButton.key = "g";
 			imageButton.XShift = "-100px";
 			buttonRow.appendChild(imageButton);
 
@@ -852,28 +858,31 @@ Attacklab.wmdBase = function(){
 			var olistButton = document.createElement("li");
 			olistButton.className = "new-button";
 			olistButton.id = "wmd-olist-button";
-			olistButton.title = "Bulleted list";
+			olistButton.title = "Numbered List <ol> Ctrl-O";
+			olistButton.key = "o";
 			olistButton.XShift = "-120px";
 			buttonRow.appendChild(olistButton);
 			
 			var ulistButton = document.createElement("li");
 			ulistButton.className = "new-button";
 			ulistButton.id = "wmd-ulist-button";
-			ulistButton.title = "Numbered list";
+			ulistButton.title = "Bulleted List <ul> Ctrl-U";
+			ulistButton.key = "u";
 			ulistButton.XShift = "-140px";
 			buttonRow.appendChild(ulistButton);
 			
 			var headingButton = document.createElement("li");
 			headingButton.className = "new-button";
 			headingButton.id = "wmd-heading-button";
-			headingButton.title = "Heading";
+			headingButton.title = "Heading <h1>/<h2> Ctrl-H";
+			headingButton.key = "h";
 			headingButton.XShift = "-160px";
 			buttonRow.appendChild(headingButton); 
 			
 			var hrButton = document.createElement("li");
 			hrButton.className = "new-button";
 			hrButton.id = "wmd-hr-button";
-			hrButton.title = "Horizontal rule";
+			hrButton.title = "Horizontal Rule <hr>";
 			hrButton.XShift = "-180px";
 			buttonRow.appendChild(hrButton); 
 			
@@ -885,21 +894,23 @@ Attacklab.wmdBase = function(){
 			var undoButton = document.createElement("li");
 			undoButton.className = "new-button";
 			undoButton.id = "wmd-undo-button";
-			undoButton.title = "Undo";
+			undoButton.title = "Undo - Ctrl-Z";
+			undoButton.key = "z";
 			undoButton.XShift = "-200px";
 			buttonRow.appendChild(undoButton); 
 			
 			var redoButton = document.createElement("li");
 			redoButton.className = "new-button";
 			redoButton.id = "wmd-redo-button";
-			redoButton.title = "Redo";
+			redoButton.title = "Redo - Ctrl-Y";
+			redoButton.key = "y";
 			redoButton.XShift = "-220px";
 			buttonRow.appendChild(redoButton); 
 			
 			var helpButton = document.createElement("li");
 			helpButton.className = "new-button";
 			helpButton.id = "wmd-help-button";
-			helpButton.title = "Help";
+			helpButton.title = "Markdown Quick Reference";
 			helpButton.XShift = "-240px";
 			buttonRow.appendChild(helpButton);
 			
