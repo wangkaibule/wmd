@@ -1,4 +1,0 @@
-This is a sample of SO from early January, 2008.
-
-Note that the functionality of wmd.js is contained in the file
-jquery.package.editor.js.

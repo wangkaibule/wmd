@@ -1,1 +1,0 @@
-This is the original code downloaded from AttackLab in early Jan, 2008.
