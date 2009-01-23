@@ -1200,16 +1200,16 @@ Attacklab.wmdBase = function(){
 				
 				stateObj.text = fixEolChars(inputArea.value);
 					
-				var range = doc.selection.createRange(); // The currently selected text.
-				var fixedRange = fixEolChars(range.text); // The currently selected text with regular newlines.
-				var marker = "\x07"; // A marker for the selected text.
-				var markedRange = marker + fixedRange + marker; // Surround the selection with a marker.
-				range.text = markedRange; // Change the selection text to marked up range.
+				var range = doc.selection.createRange();
+				var fixedRange = fixEolChars(range.text);
+				var marker = "\x07";
+				var markedRange = marker + fixedRange + marker;
+				range.text = markedRange;
 				var inputText = fixEolChars(inputArea.value);
 					
-				range.moveStart("character", -markedRange.length); // Move the selection start back to the beginning of the marked up text.
-				range.text = fixedRange; // And substitute the text with the fixed newlines.
-				// Start and End refer to the marked up region.
+				range.moveStart("character", -markedRange.length);
+				range.text = fixedRange;
+
 				stateObj.start = inputText.indexOf(marker);
 				stateObj.end = inputText.lastIndexOf(marker) - marker.length;
 					
