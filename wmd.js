@@ -19,6 +19,7 @@ Attacklab.wmdBase = function(){
 	var command = wmd.Command;
 	var global = wmd.Global;
 	
+	
 	// Used to work around some browser bugs where we can't use feature testing.
 	global.isIE 		= /msie/.test(nav.userAgent.toLowerCase());
 	global.isIE_5or6 	= /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase());
@@ -51,6 +52,18 @@ Attacklab.wmdBase = function(){
 	//  END OF YOUR CHANGES
 	// -------------------------------------------------------------------
 	
+	// A collection of the important regions on the page.
+	// Cached so we don't have to keep traversing the DOM.
+	var PanelCollection = function(){
+		this.buttonBar = doc.getElementById("wmd-button-bar");
+		this.preview = doc.getElementById("wmd-preview");
+		this.output = doc.getElementById("wmd-output");
+		this.input = doc.getElementById("wmd-input");
+	};
+	
+	// This PanelCollection object can't be filled until after the page
+	// has loaded.
+	var panels = undefined;
 	
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
@@ -1611,20 +1624,6 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-
-	// DONE - jslint clean
-	util.findPanels = function(){
-	
-		var wmdPanels = {};
-			
-		wmdPanels.buttonBar = doc.getElementById("wmd-button-bar");
-		wmdPanels.preview = doc.getElementById("wmd-preview");
-		wmdPanels.output = doc.getElementById("wmd-output");
-		wmdPanels.input = doc.getElementById("wmd-input");
-		
-		return wmdPanels;
-	};
-	
 	// DONE - jslint clean
 	util.makeAPI = function(){
 		wmd.wmd = {};
@@ -1640,19 +1639,18 @@ Attacklab.wmdBase = function(){
 			return;
 		}
 
-		var wmdPanels;	// A collection of all the important WMD regions on the page.
 		var edit;		// The editor (buttons + input + outputs) - the main object.
 		var previewMgr;	// The preview manager.
 		
 		// Fired after the page has fully loaded.
 		var loadListener = function(){
 		
-			wmdPanels = util.findPanels();
+			panels = new PanelCollection();
 			
-			previewMgr = new wmd.previewManager(wmdPanels);
+			previewMgr = new wmd.previewManager(panels);
 			var previewRefreshCallback = previewMgr.refresh;
 						
-			edit = new wmd.editor(wmdPanels.input, previewRefreshCallback);
+			edit = new wmd.editor(panels.input, previewRefreshCallback);
 			
 			previewMgr.refresh(true);
 			
