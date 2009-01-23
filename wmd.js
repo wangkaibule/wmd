@@ -1155,9 +1155,22 @@ Attacklab.wmdBase = function(){
 		var stateObj = this;
 		var inputArea = wmd.panels.input;
 		
+		this.init = function() {
+		
+			if (!util.isVisible(inputArea)) {
+				return;
+			}
+				
+			this.setInputAreaSelectionStartEnd();
+			this.scrollTop = inputArea.scrollTop;
+			if (!this.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
+				this.text = inputArea.value;
+			}
+			
+		}
+		
 		// Sets the selected text in the input box after we've performed an
 		// operation.
-		// This should probably be moved to the editor.
 		this.setInputAreaSelectedText = function(){
 		
 			if (!util.isVisible(inputArea)) {
@@ -1187,7 +1200,7 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		this.setStartEnd = function(){
+		this.setInputAreaSelectionStartEnd = function(){
 		
 			if (inputArea.selectionStart || inputArea.selectionStart === 0) {
 			
@@ -1267,17 +1280,8 @@ Attacklab.wmdBase = function(){
 			stateObj.text = chunk.before + chunk.selection + chunk.after;
 			stateObj.scrollTop = chunk.scrollTop;
 		};
-			
-		if (!util.isVisible(inputArea)) {
-			return;
-		}
-			
-		this.setStartEnd();
-		this.scrollTop = inputArea.scrollTop;
-		if (!this.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
-			this.text = inputArea.value;
-		}
 
+		this.init();
 	};
 	
 	// DONE - empty
