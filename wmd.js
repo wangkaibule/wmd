@@ -923,11 +923,6 @@ Attacklab.wmdBase = function(){
 			
 				if (btn.className === "new-button") {
 					
-					// Demonstrates button-specific code.
-					btn.onclick = function(){
-						window.alert(this.getAttribute("id"));
-					}
-					
 					btn.onmouseover = function(){
 						this.style.backgroundPosition = this.XShift + " " + highlightYShift;
 					};
@@ -2293,6 +2288,12 @@ Attacklab.wmdBase = function(){
 		}
 	};	
 	
+	command.doHorizontalRule = function(chunk){
+		chunk.startTag = "----------\n";
+		chunk.selection = "";
+		chunk.skipLines(2, 1, true);
+	}
+	
 	// Note that these commands either have a textOp callback which is
 	// executed on button click OR they have an execute function which
 	// performs non-text work (undo/redo only).
@@ -2382,11 +2383,7 @@ Attacklab.wmdBase = function(){
 	command.hr.description = "Horizontal Rule <hr>";
 	command.hr.image = "hr.png";
 	command.hr.key = "r";
-	command.hr.textOp = function(chunk){	
-		chunk.startTag = "----------\n";
-		chunk.selection = "";
-		chunk.skipLines(2, 1, true);
-	};
+	command.hr.textOp = command.doHorizontalRule;
 };
 
 
