@@ -331,6 +331,15 @@ Attacklab.wmdBase = function(){
 		return result;
 	};
 	
+	position.getHeight = function (elem) {
+		return elem.offsetHeight || elem.scrollHeight;
+	};
+
+	position.getWidth = function (elem) {
+		return elem.offsetWidth || elem.scrollWidth;
+	};
+
+	
 	// DONE - slightly improved - jslint clean
 	//
 	// Watches the input textarea, polling at an interval and runs
