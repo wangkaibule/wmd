@@ -200,22 +200,24 @@ Attacklab.wmdBase = function(){
 			util.removeEvent(doc.body, "keydown", checkEscape);
 			var text = input.value;
 			
-			// Fixes common pasting errors.
-			text = text.replace('http://http://', 'http://');
-			text = text.replace('http://https://', 'https://');
-			text = text.replace('http://ftp://', 'ftp://');
-			
-			if (text.indexOf('http://') === -1 && text.indexOf('ftp://') === -1) {
-				text = 'http://' + text;
-			}
-			
-			if (isCancel) {
-				text = null;
-			}
 			dialog.parentNode.removeChild(dialog);
 			background.parentNode.removeChild(background);
-			makeLinkMarkdown(text);
-			return false;
+			
+			if (isCancel){
+				makeLinkMarkdown(null);
+			}
+			else{
+				// Fixes common pasting errors.
+				text = text.replace('http://http://', 'http://');
+				text = text.replace('http://https://', 'https://');
+				text = text.replace('http://ftp://', 'ftp://');
+				
+				if (text.indexOf('http://') === -1 && text.indexOf('ftp://') === -1) {
+					text = 'http://' + text;
+				}
+
+				makeLinkMarkdown(text);
+			}
 		};
 		
 		// Creates the background behind the hyperlink text entry box.
@@ -227,7 +229,7 @@ Attacklab.wmdBase = function(){
 			background.className = "wmd-prompt-background";
 			
 			// Some versions of Konqueror don't support transparent colors
-			// so we make the whole window transparent, frustrating the users.
+			// so we make the whole window transparent.
 			if (global.isKonqueror){
 				background.style.backgroundColor = "transparent";
 			}
@@ -264,7 +266,7 @@ Attacklab.wmdBase = function(){
 			var okButton = doc.createElement("input");
 			okButton.type = "button";
 			okButton.onclick = function(){
-				return close();
+				close(false);
 			};
 			okButton.value = "OK";
 
@@ -273,7 +275,7 @@ Attacklab.wmdBase = function(){
 			var cancelButton = doc.createElement("input");
 			cancelButton.type = "button";
 			cancelButton.onclick = function(){
-				return close(true);
+				close(true);
 			};
 			cancelButton.value = "Cancel";
 
@@ -289,7 +291,6 @@ Attacklab.wmdBase = function(){
 			
 			
 			if (global.isIE_5or6) {
-				// Might want to move to CSS in conditional comment.
 				dialog.style.position = "absolute";
 				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
 			}
@@ -303,9 +304,10 @@ Attacklab.wmdBase = function(){
 			
 		};
 		
-		// Why isn't this stuff all in one place?
 		createBackground();
 		
+		// Why is this in a zero-length timeout?
+		// Is it working around a browser bug?
 		top.setTimeout(function(){
 		
 			createDialog();
