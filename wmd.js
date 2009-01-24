@@ -162,10 +162,9 @@ Attacklab.wmdBase = function(){
 		return elem;
 	};
 	
-	// TODO: Clean up dialog creation code, perhaps in a real constructor.
-	//
-	// This is the thing that pops up and asks for the URL when you click the hyperlink
-	// or image buttons.
+
+	// This simulates a modal dialog box and asks for the URL when you
+	// click the hyperlink or image buttons.
 	//
 	// text: The html for the input box.
 	// defaultInputText: The default value that appears in the input box.
@@ -178,8 +177,7 @@ Attacklab.wmdBase = function(){
 		var background;		// The background beind the dialog box.
 		var input;			// The text box where you enter the hyperlink.
 		
-		// Shouldn't this go someplace else?
-		// Like maybe at the top?
+
 		if (defaultInputText === undefined) {
 			defaultInputText = "";
 		}
@@ -199,12 +197,9 @@ Attacklab.wmdBase = function(){
 		var close = function(isCancel){
 			util.removeEvent(doc.body, "keydown", checkEscape);
 			var text = input.value;
-			
-			dialog.parentNode.removeChild(dialog);
-			background.parentNode.removeChild(background);
-			
+
 			if (isCancel){
-				makeLinkMarkdown(null);
+				text = null;
 			}
 			else{
 				// Fixes common pasting errors.
@@ -215,9 +210,11 @@ Attacklab.wmdBase = function(){
 				if (text.indexOf('http://') === -1 && text.indexOf('ftp://') === -1) {
 					text = 'http://' + text;
 				}
-
-				makeLinkMarkdown(text);
 			}
+			
+			dialog.parentNode.removeChild(dialog);
+			background.parentNode.removeChild(background);
+			makeLinkMarkdown(text);
 		};
 		
 		// Creates the background behind the hyperlink text entry box.
@@ -230,6 +227,8 @@ Attacklab.wmdBase = function(){
 			
 			// Some versions of Konqueror don't support transparent colors
 			// so we make the whole window transparent.
+			//
+			// Is this necessary on modern konqueror browsers?
 			if (global.isKonqueror){
 				background.style.backgroundColor = "transparent";
 			}
@@ -298,7 +297,8 @@ Attacklab.wmdBase = function(){
 			util.addEvent(doc.body, "keydown", checkEscape);
 			doc.body.appendChild(dialog);
 			
-			// This has to be done AFTER adding the dialog to the form if you want it to be centered.
+			// This has to be done AFTER adding the dialog to the form if you
+			// want it to be centered.
 			dialog.style.marginTop = -(position.getHeight(dialog) / 2) + "px";
 			dialog.style.marginLeft = -(position.getWidth(dialog) / 2) + "px";
 			
@@ -311,21 +311,19 @@ Attacklab.wmdBase = function(){
 		top.setTimeout(function(){
 		
 			createDialog();
-			
-			// Select the default input box text.
+
 			var defTextLen = defaultInputText.length;
 			if (input.selectionStart !== undefined) {
 				input.selectionStart = 0;
 				input.selectionEnd = defTextLen;
 			}
-			else 
-				if (input.createTextRange) {
-					var range = input.createTextRange();
-					range.collapse(false);
-					range.moveStart("character", -defTextLen);
-					range.moveEnd("character", defTextLen);
-					range.select();
-				}
+			else if (input.createTextRange) {
+				var range = input.createTextRange();
+				range.collapse(false);
+				range.moveStart("character", -defTextLen);
+				range.moveEnd("character", defTextLen);
+				range.select();
+			}
 			
 			input.focus();
 		}, 0);
