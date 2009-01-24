@@ -799,6 +799,8 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
+		var spriteButtons = {};
+		
 		var makeSpritedButtonRow = function(){
 		 	
 			var buttonBar = document.getElementById("new-button-bar");
@@ -818,6 +820,7 @@ Attacklab.wmdBase = function(){
 			boldButton.title = "Strong <strong> Ctrl-B";
 			boldButton.key = "b";
 			boldButton.XShift = "0px";
+			boldButton.textOp = command.doBold;
 			buttonRow.appendChild(boldButton);
 			
 			var italicButton = document.createElement("li");
@@ -826,6 +829,7 @@ Attacklab.wmdBase = function(){
 			italicButton.title = "Emphasis <em> Ctrl-I";
 			italicButton.key = "i";
 			italicButton.XShift = "-20px";
+			italicButton.textOp = command.doItalic;
 			buttonRow.appendChild(italicButton);
 
 			var spacer1 = document.createElement("li");
@@ -839,6 +843,9 @@ Attacklab.wmdBase = function(){
 			linkButton.title = "Hyperlink <a> Ctrl-L";
 			linkButton.key = "l";
 			linkButton.XShift = "-40px";
+			linkButton.textOp = function(chunk, postProcessing){
+				command.doLinkOrImage(chunk, postProcessing, false);
+			};
 			buttonRow.appendChild(linkButton);
 
 			var quoteButton = document.createElement("li");
@@ -847,6 +854,7 @@ Attacklab.wmdBase = function(){
 			quoteButton.title = "Blockquote <blockquote> Ctrl-.";
 			quoteButton.key = ".";
 			quoteButton.XShift = "-60px";
+			quoteButton.textOp = command.doBlockquote;
 			buttonRow.appendChild(quoteButton);
 			
 			var codeButton = document.createElement("li");
@@ -855,6 +863,7 @@ Attacklab.wmdBase = function(){
 			codeButton.title = "Code Sample <pre><code> Ctrl-K";
 			codeButton.key = "k";
 			codeButton.XShift = "-80px";
+			codeButton.textOp = command.doCode;
 			buttonRow.appendChild(codeButton);
 
 			var imageButton = document.createElement("li");
@@ -863,6 +872,9 @@ Attacklab.wmdBase = function(){
 			imageButton.title = "Image <img> Ctrl-G";
 			imageButton.key = "g";
 			imageButton.XShift = "-100px";
+			imageButton.textOp = function(chunk, postProcessing){
+				command.doLinkOrImage(chunk, postProcessing, true);
+			};
 			buttonRow.appendChild(imageButton);
 
 			var spacer2 = document.createElement("li");
@@ -876,6 +888,9 @@ Attacklab.wmdBase = function(){
 			olistButton.title = "Numbered List <ol> Ctrl-O";
 			olistButton.key = "o";
 			olistButton.XShift = "-120px";
+			olistButton.textOp = function(chunk, postProcessing){
+				command.doList(chunk, postProcessing, true);
+			};
 			buttonRow.appendChild(olistButton);
 			
 			var ulistButton = document.createElement("li");
@@ -884,6 +899,9 @@ Attacklab.wmdBase = function(){
 			ulistButton.title = "Bulleted List <ul> Ctrl-U";
 			ulistButton.key = "u";
 			ulistButton.XShift = "-140px";
+			ulistButton.textOp = function(chunk, postProcessing){
+				command.doList(chunk, postProcessing, false);
+			};
 			buttonRow.appendChild(ulistButton);
 			
 			var headingButton = document.createElement("li");
@@ -892,6 +910,7 @@ Attacklab.wmdBase = function(){
 			headingButton.title = "Heading <h1>/<h2> Ctrl-H";
 			headingButton.key = "h";
 			headingButton.XShift = "-160px";
+			headingButton.textOp = command.doHeading;
 			buttonRow.appendChild(headingButton); 
 			
 			var hrButton = document.createElement("li");
@@ -899,6 +918,7 @@ Attacklab.wmdBase = function(){
 			hrButton.id = "wmd-hr-button";
 			hrButton.title = "Horizontal Rule <hr> Ctrl-R";
 			hrButton.XShift = "-180px";
+			hrButton.textOp = command.doHorizontalRule;
 			buttonRow.appendChild(hrButton); 
 			
 			var spacer3 = document.createElement("li");
@@ -912,6 +932,9 @@ Attacklab.wmdBase = function(){
 			undoButton.title = "Undo - Ctrl-Z";
 			undoButton.key = "z";
 			undoButton.XShift = "-200px";
+			undoButton.execute = function(manager){
+				manager.undo();
+			};
 			buttonRow.appendChild(undoButton); 
 			
 			var redoButton = document.createElement("li");
@@ -920,6 +943,9 @@ Attacklab.wmdBase = function(){
 			redoButton.title = "Redo - Ctrl-Y";
 			redoButton.key = "y";
 			redoButton.XShift = "-220px";
+			redoButton.execute = function(manager){
+				manager.redo();
+			};
 			buttonRow.appendChild(redoButton); 
 			
 			var helpButton = document.createElement("li");
@@ -937,7 +963,7 @@ Attacklab.wmdBase = function(){
 			for (var i = 0; i < buttons.length; i++) {
 				
 				var btn = buttons[i];
-			
+
 				if (btn.className === "new-button") {
 					
 					btn.onmouseover = function(){
@@ -949,24 +975,24 @@ Attacklab.wmdBase = function(){
 					};
 					
 					btn.onclick = function() {
-					
 						if (this.onmouseout) {
 							this.onmouseout();
 						}
-			
+						doClick(this);
 					}
 				}
 			}
 			
+			
 			// Need to read and store the x value at button creation.
 			// Should also store the two offsets (-20 and -40) as constants at the top
 			// instead of as magic numbers.
-			undoButton.style.backgroundPosition = undoButton.XShift + " " + disabledYShift;
-			redoButton.style.backgroundPosition = redoButton.XShift + " " + disabledYShift;
+			//undoButton.style.backgroundPosition = undoButton.XShift + " " + disabledYShift;
+			//redoButton.style.backgroundPosition = redoButton.XShift + " " + disabledYShift;
 
 			
-			undoButton.onmouseover = undoButton.onmouseout = undoButton.onclick = null;
-			redoButton.onmouseover = redoButton.onmouseout = redoButton.onclick = null;
+			//undoButton.onmouseover = undoButton.onmouseout = undoButton.onclick = null;
+			//redoButton.onmouseover = redoButton.onmouseout = redoButton.onclick = null;
 		}
 		
 		var createEditor = function(){
