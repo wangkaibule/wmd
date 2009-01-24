@@ -713,8 +713,26 @@ Attacklab.wmdBase = function(){
 				
 				var chunks = state.getChunks();
 				
-				// This seems like a very convoluted way of performing the action.
-				var performAction = function(){
+				// Some commands launch a "modal" prompt dialog.  Javascript
+				// can't really make a modal dialog box and the WMD code
+				// will continue to execute while the dialog is displayed.
+				// This prevents the dialog pattern I'm used to and means
+				// I can't do something like this:
+				//
+				// var link = CreateLinkDialog();
+				// makeMarkdownLink(link);
+				// 
+				// Instead of this straightforward method of handling a
+				// dialog I have to pass any code which would execute
+				// after the dialog is dismissed (e.g. link creation)
+				// in a function parameter.
+				//
+				// Yes this is awkward and I think it sucks, but there's
+				// no real workaround.  Only the image and link code
+				// create dialogs and require the function pointers
+				// but I'm making all the code work like this for
+				// consistency.
+				var fixupInputArea = function(){
 				
 					inputBox.focus();
 					
@@ -726,11 +744,8 @@ Attacklab.wmdBase = function(){
 					previewRefreshCallback();
 				};
 				
-				var action = button.textOp(chunks, performAction);
+				button.textOp(chunks, fixupInputArea);
 				
-				if (!action) {
-					performAction();
-				}
 			}
 			
 			if (button.execute) {
@@ -1522,22 +1537,18 @@ Attacklab.wmdBase = function(){
 		chunk.selection = chunk.selection.replace(/\s+$/, "");
 	};
 	
-	command.doBold = function(chunk){
-		return command.doBorI(chunk, 2, "strong text");
+	command.doBold = function(chunk, postProcessing){
+		return command.doBorI(chunk, postProcessing, 2, "strong text");
 	};
 	
-	command.doItalic = function(chunk){
-		return command.doBorI(chunk, 1, "emphasized text");
+	command.doItalic = function(chunk, postProcessing){
+		return command.doBorI(chunk, postProcessing, 1, "emphasized text");
 	};
 	
-	// DONE - reworked a little and jslint clean
-	//
 	// chunk: The selected region that will be enclosed with */**
 	// nStars: 1 for italics, 2 for bold
 	// insertText: If you just click the button without highlighting text, this gets inserted
-	//
-	// This part of the control acts in some pretty weird ways.
-	command.doBorI = function(chunk, nStars, insertText){
+	command.doBorI = function(chunk, postProcessing, nStars, insertText){
 	
 		// Get rid of whitespace and fixup newlines.
 		chunk.trimWhitespace();
@@ -1556,32 +1567,32 @@ Attacklab.wmdBase = function(){
 		if ((prevStars >= nStars) && (prevStars != 2 || nStars != 1)) {
 			chunk.before = chunk.before.replace(re("[*]{" + nStars + "}$", ""), "");
 			chunk.after = chunk.after.replace(re("^[*]{" + nStars + "}", ""), "");
-			return;
 		}
-		
-		// It's not really clear why this code is necessary.  It just moves
-		// some arbitrary stuff around.
-		if (!chunk.selection && starsAfter) {
+		else if (!chunk.selection && starsAfter) {
+			// It's not really clear why this code is necessary.  It just moves
+			// some arbitrary stuff around.
 			chunk.after = chunk.after.replace(/^([*_]*)/, "");
 			chunk.before = chunk.before.replace(/(\s?)$/, "");
 			var whitespace = re.$1;
 			chunk.before = chunk.before + starsAfter + whitespace;
-			return;
+		}
+		else {
+		
+			// In most cases, if you don't have any selected text and click the button
+			// you'll get a selected, marked up region with the default text inserted.
+			if (!chunk.selection && !starsAfter) {
+				chunk.selection = insertText;
+			}
+			
+			// Add the true markup.
+			var markup = nStars <= 1 ? "*" : "**"; // shouldn't the test be = ?
+			chunk.before = chunk.before + markup;
+			chunk.after = markup + chunk.after;
 		}
 		
-		// In most cases, if you don't have any selected text and click the button
-		// you'll get a selected, marked up region with the default text inserted.
-		if (!chunk.selection && !starsAfter) {
-			chunk.selection = insertText;
-		}
-		
-		// Add the true markup.
-		var markup = nStars <= 1 ? "*" : "**"; // shouldn't the test be = ?
-		chunk.before = chunk.before + markup;
-		chunk.after = markup + chunk.after;
+		postProcessing();
 	};
 	
-	// DONE
 	command.stripLinkDefs = function(text, defsToAdd){
 	
 		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm, 
@@ -1598,7 +1609,6 @@ Attacklab.wmdBase = function(){
 		return text;
 	};
 	
-	// DONE
 	command.addLinkDef = function(chunk, linkDef){
 	
 		var refNumber = 0; // The current reference number
@@ -1652,8 +1662,7 @@ Attacklab.wmdBase = function(){
 		return refOut;
 	};
 	
-	// Done
-	command.doLinkOrImage = function(chunk, isImage, performAction){
+	command.doLinkOrImage = function(chunk, postProcessing, isImage){
 	
 		chunk.trimWhitespace();
 		chunk.findTags(/\s*!?\[/, /\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
@@ -1694,7 +1703,7 @@ Attacklab.wmdBase = function(){
 						}
 					}
 				}
-				performAction();
+				postProcessing();
 			};
 			
 			if (isImage) {
@@ -1703,18 +1712,15 @@ Attacklab.wmdBase = function(){
 			else {
 				util.prompt(linkDialogText, linkDefaultText, makeLinkMarkdown);
 			}
-			return true;
 		}
 	};
 	
-	// DONE - jslint clean
 	util.makeAPI = function(){
 		wmd.wmd = {};
 		wmd.wmd.editor = wmd.editor;
 		wmd.wmd.previewManager = wmd.previewManager;
 	};
 	
-	// DONE - fixed up and jslint clean
 	util.startEditor = function(){
 	
 		if (wmd.wmd_env.autostart === false) {
@@ -1742,7 +1748,6 @@ Attacklab.wmdBase = function(){
 		util.addEvent(top, "load", loadListener);
 	};
 	
-	// DONE
 	wmd.previewManager = function(){
 		
 		var managerObj = this;
@@ -1959,7 +1964,7 @@ Attacklab.wmdBase = function(){
 
 	// When making a list, hitting shift-enter will put your cursor on the next line
 	// at the current indent level.
-	command.doAutoindent = function(chunk){
+	command.doAutoindent = function(chunk, postProcessing){
 		
 		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
 		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
@@ -1980,10 +1985,11 @@ Attacklab.wmdBase = function(){
 				command.doCode(chunk);
 			}
 		}
+		
+		postProcessing();
 	};
 	
-	// DONE
-	command.doBlockquote = function(chunk){
+	command.doBlockquote = function(chunk, postProcessing){
 		
 		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
 			function(totalMatch, newlinesBefore, text, newlinesAfter){
@@ -2065,10 +2071,11 @@ Attacklab.wmdBase = function(){
 				return "";
 			});
 		}
+		
+		postProcessing();
 	};
 
-	// DONE
-	command.doCode = function(chunk){
+	command.doCode = function(chunk, postProcessing){
 		
 		var hasTextBefore = /\S[ ]*$/.test(chunk.before);
 		var hasTextAfter = /^[ ]*\S/.test(chunk.after);
@@ -2098,14 +2105,14 @@ Attacklab.wmdBase = function(){
 			if(!chunk.selection){
 				chunk.startTag = "    ";
 				chunk.selection = "enter code here";
-				return;
 			}
-			
-			if(/^[ ]{0,3}\S/m.test(chunk.selection)){
-				chunk.selection = chunk.selection.replace(/^/gm, "    ");
-			}
-			else{
-				chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+			else {
+				if(/^[ ]{0,3}\S/m.test(chunk.selection)){
+					chunk.selection = chunk.selection.replace(/^/gm, "    ");
+				}
+				else{
+					chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+				}
 			}
 		}
 		else{
@@ -2129,12 +2136,14 @@ Attacklab.wmdBase = function(){
 				chunk.startTag = chunk.endTag="";
 			}
 		}
+		
+		postProcessing();
 	};
 	
 	// List processing callback.
 	//
 	// isNumberedList will be undefined if this function is called by autoindent.
-	command.doList = function(chunk, isNumberedList){
+	command.doList = function(chunk, postProcessing, isNumberedList){
 				
 		// These are identical except at the very beginning and end.
 		// Should probably use the regex extension function to make this clearer.
@@ -2199,6 +2208,7 @@ Attacklab.wmdBase = function(){
 				chunk.after = chunk.after.replace(nextItemsRegex, getPrefixedItem);
 			}
 			if(isNumberedList == hasDigits){
+				postProcessing();
 				return;
 			}
 		}
@@ -2234,10 +2244,12 @@ Attacklab.wmdBase = function(){
 		var spaces = prefix.replace(/./g, " ");
 		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
 		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
+		
+		postProcessing();
 	};
 	
 	// DONE
-	command.doHeading = function(chunk){
+	command.doHeading = function(chunk, postProcessing){
 		
 		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
 		chunk.selection = chunk.selection.replace(/\s+/g, " ");
@@ -2249,6 +2261,7 @@ Attacklab.wmdBase = function(){
 			chunk.startTag = "## ";
 			chunk.selection = "Heading";
 			chunk.endTag = " ##";
+			postProcessing();
 			return;
 		}
 		
@@ -2294,12 +2307,15 @@ Attacklab.wmdBase = function(){
 				chunk.endTag += headerChar;
 			}
 		}
+		
+		postProcessing();
 	};	
 	
-	command.doHorizontalRule = function(chunk){
+	command.doHorizontalRule = function(chunk, postProcessing){
 		chunk.startTag = "----------\n";
 		chunk.selection = "";
 		chunk.skipLines(2, 1, true);
+		postProcessing();
 	}
 	
 	// Note that these commands either have a textOp callback which is
@@ -2322,8 +2338,8 @@ Attacklab.wmdBase = function(){
 	command.link.description = "Hyperlink <a>";
 	command.link.image = "link.png";
 	command.link.key = "l";
-	command.link.textOp = function(chunk, callback){
-		return command.doLinkOrImage(chunk, false, callback);
+	command.link.textOp = function(chunk, postProcessing){
+		command.doLinkOrImage(chunk, postProcessing, false);
 	};
 	
 	command.undo = {};
@@ -2347,9 +2363,7 @@ Attacklab.wmdBase = function(){
 	command.blockquote.description = "Blockquote <blockquote>";
 	command.blockquote.image = "blockquote.png";
 	command.blockquote.key = ".";
-	command.blockquote.textOp = function(chunk){
-		return command.doBlockquote(chunk);
-	};
+	command.blockquote.textOp = command.doBlockquote;
 	
 	command.code = {};
 	command.code.description = "Code Sample <pre><code>";
@@ -2361,24 +2375,24 @@ Attacklab.wmdBase = function(){
 	command.img.description = "Image <img>";
 	command.img.image = "img.png";
 	command.img.key = "g";
-	command.img.textOp = function(chunk, callback){
-		return command.doLinkOrImage(chunk, true, callback);
+	command.img.textOp = function(chunk, postProcessing){
+		command.doLinkOrImage(chunk, postProcessing, true);
 	};
 	
 	command.ol = {};
 	command.ol.description = "Numbered List <ol>";
 	command.ol.image = "ol.png";
 	command.ol.key = "o";
-	command.ol.textOp = function(chunk){
-		command.doList(chunk, true);
+	command.ol.textOp = function(chunk, postProcessing){
+		command.doList(chunk, postProcessing, true);
 	};
 	
 	command.ul = {};
 	command.ul.description = "Bulleted List <ul>";
 	command.ul.image = "ul.png";
 	command.ul.key = "u";
-	command.ul.textOp = function(chunk){
-		command.doList(chunk, false);
+	command.ul.textOp = function(chunk, postProcessing){
+		command.doList(chunk, postProcessing, false);
 	};
 	
 	command.h1 = {};
