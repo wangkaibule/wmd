@@ -897,7 +897,7 @@ Attacklab.wmdBase = function(){
 			var hrButton = document.createElement("li");
 			hrButton.className = "new-button";
 			hrButton.id = "wmd-hr-button";
-			hrButton.title = "Horizontal Rule <hr>";
+			hrButton.title = "Horizontal Rule <hr> Ctrl-R";
 			hrButton.XShift = "-180px";
 			buttonRow.appendChild(hrButton); 
 			
