@@ -797,11 +797,12 @@ Attacklab.wmdBase = function(){
 				makeButton(buttonCallbacks[callback]);
 			}
 		};
-		
-		
+			
 		var setUndoRedoButtonStates = function(){
-			setupButton(document.getElementById("wmd-undo-button"), undoMgr.canUndo());
-			setupButton(document.getElementById("wmd-redo-button"), undoMgr.canRedo());
+			if(undoMgr){
+				setupButton(document.getElementById("wmd-undo-button"), undoMgr.canUndo());
+				setupButton(document.getElementById("wmd-redo-button"), undoMgr.canRedo());
+			}
 		};
 		
 		var setupButton = function(button, isEnabled) {
@@ -832,8 +833,7 @@ Attacklab.wmdBase = function(){
 				button.onmouseover = button.onmouseout = button.onclick = function(){};
 			}
 		}
-
-		
+	
 		var makeSpritedButtonRow = function(){
 		 	
 			var buttonBar = document.getElementById("new-button-bar");
@@ -1096,6 +1096,7 @@ Attacklab.wmdBase = function(){
 			if (!wmd.nativeUndo) {
 				undoMgr = new wmd.undoManager(function(){
 					previewRefreshCallback();
+					setUndoRedoButtonStates();
 				});
 			}
 			
