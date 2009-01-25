@@ -1163,8 +1163,6 @@ Attacklab.wmdBase = function(){
 			}
 			
 			util.addEvent(inputBox, keyEvent, function(key){
-			
-				var isButtonKey = false;
 				
 				// Check to see if we have a button key and, if so execute the callback.
 				if (key.ctrlKey || key.metaKey) {
@@ -1186,18 +1184,13 @@ Attacklab.wmdBase = function(){
 						
 						if (!key.altKey && !key.shiftKey && ((button.key && (keyCodeStr === button.key)))) {
 							doClick(button);
-							isButtonKey = true;
+							if (key.preventDefault) {
+								key.preventDefault();
+							}
+							if (top.event) {
+								top.event.returnValue = false;
+							}
 						}
-					}
-				}
-				
-				// This should be moved into the if test in the for loop.
-				if (isButtonKey) {
-					if (key.preventDefault) {
-						key.preventDefault();
-					}
-					if (top.event) {
-						top.event.returnValue = false;
 					}
 				}
 			});
