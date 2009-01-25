@@ -418,7 +418,6 @@ Attacklab.wmdBase = function(){
 		assignInterval();
 	};
 	
-	// DONE
 	// Handles pushing and popping TextareaStates for undo/redo commands.
 	// I should rename the stack variables to list.
 	wmd.undoManager = function(callback){
@@ -803,7 +802,6 @@ Attacklab.wmdBase = function(){
 			boldButton.className = "wmd-button";
 			boldButton.id = "wmd-bold-button";
 			boldButton.title = "Strong <strong> Ctrl-B";
-			boldButton.key = "b";
 			boldButton.XShift = "0px";
 			boldButton.textOp = command.doBold;
 			setupButton(boldButton, true);
@@ -813,7 +811,6 @@ Attacklab.wmdBase = function(){
 			italicButton.className = "wmd-button";
 			italicButton.id = "wmd-italic-button";
 			italicButton.title = "Emphasis <em> Ctrl-I";
-			italicButton.key = "i";
 			italicButton.XShift = "-20px";
 			italicButton.textOp = command.doItalic;
 			setupButton(italicButton, true);
@@ -828,7 +825,6 @@ Attacklab.wmdBase = function(){
 			linkButton.className = "wmd-button";
 			linkButton.id = "wmd-link-button";
 			linkButton.title = "Hyperlink <a> Ctrl-L";
-			linkButton.key = "l";
 			linkButton.XShift = "-40px";
 			linkButton.textOp = function(chunk, postProcessing){
 				command.doLinkOrImage(chunk, postProcessing, false);
@@ -840,7 +836,6 @@ Attacklab.wmdBase = function(){
 			quoteButton.className = "wmd-button";
 			quoteButton.id = "wmd-quote-button";
 			quoteButton.title = "Blockquote <blockquote> Ctrl-.";
-			quoteButton.key = ".";
 			quoteButton.XShift = "-60px";
 			quoteButton.textOp = command.doBlockquote;
 			setupButton(quoteButton, true);
@@ -850,7 +845,6 @@ Attacklab.wmdBase = function(){
 			codeButton.className = "wmd-button";
 			codeButton.id = "wmd-code-button";
 			codeButton.title = "Code Sample <pre><code> Ctrl-K";
-			codeButton.key = "k";
 			codeButton.XShift = "-80px";
 			codeButton.textOp = command.doCode;
 			setupButton(codeButton, true);
@@ -860,7 +854,6 @@ Attacklab.wmdBase = function(){
 			imageButton.className = "wmd-button";
 			imageButton.id = "wmd-image-button";
 			imageButton.title = "Image <img> Ctrl-G";
-			imageButton.key = "g";
 			imageButton.XShift = "-100px";
 			imageButton.textOp = function(chunk, postProcessing){
 				command.doLinkOrImage(chunk, postProcessing, true);
@@ -877,7 +870,6 @@ Attacklab.wmdBase = function(){
 			olistButton.className = "wmd-button";
 			olistButton.id = "wmd-olist-button";
 			olistButton.title = "Numbered List <ol> Ctrl-O";
-			olistButton.key = "o";
 			olistButton.XShift = "-120px";
 			olistButton.textOp = function(chunk, postProcessing){
 				command.doList(chunk, postProcessing, true);
@@ -889,7 +881,6 @@ Attacklab.wmdBase = function(){
 			ulistButton.className = "wmd-button";
 			ulistButton.id = "wmd-ulist-button";
 			ulistButton.title = "Bulleted List <ul> Ctrl-U";
-			ulistButton.key = "u";
 			ulistButton.XShift = "-140px";
 			ulistButton.textOp = function(chunk, postProcessing){
 				command.doList(chunk, postProcessing, false);
@@ -901,7 +892,6 @@ Attacklab.wmdBase = function(){
 			headingButton.className = "wmd-button";
 			headingButton.id = "wmd-heading-button";
 			headingButton.title = "Heading <h1>/<h2> Ctrl-H";
-			headingButton.key = "h";
 			headingButton.XShift = "-160px";
 			headingButton.textOp = command.doHeading;
 			setupButton(headingButton, true);
@@ -925,7 +915,6 @@ Attacklab.wmdBase = function(){
 			undoButton.className = "wmd-button";
 			undoButton.id = "wmd-undo-button";
 			undoButton.title = "Undo - Ctrl-Z";
-			undoButton.key = "z";
 			undoButton.XShift = "-200px";
 			undoButton.execute = function(manager){
 				manager.undo();
@@ -944,7 +933,6 @@ Attacklab.wmdBase = function(){
 				// mac and other non-Windows platforms
 				redoButton.title = "Redo - Ctrl+Shift+Z";
 			}
-			redoButton.key = "y";
 			redoButton.XShift = "-220px";
 			redoButton.execute = function(manager){
 				manager.redo();
@@ -1336,8 +1324,6 @@ Attacklab.wmdBase = function(){
 		this.init();
 	};
 	
-	// DONE - empty
-	//
 	// before: contains all the text in the input box BEFORE the selection.
 	// after: contains all the text in the input box AFTER the selection.
 	wmd.Chunks = function(){
@@ -1389,8 +1375,6 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	// DONE - jslint clean
-	//
 	// If remove is false, the whitespace is transferred
 	// to the before/after regions.
 	//
@@ -2093,9 +2077,6 @@ Attacklab.wmdBase = function(){
 		postProcessing();
 	};
 	
-	// List processing callback.
-	//
-	// isNumberedList will be undefined if this function is called by autoindent.
 	command.doList = function(chunk, postProcessing, isNumberedList){
 				
 		// These are identical except at the very beginning and end.
@@ -2204,7 +2185,6 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	// DONE
 	command.doHeading = function(chunk, postProcessing){
 		
 		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
@@ -2273,95 +2253,6 @@ Attacklab.wmdBase = function(){
 		chunk.skipLines(2, 1, true);
 		postProcessing();
 	}
-	
-	// Note that these commands either have a textOp callback which is
-	// executed on button click OR they have an execute function which
-	// performs non-text work (undo/redo only).
-	
-	command.bold = {};
-	command.bold.description = "Strong <strong>";
-	command.bold.image = "bold.png";
-	command.bold.key = "b";
-	command.bold.textOp = command.doBold;
-	
-	command.italic = {};
-	command.italic.description = "Emphasis <em>";
-	command.italic.image = "italic.png";
-	command.italic.key = "i";
-	command.italic.textOp = command.doItalic;
-	
-	command.link = {};
-	command.link.description = "Hyperlink <a>";
-	command.link.image = "link.png";
-	command.link.key = "l";
-	command.link.textOp = function(chunk, postProcessing){
-		command.doLinkOrImage(chunk, postProcessing, false);
-	};
-	
-	command.undo = {};
-	command.undo.description = "Undo";
-	command.undo.image = "undo.png";
-	command.undo.execute = function(manager){
-		manager.undo();
-	};
-	
-	command.redo = {};
-	command.redo.description = "Redo";
-	command.redo.image = "redo.png";
-	command.redo.execute = function(manager){
-		manager.redo();
-	};	
-	
-	command.autoindent={};
-	command.autoindent.textOp = command.doAutoindent;
-	
-	command.blockquote = {};
-	command.blockquote.description = "Blockquote <blockquote>";
-	command.blockquote.image = "blockquote.png";
-	command.blockquote.key = ".";
-	command.blockquote.textOp = command.doBlockquote;
-	
-	command.code = {};
-	command.code.description = "Code Sample <pre><code>";
-	command.code.image = "code.png";
-	command.code.key = "k";
-	command.code.textOp = command.doCode;
-	
-	command.img = {};
-	command.img.description = "Image <img>";
-	command.img.image = "img.png";
-	command.img.key = "g";
-	command.img.textOp = function(chunk, postProcessing){
-		command.doLinkOrImage(chunk, postProcessing, true);
-	};
-	
-	command.ol = {};
-	command.ol.description = "Numbered List <ol>";
-	command.ol.image = "ol.png";
-	command.ol.key = "o";
-	command.ol.textOp = function(chunk, postProcessing){
-		command.doList(chunk, postProcessing, true);
-	};
-	
-	command.ul = {};
-	command.ul.description = "Bulleted List <ul>";
-	command.ul.image = "ul.png";
-	command.ul.key = "u";
-	command.ul.textOp = function(chunk, postProcessing){
-		command.doList(chunk, postProcessing, false);
-	};
-	
-	command.h1 = {};
-	command.h1.description = "Heading <h1>/<h2>";
-	command.h1.image = "h1.png";
-	command.h1.key = "h";
-	command.h1.textOp = command.doHeading;
-	
-	command.hr = {};
-	command.hr.description = "Horizontal Rule <hr>";
-	command.hr.image = "hr.png";
-	command.hr.key = "r";
-	command.hr.textOp = command.doHorizontalRule;
 };
 
 
