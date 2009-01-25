@@ -1178,20 +1178,61 @@ Attacklab.wmdBase = function(){
 						keyCodeStr = ".";
 					}
 					
-					for (var callback in buttonCallbacks) {
+					switch(keyCodeStr) {
+						case "b":
+							doClick(document.getElementById("wmd-bold-button"));
+							break;
+						case "i":
+							doClick(document.getElementById("wmd-italic-button"));
+							break;
+						case "l":
+							doClick(document.getElementById("wmd-link-button"));
+							break;
+						case ".":
+							doClick(document.getElementById("wmd-quote-button"));
+							break;
+						case "k":
+							doClick(document.getElementById("wmd-code-button"));
+							break;
+						case "g":
+							doClick(document.getElementById("wmd-image-button"));
+							break;
+						case "o":
+							doClick(document.getElementById("wmd-olist-button"));
+							break;
+						case "u":
+							doClick(document.getElementById("wmd-ulist-button"));
+							break;
+						case "h":
+							doClick(document.getElementById("wmd-heading-button"));
+							break;
+						case "r":
+							doClick(document.getElementById("wmd-hr-button"));
+							break;
+						case "y":
+							doClick(document.getElementById("wmd-redo-button"));
+							break;
+						case "z":
+							doClick(document.getElementById("wmd-undo-button"));
+							break;
+						default:
+							return;
+					}
 					
-						var button = buttonCallbacks[callback];
+					// for (var callback in buttonCallbacks) {
+					
+						// var button = buttonCallbacks[callback];
 						
-						if (!key.altKey && !key.shiftKey && ((button.key && (keyCodeStr === button.key)))) {
-							doClick(button);
+						// if (!key.altKey && !key.shiftKey && ((button.key && (keyCodeStr === button.key)))) {
+							// doClick(button);
 							if (key.preventDefault) {
 								key.preventDefault();
 							}
 							if (top.event) {
 								top.event.returnValue = false;
 							}
-						}
-					}
+						// }
+					// }
 				}
 			});
 			
