@@ -690,9 +690,6 @@ Attacklab.wmdBase = function(){
 		var creationHandle;
 		
 		var undoMgr; // The undo manager
-		var undoImage; // The image on the undo button
-		var redoImage; // The image on the redo button
-		var buttonCallbacks = []; // Callbacks for the buttons at the top of the input area
 		
 		// Perform the button's action.
 		var doClick = function(button){
@@ -750,51 +747,6 @@ Attacklab.wmdBase = function(){
 			
 			if (button.execute) {
 				button.execute(editObj);
-			}
-		};
-		
-		var addButtonCallback = function(callback){
-			callback && buttonCallbacks.push(callback);
-		};
-			
-		var makeButton = function(button){
-		
-			if (button.image) {
-			
-				// Create the image and add properties.
-				var btnImage = util.createImage(button.image);
-				btnImage.border = 0;
-				if (button.description) {
-					var desc = button.description;
-					if (button.key) {
-						var ctrl = " Ctrl+";
-						desc += ctrl + button.key.toUpperCase();
-					}
-					btnImage.title = desc;
-				}
-				
-				btnImage.onmouseover = function(){};
-				btnImage.onmouseout = function(){};
-				
-				btnImage.onclick = function(){
-					if (btnImage.onmouseout) {
-						btnImage.onmouseout();
-					}
-					doClick(button);
-					return false;
-				};
-				doc.getElementById("wmd-button-bar").appendChild(btnImage);
-				return btnImage;
-			}
-			
-			return;
-		};
-		
-		// Creates the button row above the input area.
-		var makeButtonRow = function(){
-		
-			for (var callback in buttonCallbacks) {
-				makeButton(buttonCallbacks[callback]);
 			}
 		};
 			
@@ -1046,53 +998,6 @@ Attacklab.wmdBase = function(){
 			return false;
 		};
 		
-		var setButtonCallbacks = function(){
-		
-			var buttons = wmd.wmd_env.buttons.split(/\s+/);
-			
-			for (var btn in buttons) {
-			
-				switch (buttons[btn]) {
-					case "bold":
-						addButtonCallback(command.bold);
-						break;
-					case "italic":
-						addButtonCallback(command.italic);
-						break;
-					case "link":
-						addButtonCallback(command.link);
-						break;
-				}
-				
-				if (wmd.full) {
-					switch (buttons[btn]) {
-						case "blockquote":
-							addButtonCallback(command.blockquote);
-							break;
-						case "code":
-							addButtonCallback(command.code);
-							break;
-						case "image":
-							addButtonCallback(command.img);
-							break;
-						case "ol":
-							addButtonCallback(command.ol);
-							break;
-						case "ul":
-							addButtonCallback(command.ul);
-							break;
-						case "heading":
-							addButtonCallback(command.h1);
-							break;
-						case "hr":
-							addButtonCallback(command.hr);
-							break;
-					}
-				}
-			}
-			return;
-		};
-		
 		var setupEditor = function(){
 		
 			if (/\?noundo/.test(doc.location.href)) {
@@ -1129,33 +1034,8 @@ Attacklab.wmdBase = function(){
 			mainSpan.unselectable = "on";
 			mainDiv.appendChild(mainSpan);
 			
-			// The autoindent callback always exists, even though there's no actual button for it.
-			// It's only called when shift-enter is pressed and we're making a list.
-			addButtonCallback(command.autoindent);
 			
-			setButtonCallbacks();
-			makeButtonRow();
 			makeSpritedButtonRow();
-			
-			// Create the undo/redo buttons.
-			if (undoMgr) {
-				undoImage = makeButton(command.undo);
-				redoImage = makeButton(command.redo);
-				
-				var platform = nav.platform.toLowerCase();
-				if (/win/.test(platform)) {
-					undoImage.title += " - Ctrl+Z";
-					redoImage.title += " - Ctrl+Y";
-				}
-				else if (/mac/.test(platform)) {
-					undoImage.title += " - Ctrl+Z";
-					redoImage.title += " - Ctrl+Shift+Z";
-				}
-				else {
-					undoImage.title += " - Ctrl+Z";
-					redoImage.title += " - Ctrl+Shift+Z";
-				}
-			}
 			
 			var keyEvent = "keydown";
 			if (global.isOpera) {
@@ -1219,20 +1099,14 @@ Attacklab.wmdBase = function(){
 							return;
 					}
 					
-					// for (var callback in buttonCallbacks) {
+
+					if (key.preventDefault) {
+						key.preventDefault();
+					}
 					
-						// var button = buttonCallbacks[callback];
-						
-						// if (!key.altKey && !key.shiftKey && ((button.key && (keyCodeStr === button.key)))) {
-							// doClick(button);
-							if (key.preventDefault) {
-								key.preventDefault();
-							}
-							if (top.event) {
-								top.event.returnValue = false;
-							}
-						// }
-					// }
+					if (top.event) {
+						top.event.returnValue = false;
+					}
 				}
 			});
 			
