@@ -985,6 +985,13 @@ Attacklab.wmdBase = function(){
 			redoButton.className = "new-button";
 			redoButton.id = "wmd-redo-button";
 			redoButton.title = "Redo - Ctrl-Y";
+			if (/win/.test(nav.platform.toLowerCase())) {
+				redoButton.title = "Redo - Ctrl-Y";
+			}
+			else {
+				// mac and other non-Windows platforms
+				redoButton.title = "Redo - Ctrl+Shift+Z";
+			}
 			redoButton.key = "y";
 			redoButton.XShift = "-220px";
 			redoButton.execute = function(manager){
@@ -1000,7 +1007,6 @@ Attacklab.wmdBase = function(){
 			helpButton.XShift = "-240px";
 			setupButton(helpButton, true);
 			buttonRow.appendChild(helpButton);
-			
 			
 			setUndoRedoButtonStates();
 		}
