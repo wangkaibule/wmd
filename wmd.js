@@ -1242,7 +1242,9 @@ Attacklab.wmdBase = function(){
 					var keyCode = key.charCode || key.keyCode;
 					// Character 13 is Enter
 					if (keyCode === 13) {
-						doClick(command.autoindent);
+						fakeButton = {};
+						fakeButton.textOp = command.doAutoindent;
+						doClick(fakeButton);
 					}
 				}
 			});
@@ -2322,7 +2324,10 @@ Attacklab.wmdBase = function(){
 		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
 		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
 		
-		postProcessing();
+		// Not set when called by autoindent.
+		if (postProcessing) {
+			postProcessing();
+		}
 	};
 	
 	// DONE
