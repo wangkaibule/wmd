@@ -756,8 +756,7 @@ Attacklab.wmdBase = function(){
 		var addButtonCallback = function(callback){
 			callback && buttonCallbacks.push(callback);
 		};
-		
-		
+			
 		var makeButton = function(button){
 		
 			if (button.image) {
@@ -799,7 +798,41 @@ Attacklab.wmdBase = function(){
 			}
 		};
 		
-		var spriteButtons = {};
+		
+		var setUndoRedoButtonStates = function(){
+			setupButton(document.getElementById("wmd-undo-button"), undoMgr.canUndo());
+			setupButton(document.getElementById("wmd-redo-button"), undoMgr.canRedo());
+		};
+		
+		var setupButton = function(button, isEnabled) {
+		
+			var normalYShift = "0px";
+			var disabledYShift = "-20px";
+			var highlightYShift = "-40px";
+			
+			if(isEnabled) {
+				button.style.backgroundPosition = button.XShift + " " + normalYShift;
+				button.onmouseover = function(){
+					this.style.backgroundPosition = this.XShift + " " + highlightYShift;
+				};
+							
+				button.onmouseout = function(){
+					this.style.backgroundPosition = this.XShift + " " + normalYShift;
+				};
+					
+				button.onclick = function() {
+					if (this.onmouseout) {
+						this.onmouseout();
+					}
+					doClick(this);
+				}
+			}
+			else {
+				button.style.backgroundPosition = button.XShift + " " + disabledYShift;
+				button.onmouseover = button.onmouseout = button.onclick = function(){};
+			}
+		}
+
 		
 		var makeSpritedButtonRow = function(){
 		 	
@@ -821,6 +854,7 @@ Attacklab.wmdBase = function(){
 			boldButton.key = "b";
 			boldButton.XShift = "0px";
 			boldButton.textOp = command.doBold;
+			setupButton(boldButton, true);
 			buttonRow.appendChild(boldButton);
 			
 			var italicButton = document.createElement("li");
@@ -830,6 +864,7 @@ Attacklab.wmdBase = function(){
 			italicButton.key = "i";
 			italicButton.XShift = "-20px";
 			italicButton.textOp = command.doItalic;
+			setupButton(italicButton, true);
 			buttonRow.appendChild(italicButton);
 
 			var spacer1 = document.createElement("li");
@@ -846,6 +881,7 @@ Attacklab.wmdBase = function(){
 			linkButton.textOp = function(chunk, postProcessing){
 				command.doLinkOrImage(chunk, postProcessing, false);
 			};
+			setupButton(linkButton, true);
 			buttonRow.appendChild(linkButton);
 
 			var quoteButton = document.createElement("li");
@@ -855,6 +891,7 @@ Attacklab.wmdBase = function(){
 			quoteButton.key = ".";
 			quoteButton.XShift = "-60px";
 			quoteButton.textOp = command.doBlockquote;
+			setupButton(quoteButton, true);
 			buttonRow.appendChild(quoteButton);
 			
 			var codeButton = document.createElement("li");
@@ -864,6 +901,7 @@ Attacklab.wmdBase = function(){
 			codeButton.key = "k";
 			codeButton.XShift = "-80px";
 			codeButton.textOp = command.doCode;
+			setupButton(codeButton, true);
 			buttonRow.appendChild(codeButton);
 
 			var imageButton = document.createElement("li");
@@ -875,6 +913,7 @@ Attacklab.wmdBase = function(){
 			imageButton.textOp = function(chunk, postProcessing){
 				command.doLinkOrImage(chunk, postProcessing, true);
 			};
+			setupButton(imageButton, true);
 			buttonRow.appendChild(imageButton);
 
 			var spacer2 = document.createElement("li");
@@ -891,6 +930,7 @@ Attacklab.wmdBase = function(){
 			olistButton.textOp = function(chunk, postProcessing){
 				command.doList(chunk, postProcessing, true);
 			};
+			setupButton(olistButton, true);
 			buttonRow.appendChild(olistButton);
 			
 			var ulistButton = document.createElement("li");
@@ -902,6 +942,7 @@ Attacklab.wmdBase = function(){
 			ulistButton.textOp = function(chunk, postProcessing){
 				command.doList(chunk, postProcessing, false);
 			};
+			setupButton(ulistButton, true);
 			buttonRow.appendChild(ulistButton);
 			
 			var headingButton = document.createElement("li");
@@ -911,6 +952,7 @@ Attacklab.wmdBase = function(){
 			headingButton.key = "h";
 			headingButton.XShift = "-160px";
 			headingButton.textOp = command.doHeading;
+			setupButton(headingButton, true);
 			buttonRow.appendChild(headingButton); 
 			
 			var hrButton = document.createElement("li");
@@ -919,6 +961,7 @@ Attacklab.wmdBase = function(){
 			hrButton.title = "Horizontal Rule <hr> Ctrl-R";
 			hrButton.XShift = "-180px";
 			hrButton.textOp = command.doHorizontalRule;
+			setupButton(hrButton, true);
 			buttonRow.appendChild(hrButton); 
 			
 			var spacer3 = document.createElement("li");
@@ -935,6 +978,7 @@ Attacklab.wmdBase = function(){
 			undoButton.execute = function(manager){
 				manager.undo();
 			};
+			setupButton(undoButton, true);
 			buttonRow.appendChild(undoButton); 
 			
 			var redoButton = document.createElement("li");
@@ -946,6 +990,7 @@ Attacklab.wmdBase = function(){
 			redoButton.execute = function(manager){
 				manager.redo();
 			};
+			setupButton(redoButton, true);
 			buttonRow.appendChild(redoButton); 
 			
 			var helpButton = document.createElement("li");
@@ -953,46 +998,11 @@ Attacklab.wmdBase = function(){
 			helpButton.id = "wmd-help-button";
 			helpButton.title = "Markdown Quick Reference";
 			helpButton.XShift = "-240px";
+			setupButton(helpButton, true);
 			buttonRow.appendChild(helpButton);
 			
 			
-			// Add onclick event handling to buttons.
-			// This is NOT very efficient.  I should store the buttons in a list
-			// and iterate over them instead.
-			var buttons = document.getElementsByTagName("li");
-			for (var i = 0; i < buttons.length; i++) {
-				
-				var btn = buttons[i];
-
-				if (btn.className === "new-button") {
-					
-					btn.onmouseover = function(){
-						this.style.backgroundPosition = this.XShift + " " + highlightYShift;
-					};
-							
-					btn.onmouseout = function(){
-						this.style.backgroundPosition = this.XShift + " " + normalYShift;
-					};
-					
-					btn.onclick = function() {
-						if (this.onmouseout) {
-							this.onmouseout();
-						}
-						doClick(this);
-					}
-				}
-			}
-			
-			
-			// Need to read and store the x value at button creation.
-			// Should also store the two offsets (-20 and -40) as constants at the top
-			// instead of as magic numbers.
-			//undoButton.style.backgroundPosition = undoButton.XShift + " " + disabledYShift;
-			//redoButton.style.backgroundPosition = redoButton.XShift + " " + disabledYShift;
-
-			
-			//undoButton.onmouseover = undoButton.onmouseout = undoButton.onclick = null;
-			//redoButton.onmouseover = redoButton.onmouseout = redoButton.onclick = null;
+			setUndoRedoButtonStates();
 		}
 		
 		var createEditor = function(){
