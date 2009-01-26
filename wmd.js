@@ -228,14 +228,28 @@ Attacklab.wmdBase = function(){
 		
 			background = doc.createElement("div");
 			background.className = "wmd-prompt-background";
+			style = background.style;
+			style.position = "absolute";
+			style.top = "0";
+			style.left = "0";
+			style.backgroundColor = "#000";
+			style.zIndex = "1000";
 			
 			// Some versions of Konqueror don't support transparent colors
 			// so we make the whole window transparent.
 			//
 			// Is this necessary on modern konqueror browsers?
 			if (global.isKonqueror){
-				background.style.backgroundColor = "transparent";
+				style.backgroundColor = "transparent";
 			}
+			else{
+				style.opacity = "0.5";
+				style.filter = "alpha(opacity=50)";
+			}
+			
+			var pageSize = position.getPageSize();
+			style.width = "100%";
+			style.height = pageSize[1] + "px";
 			
 			doc.body.appendChild(background);
 		};
@@ -355,7 +369,46 @@ Attacklab.wmdBase = function(){
 		return elem.offsetWidth || elem.scrollWidth;
 	};
 
-
+	position.getPageSize = function(){
+		
+		var scrollWidth, scrollHeight;
+		var innerWidth, innerHeight;
+		
+		// It's not very clear which blocks work with which browsers.
+		if(self.innerHeight && self.scrollMaxY){
+			scrollWidth = doc.body.scrollWidth;
+			scrollHeight = self.innerHeight + self.scrollMaxY;
+		}
+		else if(doc.body.scrollHeight > doc.body.offsetHeight){
+			scrollWidth = doc.body.scrollWidth;
+			scrollHeight = doc.body.scrollHeight;
+		}
+		else{
+			scrollWidth = doc.body.offsetWidth;
+			scrollHeight = doc.body.offsetHeight;
+		}
+		
+		if(self.innerHeight){
+			// Non-IE browser
+			innerWidth = self.innerWidth;
+			innerHeight = self.innerHeight;
+		}
+		else if(doc.documentElement && doc.documentElement.clientHeight){
+			// Some versions of IE (IE 6 w/ a DOCTYPE declaration)
+			innerWidth = doc.documentElement.clientWidth;
+			innerHeight = doc.documentElement.clientHeight;
+		}
+		else if(doc.body){
+			// Other versions of IE
+			innerWidth = doc.body.clientWidth;
+			innerHeight = doc.body.clientHeight;
+		}
+		
+        var maxWidth = Math.max(scrollWidth, innerWidth);
+        var maxHeight = Math.max(scrollHeight, innerHeight);
+        return [maxWidth, maxHeight, innerWidth, innerHeight];
+	};
+	
 	// Watches the input textarea, polling at an interval and runs
 	// a callback function if anything has changed.
 	wmd.inputPoller = function(callback, interval){
@@ -950,41 +1003,6 @@ Attacklab.wmdBase = function(){
 			setUndoRedoButtonStates();
 		}
 		
-		var createEditor = function(){
-		
-			if (inputBox.offsetParent) {
-			
-				div = doc.createElement("div");
-				
-				var style = div.style;
-				style.visibility = "hidden";
-				style.top = style.left = style.width = "0px";
-				style.display = "inline";
-				style.cssFloat = "left";
-				style.overflow = "visible";
-				style.opacity = "0.999";
-				
-				mainDiv.style.position = "absolute";
-				
-				div.appendChild(mainDiv);
-				
-				inputBox.style.marginTop = "";
-				var height1 = position.getTop(inputBox);
-				
-				inputBox.style.marginTop = "0";
-				var height2 = position.getTop(inputBox);
-				
-				offsetHeight = height1 - height2;
-				
-				inputBox.parentNode.insertBefore(div, inputBox);
-				
-				style.visibility = "visible";
-				
-				return true;
-			}
-			return false;
-		};
-		
 		var setupEditor = function(){
 		
 			if (/\?noundo/.test(doc.location.href)) {
@@ -997,30 +1015,6 @@ Attacklab.wmdBase = function(){
 					setUndoRedoButtonStates();
 				});
 			}
-			
-			mainDiv = doc.createElement("div");
-			mainDiv.style.display = "block";
-			mainDiv.style.zIndex = 100;
-			if (!wmd.full) {
-				mainDiv.title += "\n(Free Version)";
-			}
-			mainDiv.unselectable = "on";
-			mainDiv.onclick = function(){
-				inputBox.focus();
-			};
-			
-			mainSpan = doc.createElement("span");
-			var style = mainSpan.style;
-			style.height = "auto";
-			style.paddingBottom = "2px";
-			style.lineHeight = "0";
-			style.paddingLeft = "15px";
-			style.paddingRight = "65px";
-			style.display = "block";
-			style.position = "absolute";
-			mainSpan.unselectable = "on";
-			mainDiv.appendChild(mainSpan);
-			
 			
 			makeSpritedButtonRow();
 			
@@ -1080,7 +1074,12 @@ Attacklab.wmdBase = function(){
 							doClick(document.getElementById("wmd-redo-button"));
 							break;
 						case "z":
-							doClick(document.getElementById("wmd-undo-button"));
+							if(key.shiftKey) {
+								doClick(document.getElementById("wmd-redo-button"));
+							}
+							else {
+								doClick(document.getElementById("wmd-undo-button"));
+							}
 							break;
 						default:
 							return;
@@ -1109,14 +1108,6 @@ Attacklab.wmdBase = function(){
 					}
 				}
 			});
-			
-			if (!createEditor()) {
-				creationHandle = top.setInterval(function(){
-					if (createEditor()) {
-						top.clearInterval(creationHandle);
-					}
-				}, 100);
-			}
 			
 			if (inputBox.form) {
 				var submitCallback = inputBox.form.onsubmit;

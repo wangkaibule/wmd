@@ -1,6 +1,19 @@
-.wmd-button-bar { width:50%; background-color:White; }
+body { background-color: White}
 
-.wmd-input { width:50%; height:500px; }
+.wmd-button-bar 
+{
+	width:50%;
+	background-color:White; 
+}
+
+.wmd-input 
+{ 
+	width:50%; 
+	height:500px;
+	background-color: Gainsboro;
+	border:1px solid DarkGray;
+	margin-top: -20px;
+}
 
 .wmd-preview { width:50%; background-color:LightSkyBlue; }
 
