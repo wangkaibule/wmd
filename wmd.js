@@ -69,6 +69,9 @@ Attacklab.wmdBase = function(){
 	// has loaded.
 	wmd.panels = undefined;
 	
+	wmd.ieCachedRange = null;
+	wmd.ieRetardedClick = false;
+	
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
 	util.isVisible = function (elem) {
@@ -852,12 +855,20 @@ Attacklab.wmdBase = function(){
 				button.onmouseout = function(){
 					this.style.backgroundPosition = this.XShift + " " + normalYShift;
 				};
+				
+				if(global.isIE) {
+					button.onmousedown =  function() { 
+						wmd.ieRetardedClick = true;
+						wmd.ieCachedRange = document.selection.createRange(); 
+					};
+				}
 					
 				button.onclick = function() {
 					if (this.onmouseout) {
 						this.onmouseout();
 					}
 					doClick(this);
+					return false;
 				}
 			}
 			else {
@@ -1046,6 +1057,7 @@ Attacklab.wmdBase = function(){
 			}
 			
 			makeSpritedButtonRow();
+			
 			
 			var keyEvent = "keydown";
 			if (global.isOpera) {
@@ -1268,8 +1280,16 @@ Attacklab.wmdBase = function(){
 			else if (doc.selection) {
 				
 				stateObj.text = util.fixEolChars(inputArea.value);
-					
-				var range = doc.selection.createRange();
+				
+				var range;
+				if(wmd.ieRetardedClick && wmd.ieCachedRange) {
+					range = wmd.ieCachedRange;
+					wmd.ieRetardedClick = false;
+				}
+				else {
+					range = doc.selection.createRange();
+				}
+				//var range = doc.selection.createRange();
 				var fixedRange = util.fixEolChars(range.text);
 				var marker = "\x07";
 				var markedRange = marker + fixedRange + marker;
@@ -2073,11 +2093,10 @@ Attacklab.wmdBase = function(){
 			}
 		}
 		else{
-			
 			// Use backticks (`) to delimit the code block.
 			
 			chunk.trimWhitespace();
-			chunk.findTags(/`/,/`/);
+			chunk.findTags(/`/, /`/);
 			
 			if(!chunk.startTag && !chunk.endTag){
 				chunk.startTag = chunk.endTag="`";
