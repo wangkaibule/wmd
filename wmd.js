@@ -232,7 +232,6 @@ Attacklab.wmdBase = function(){
 			style.position = "absolute";
 			style.top = "0";
 			style.left = "0";
-			style.backgroundColor = "#000";
 			style.zIndex = "1000";
 			
 			// Some versions of Konqueror don't support transparent colors
@@ -242,9 +241,11 @@ Attacklab.wmdBase = function(){
 			if (global.isKonqueror){
 				style.backgroundColor = "transparent";
 			}
-			else{
-				style.opacity = "0.5";
+			else if (global.isIE){
 				style.filter = "alpha(opacity=50)";
+			}
+			else {
+				style.opacity = "0.5";
 			}
 			
 			var pageSize = position.getPageSize();
@@ -260,41 +261,59 @@ Attacklab.wmdBase = function(){
 			// The main dialog box.
 			dialog = doc.createElement("div");
 			dialog.className = "wmd-prompt-dialog";
+			dialog.style.padding = "10px;";
+			dialog.style.position = "fixed";
+			dialog.style.width = "400px";
+			dialog.style.zIndex = "1001";
 			
 			// The dialog text.
 			var question = doc.createElement("div");
 			question.innerHTML = text;
+			question.style.padding = "5px";
 			dialog.appendChild(question);
 			
 			// The web form container for the text box and buttons.
 			var form = doc.createElement("form");
-			form.onsubmit = function(){
-				return close();
-			};
+			form.onsubmit = function(){ return close(); };
+			style = form.style;
+			style.padding = "0";
+			style.margin = "0";
+			style.cssFloat = "left";
+			style.width = "100%";
+			style.textAlign = "center";
+			style.position = "relative";
 			dialog.appendChild(form);
 			
 			// The input text box
 			input = doc.createElement("input");
 			input.type = "text";
 			input.value = defaultInputText;
+			style = input.style;
+			style.display = "block";
+			style.width = "80%";
+			style.marginLeft = style.marginRight = "auto";
 			form.appendChild(input);
 			
 			// The ok button
 			var okButton = doc.createElement("input");
 			okButton.type = "button";
-			okButton.onclick = function(){
-				close(false);
-			};
+			okButton.onclick = function(){ close(false); };
 			okButton.value = "OK";
+			style = okButton.style;
+			style.margin = "10px";
+			style.display = "inline";
+			style.width = "7em";
 
 			
 			// The cancel button
 			var cancelButton = doc.createElement("input");
 			cancelButton.type = "button";
-			cancelButton.onclick = function(){
-				close(true);
-			};
+			cancelButton.onclick = function(){ close(true); };
 			cancelButton.value = "Cancel";
+			style = cancelButton.style;
+			style.margin = "10px";
+			style.display = "inline";
+			style.width = "7em";
 
 			// The order of these buttons is different on macs.
 			if (/mac/.test(nav.platform.toLowerCase())) {
@@ -305,14 +324,16 @@ Attacklab.wmdBase = function(){
 				form.appendChild(okButton);
 				form.appendChild(cancelButton);
 			}
-			
-			
-			if (global.isIE_5or6) {
-				dialog.style.position = "absolute";
-				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
-			}
 
 			util.addEvent(doc.body, "keydown", checkEscape);
+			dialog.style.top = "50%";
+			dialog.style.left = "50%";
+			dialog.style.display = "block";
+			if(global.isIE_5or6){
+				dialog.style.position = "absolute";
+				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
+				dialog.style.left = "50%";
+			}
 			doc.body.appendChild(dialog);
 			
 			// This has to be done AFTER adding the dialog to the form if you
