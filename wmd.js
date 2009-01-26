@@ -594,31 +594,27 @@ Attacklab.wmdBase = function(){
 					// 63232 - 63235: page up/dn and arrow keys on safari
 					setMode("moving");
 				}
-				else 
-					if (keyCode == 8 || keyCode == 46 || keyCode == 127) {
-						// 8: backspace
-						// 46: delete
-						// 127: delete
-						setMode("deleting");
-					}
-					else 
-						if (keyCode == 13) {
-							// 13: Enter
-							setMode("newlines");
-						}
-						else 
-							if (keyCode == 27) {
-								// 27: escape
-								setMode("escape");
-							}
-							else 
-								if ((keyCode < 16 || keyCode > 20) && keyCode != 91) {
-									// 16-20 are shift, etc. 
-									// 91: left window key
-									// I think this might be a little messed up since there are
-									// a lot of nonprinting keys above 20.
-									setMode("typing");
-								}
+				else if (keyCode == 8 || keyCode == 46 || keyCode == 127) {
+					// 8: backspace
+					// 46: delete
+					// 127: delete
+					setMode("deleting");
+				}
+				else if (keyCode == 13) {
+					// 13: Enter
+					setMode("newlines");
+				}
+				else if (keyCode == 27) {
+					// 27: escape
+					setMode("escape");
+				}
+				else if ((keyCode < 16 || keyCode > 20) && keyCode != 91) {
+					// 16-20 are shift, etc. 
+					// 91: left window key
+					// I think this might be a little messed up since there are
+					// a lot of nonprinting keys above 20.
+					setMode("typing");
+				}
 			}
 		};
 		
