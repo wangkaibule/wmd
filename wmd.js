@@ -231,7 +231,7 @@ Attacklab.wmdBase = function(){
 			style = background.style;
 			style.position = "absolute";
 			style.top = "0";
-			style.left = "0";
+			
 			style.zIndex = "1000";
 			
 			// Some versions of Konqueror don't support transparent colors
@@ -249,8 +249,16 @@ Attacklab.wmdBase = function(){
 			}
 			
 			var pageSize = position.getPageSize();
-			style.width = "100%";
 			style.height = pageSize[1] + "px";
+			
+			if(global.isIE){
+				style.left = doc.documentElement.scrollLeft;
+				style.width = doc.documentElement.clientWidth;
+			}
+			else {
+				style.left = "0";
+				style.width = "100%";
+			}
 			
 			doc.body.appendChild(background);
 		};
