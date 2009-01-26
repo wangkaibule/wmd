@@ -48,6 +48,10 @@ Attacklab.wmdBase = function(){
 	// The location of your button images relative to the base directory.
 	var imageDirectory = "images/";
 	
+	// Some intervals in ms.  These can be adjusted to reduce the control's load.
+	var previewPollInterval = 500;
+	var pastePollInterval = 100;
+	
 	// -------------------------------------------------------------------
 	//  END OF YOUR CHANGES
 	// -------------------------------------------------------------------
@@ -405,9 +409,7 @@ Attacklab.wmdBase = function(){
 		
 		// Set how often we poll the textarea for changes.
 		var assignInterval = function(){
-			if (interval === undefined) {
-				interval = 500;
-			}
+			// previewPollInterval is set at the top of the namespace.
 			killHandle = top.setInterval(doTickCallback, interval);
 		};
 		
@@ -640,7 +642,8 @@ Attacklab.wmdBase = function(){
 				}
 			};
 			
-			poller = new wmd.inputPoller(handlePaste, 100);
+			// pastePollInterval is specified at the beginning of this namespace.
+			poller = new wmd.inputPoller(handlePaste, pastePollInterval);
 			
 			util.addEvent(wmd.panels.input, "keydown", handleCtrlYZ);
 			util.addEvent(wmd.panels.input, "keydown", handleModeChange);
@@ -1706,7 +1709,8 @@ Attacklab.wmdBase = function(){
 			
 			util.addEvent(inputElem, "keypress", listener);
 			util.addEvent(inputElem, "keydown", listener);
-			poller = new wmd.inputPoller(listener);
+			// previewPollInterval is set at the top of this file.
+			poller = new wmd.inputPoller(listener, previewPollInterval);
 		};
 		
 		var getDocScrollTop = function(){
