@@ -69,8 +69,20 @@ Attacklab.wmdBase = function(){
 	// has loaded.
 	wmd.panels = undefined;
 	
-	wmd.ieCachedRange = null;
-	wmd.ieRetardedClick = false;
+	// Internet explorer has problems with CSS sprite buttons that use HTML
+	// lists.  When you click on the background image "button", IE will 
+	// select the non-existent link text and discard the selection in the
+	// textarea.  The solution to this is to cache the textarea selection
+	// on the button's mousedown event and set a flag.  In the part of the
+	// code where we need to grab the selection, we check for the flag
+	// and, if it's set, use the cached area instead of querying the
+	// textarea.
+	//
+	// This ONLY affects Internet Explorer (tested on versions 6, 7
+	// and 8) and ONLY on button clicks.  Keyboard shortcuts work
+	// normally since the focus never leaves the textarea.
+	wmd.ieCachedRange = null;		// cached textarea selection
+	wmd.ieRetardedClick = false;	// flag
 	
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
@@ -856,6 +868,9 @@ Attacklab.wmdBase = function(){
 					this.style.backgroundPosition = this.XShift + " " + normalYShift;
 				};
 				
+				// IE tries to select the background image "button" text (it's
+				// implemented in a list item) so we have to cache the selection
+				// on mousedown.
 				if(global.isIE) {
 					button.onmousedown =  function() { 
 						wmd.ieRetardedClick = true;
@@ -1281,6 +1296,9 @@ Attacklab.wmdBase = function(){
 				
 				stateObj.text = util.fixEolChars(inputArea.value);
 				
+				// IE loses the selection in the textarea when buttons are
+				// clicked.  On IE we cache the selection and set a flag
+				// which we check for here.
 				var range;
 				if(wmd.ieRetardedClick && wmd.ieCachedRange) {
 					range = wmd.ieCachedRange;
@@ -1289,7 +1307,7 @@ Attacklab.wmdBase = function(){
 				else {
 					range = doc.selection.createRange();
 				}
-				//var range = doc.selection.createRange();
+
 				var fixedRange = util.fixEolChars(range.text);
 				var marker = "\x07";
 				var markedRange = marker + fixedRange + marker;
