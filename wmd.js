@@ -52,6 +52,10 @@ Attacklab.wmdBase = function(){
 	var previewPollInterval = 500;
 	var pastePollInterval = 100;
 	
+	// The link and title for the help button
+	var helpLink = "http://wmd-editor.com/";
+	var helpHoverTitle = "WMD website";
+	
 	// -------------------------------------------------------------------
 	//  END OF YOUR CHANGES
 	// -------------------------------------------------------------------
@@ -1050,8 +1054,11 @@ Attacklab.wmdBase = function(){
 			var helpButton = document.createElement("li");
 			helpButton.className = "wmd-button";
 			helpButton.id = "wmd-help-button";
-			helpButton.title = "Markdown Quick Reference";
+			helpButton.title = helpHoverTitle;
 			helpButton.XShift = "-240px";
+			helpButton.execute = function(){
+				window.open(helpLink);
+			};
 			setupButton(helpButton, true);
 			buttonRow.appendChild(helpButton);
 			
