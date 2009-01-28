@@ -3,31 +3,34 @@ body
 	background-color: White
 }
 
+.wmd-panel
+{
+	width: 50%;
+	min-width: 500px;
+}
+
 #wmd-button-bar 
 {
-	width:50%;
-	background-color:White; 
+
+	background-color: White; 
 }
 
 #wmd-input 
 { 
-	width:50%; 
-	height:500px;
+	height: 500px;
 	background-color: Gainsboro;
-	border:1px solid DarkGray;
+	border: 1px solid DarkGray;
 	margin-top: -20px;
 }
 
 #wmd-preview 
 { 
-	width:50%; 
-	background-color:LightSkyBlue; 
+	background-color: LightSkyBlue; 
 }
 
 #wmd-output 
 { 
-	width:50%; 
-	background-color:Pink;
+	background-color: Pink;
 }
 
 #wmd-button-row 
@@ -107,7 +110,7 @@ body
 
 .wmd-prompt-dialog > form > input[type="text"] {
 	border: 1px solid #999999;
-	color:black;
+	color: black;
 }
 
 .wmd-prompt-dialog > form > input[type="button"]{
