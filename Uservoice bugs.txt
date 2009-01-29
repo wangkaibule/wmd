@@ -1,0 +1,23 @@
+Opera post preview bug 
+
+I can't seem to get to the cause of this bug, so here is the complete post:
+
+<quote> 
+Here's an idea: - Just before you create the alert window, stop the DragEvent 
+....event.stopImmediatePropagation(); 
+store the event so we can resume if the user clicks the Yes button 
+....queuedEvent = event as DragEvent; 
+show the alert window 
+if the user clicks the yes button, resume the queued event 
+....dispatchEvent(queuedEvent); 
+</quote>
+
+(dots are spaces) 
+The problem here is that only the first indented piece of text is converted to code and has syntax highlighting. The other 2 are just indented, but no formatting applied to them.
+
+I'm using Opera 9.61, XP SP3.
+
+
+--------------------------------------------------------------------------
+
+
