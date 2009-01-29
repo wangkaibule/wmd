@@ -220,6 +220,7 @@ Attacklab.wmdBase = function(){
 		var close = function(isCancel){
 			util.removeEvent(doc.body, "keydown", checkEscape);
 			var text = input.value;
+			text = text.replace(/[\n\r]*/, "");
 
 			if (isCancel){
 				text = null;
@@ -301,7 +302,7 @@ Attacklab.wmdBase = function(){
 			
 			// The web form container for the text box and buttons.
 			var form = doc.createElement("form");
-			form.onsubmit = function(){ return close(); };
+			form.onsubmit = function(){ close(false); };
 			style = form.style;
 			style.padding = "0";
 			style.margin = "0";
