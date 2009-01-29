@@ -220,7 +220,6 @@ Attacklab.wmdBase = function(){
 		var close = function(isCancel){
 			util.removeEvent(doc.body, "keydown", checkEscape);
 			var text = input.value;
-			text = text.replace(/[\n\r]*/, "");
 
 			if (isCancel){
 				text = null;
@@ -239,6 +238,7 @@ Attacklab.wmdBase = function(){
 			dialog.parentNode.removeChild(dialog);
 			background.parentNode.removeChild(background);
 			makeLinkMarkdown(text);
+			return false;
 		};
 		
 		// Creates the background behind the hyperlink text entry box.
@@ -302,7 +302,7 @@ Attacklab.wmdBase = function(){
 			
 			// The web form container for the text box and buttons.
 			var form = doc.createElement("form");
-			form.onsubmit = function(){ close(false); };
+			form.onsubmit = function(){ return close(false); };
 			style = form.style;
 			style.padding = "0";
 			style.margin = "0";
@@ -325,7 +325,7 @@ Attacklab.wmdBase = function(){
 			// The ok button
 			var okButton = doc.createElement("input");
 			okButton.type = "button";
-			okButton.onclick = function(){ close(false); };
+			okButton.onclick = function(){ return close(false); };
 			okButton.value = "OK";
 			style = okButton.style;
 			style.margin = "10px";
@@ -336,7 +336,7 @@ Attacklab.wmdBase = function(){
 			// The cancel button
 			var cancelButton = doc.createElement("input");
 			cancelButton.type = "button";
-			cancelButton.onclick = function(){ close(true); };
+			cancelButton.onclick = function(){ return close(true); };
 			cancelButton.value = "Cancel";
 			style = cancelButton.style;
 			style.margin = "10px";
@@ -826,9 +826,7 @@ Attacklab.wmdBase = function(){
 				//
 				// Yes this is awkward and I think it sucks, but there's
 				// no real workaround.  Only the image and link code
-				// create dialogs and require the function pointers
-				// but I'm making all the code work like this for
-				// consistency.
+				// create dialogs and require the function pointers.
 				var fixupInputArea = function(){
 				
 					inputBox.focus();
@@ -841,7 +839,11 @@ Attacklab.wmdBase = function(){
 					previewRefreshCallback();
 				};
 				
-				button.textOp(chunks, fixupInputArea);
+				var noCleanup = button.textOp(chunks, fixupInputArea);
+				
+				if(!noCleanup) {
+					fixupInputArea();
+				}
 				
 			}
 			
@@ -939,7 +941,7 @@ Attacklab.wmdBase = function(){
 			linkButton.title = "Hyperlink <a> Ctrl-L";
 			linkButton.XShift = "-40px";
 			linkButton.textOp = function(chunk, postProcessing){
-				command.doLinkOrImage(chunk, postProcessing, false);
+				return command.doLinkOrImage(chunk, postProcessing, false);
 			};
 			setupButton(linkButton, true);
 			buttonRow.appendChild(linkButton);
@@ -968,7 +970,7 @@ Attacklab.wmdBase = function(){
 			imageButton.title = "Image <img> Ctrl-G";
 			imageButton.XShift = "-100px";
 			imageButton.textOp = function(chunk, postProcessing){
-				command.doLinkOrImage(chunk, postProcessing, true);
+				return command.doLinkOrImage(chunk, postProcessing, true);
 			};
 			setupButton(imageButton, true);
 			buttonRow.appendChild(imageButton);
@@ -1592,7 +1594,7 @@ Attacklab.wmdBase = function(){
 			chunk.after = markup + chunk.after;
 		}
 		
-		postProcessing();
+		return;
 	};
 	
 	command.stripLinkDefs = function(text, defsToAdd){
@@ -1714,6 +1716,7 @@ Attacklab.wmdBase = function(){
 			else {
 				util.prompt(linkDialogText, linkDefaultText, makeLinkMarkdown);
 			}
+			return true;
 		}
 	};
 	
@@ -1988,8 +1991,6 @@ Attacklab.wmdBase = function(){
 				command.doCode(chunk);
 			}
 		}
-		
-		postProcessing();
 	};
 	
 	command.doBlockquote = function(chunk, postProcessing){
@@ -2074,8 +2075,6 @@ Attacklab.wmdBase = function(){
 				return "";
 			});
 		}
-		
-		postProcessing();
 	};
 
 	command.doCode = function(chunk, postProcessing){
@@ -2138,8 +2137,6 @@ Attacklab.wmdBase = function(){
 				chunk.startTag = chunk.endTag="";
 			}
 		}
-		
-		postProcessing();
 	};
 	
 	command.doList = function(chunk, postProcessing, isNumberedList){
@@ -2207,7 +2204,6 @@ Attacklab.wmdBase = function(){
 				chunk.after = chunk.after.replace(nextItemsRegex, getPrefixedItem);
 			}
 			if(isNumberedList == hasDigits){
-				postProcessing();
 				return;
 			}
 		}
@@ -2244,10 +2240,6 @@ Attacklab.wmdBase = function(){
 		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
 		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
 		
-		// Not set when called by autoindent.
-		if (postProcessing) {
-			postProcessing();
-		}
 	};
 	
 	command.doHeading = function(chunk, postProcessing){
@@ -2308,15 +2300,12 @@ Attacklab.wmdBase = function(){
 				chunk.endTag += headerChar;
 			}
 		}
-		
-		postProcessing();
 	};	
 	
 	command.doHorizontalRule = function(chunk, postProcessing){
 		chunk.startTag = "----------\n";
 		chunk.selection = "";
 		chunk.skipLines(2, 1, true);
-		postProcessing();
 	}
 };
 
