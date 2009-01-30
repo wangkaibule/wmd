@@ -2254,7 +2254,6 @@ Attacklab.wmdBase = function(){
 			chunk.startTag = "## ";
 			chunk.selection = "Heading";
 			chunk.endTag = " ##";
-			postProcessing();
 			return;
 		}
 		
