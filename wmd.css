@@ -73,6 +73,17 @@ body
 	list-style: none;
 }
 
+.wmd-button > a
+{
+	width: 20px; 
+	height: 20px; 
+	margin-left: 5px;
+	margin-right: 5px;
+	
+	position: absolute;
+	display: inline-block; 
+}
+
 
 /* sprite button slicing style information */
 #wmd-button-bar #wmd-bold-button    {left: 0px;   background-position: 0px 0;}

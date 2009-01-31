@@ -55,6 +55,7 @@ Attacklab.wmdBase = function(){
 	// The link and title for the help button
 	var helpLink = "http://wmd-editor.com/";
 	var helpHoverTitle = "WMD website";
+	var helpTarget = "_blank";
 	
 	// -------------------------------------------------------------------
 	//  END OF YOUR CHANGES
@@ -884,13 +885,16 @@ Attacklab.wmdBase = function(){
 						wmd.ieCachedRange = document.selection.createRange(); 
 					};
 				}
-					
-				button.onclick = function() {
-					if (this.onmouseout) {
-						this.onmouseout();
+				
+				if (!button.isHelp)
+				{
+					button.onclick = function() {
+						if (this.onmouseout) {
+							this.onmouseout();
+						}
+						doClick(this);
+						return false;
 					}
-					doClick(this);
-					return false;
 				}
 			}
 			else {
@@ -1057,11 +1061,15 @@ Attacklab.wmdBase = function(){
 			var helpButton = document.createElement("li");
 			helpButton.className = "wmd-button";
 			helpButton.id = "wmd-help-button";
-			helpButton.title = helpHoverTitle;
 			helpButton.XShift = "-240px";
-			helpButton.execute = function(){
-				window.open(helpLink);
-			};
+			helpButton.isHelp = true;
+			
+			var helpAnchor = document.createElement("a");
+			helpAnchor.href = helpLink;
+			helpAnchor.target = helpTarget
+			helpAnchor.title = helpHoverTitle;
+			helpButton.appendChild(helpAnchor);
+			
 			setupButton(helpButton, true);
 			buttonRow.appendChild(helpButton);
 			
