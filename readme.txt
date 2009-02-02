@@ -1,3 +1,14 @@
+** NOTE **
+*******************************************************************************
+
+This is a branch of the original WMD for Stackoverflow.  A LOT of functionality
+was removed as we did not need it.  Most of the customization and options are
+NOT in this version.  If you want that functionality, you'll have to wait for
+the next version (WMD 3).
+
+*******************************************************************************
+*******************************************************************************
+
 Installing WMD
 --------------
 
