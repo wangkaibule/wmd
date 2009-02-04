@@ -6,9 +6,6 @@
 // Original Markdown Copyright (c) 2004-2005 John Gruber
 //   <http://daringfireball.net/projects/markdown/>
 //
-// Redistributable under a BSD-style open source license.
-// See license.txt for more information.
-//
 // The full source distribution is at:
 //
 //				A A L
