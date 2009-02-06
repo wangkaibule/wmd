@@ -13,7 +13,6 @@ body
 
 #wmd-button-bar 
 {
-
 	background-color: White; 
 }
 
@@ -22,7 +21,6 @@ body
 	height: 500px;
 	background-color: Gainsboro;
 	border: 1px solid DarkGray;
-	margin-top: -20px;
 }
 
 #wmd-preview 
