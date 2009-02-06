@@ -919,7 +919,7 @@ Attacklab.wmdBase = function(){
 			var boldButton = document.createElement("li");
 			boldButton.className = "wmd-button";
 			boldButton.id = "wmd-bold-button";
-			boldButton.title = "Strong <strong> Ctrl-B";
+			boldButton.title = "Strong <strong> Ctrl+B";
 			boldButton.XShift = "0px";
 			boldButton.textOp = command.doBold;
 			setupButton(boldButton, true);
@@ -928,7 +928,7 @@ Attacklab.wmdBase = function(){
 			var italicButton = document.createElement("li");
 			italicButton.className = "wmd-button";
 			italicButton.id = "wmd-italic-button";
-			italicButton.title = "Emphasis <em> Ctrl-I";
+			italicButton.title = "Emphasis <em> Ctrl+I";
 			italicButton.XShift = "-20px";
 			italicButton.textOp = command.doItalic;
 			setupButton(italicButton, true);
@@ -942,7 +942,7 @@ Attacklab.wmdBase = function(){
 			var linkButton = document.createElement("li");
 			linkButton.className = "wmd-button";
 			linkButton.id = "wmd-link-button";
-			linkButton.title = "Hyperlink <a> Ctrl-L";
+			linkButton.title = "Hyperlink <a> Ctrl+L";
 			linkButton.XShift = "-40px";
 			linkButton.textOp = function(chunk, postProcessing){
 				return command.doLinkOrImage(chunk, postProcessing, false);
@@ -953,7 +953,7 @@ Attacklab.wmdBase = function(){
 			var quoteButton = document.createElement("li");
 			quoteButton.className = "wmd-button";
 			quoteButton.id = "wmd-quote-button";
-			quoteButton.title = "Blockquote <blockquote> Ctrl-T";
+			quoteButton.title = "Blockquote <blockquote> Ctrl+T";
 			quoteButton.XShift = "-60px";
 			quoteButton.textOp = command.doBlockquote;
 			setupButton(quoteButton, true);
@@ -962,7 +962,7 @@ Attacklab.wmdBase = function(){
 			var codeButton = document.createElement("li");
 			codeButton.className = "wmd-button";
 			codeButton.id = "wmd-code-button";
-			codeButton.title = "Code Sample <pre><code> Ctrl-K";
+			codeButton.title = "Code Sample <pre><code> Ctrl+K";
 			codeButton.XShift = "-80px";
 			codeButton.textOp = command.doCode;
 			setupButton(codeButton, true);
@@ -971,7 +971,7 @@ Attacklab.wmdBase = function(){
 			var imageButton = document.createElement("li");
 			imageButton.className = "wmd-button";
 			imageButton.id = "wmd-image-button";
-			imageButton.title = "Image <img> Ctrl-G";
+			imageButton.title = "Image <img> Ctrl+G";
 			imageButton.XShift = "-100px";
 			imageButton.textOp = function(chunk, postProcessing){
 				return command.doLinkOrImage(chunk, postProcessing, true);
@@ -987,7 +987,7 @@ Attacklab.wmdBase = function(){
 			var olistButton = document.createElement("li");
 			olistButton.className = "wmd-button";
 			olistButton.id = "wmd-olist-button";
-			olistButton.title = "Numbered List <ol> Ctrl-O";
+			olistButton.title = "Numbered List <ol> Ctrl+O";
 			olistButton.XShift = "-120px";
 			olistButton.textOp = function(chunk, postProcessing){
 				command.doList(chunk, postProcessing, true);
@@ -998,7 +998,7 @@ Attacklab.wmdBase = function(){
 			var ulistButton = document.createElement("li");
 			ulistButton.className = "wmd-button";
 			ulistButton.id = "wmd-ulist-button";
-			ulistButton.title = "Bulleted List <ul> Ctrl-U";
+			ulistButton.title = "Bulleted List <ul> Ctrl+U";
 			ulistButton.XShift = "-140px";
 			ulistButton.textOp = function(chunk, postProcessing){
 				command.doList(chunk, postProcessing, false);
@@ -1009,7 +1009,7 @@ Attacklab.wmdBase = function(){
 			var headingButton = document.createElement("li");
 			headingButton.className = "wmd-button";
 			headingButton.id = "wmd-heading-button";
-			headingButton.title = "Heading <h1>/<h2> Ctrl-H";
+			headingButton.title = "Heading <h1>/<h2> Ctrl+H";
 			headingButton.XShift = "-160px";
 			headingButton.textOp = command.doHeading;
 			setupButton(headingButton, true);
@@ -1018,7 +1018,7 @@ Attacklab.wmdBase = function(){
 			var hrButton = document.createElement("li");
 			hrButton.className = "wmd-button";
 			hrButton.id = "wmd-hr-button";
-			hrButton.title = "Horizontal Rule <hr> Ctrl-R";
+			hrButton.title = "Horizontal Rule <hr> Ctrl+R";
 			hrButton.XShift = "-180px";
 			hrButton.textOp = command.doHorizontalRule;
 			setupButton(hrButton, true);
@@ -1032,7 +1032,7 @@ Attacklab.wmdBase = function(){
 			var undoButton = document.createElement("li");
 			undoButton.className = "wmd-button";
 			undoButton.id = "wmd-undo-button";
-			undoButton.title = "Undo - Ctrl-Z";
+			undoButton.title = "Undo - Ctrl+Z";
 			undoButton.XShift = "-200px";
 			undoButton.execute = function(manager){
 				manager.undo();
@@ -1043,9 +1043,9 @@ Attacklab.wmdBase = function(){
 			var redoButton = document.createElement("li");
 			redoButton.className = "wmd-button";
 			redoButton.id = "wmd-redo-button";
-			redoButton.title = "Redo - Ctrl-Y";
+			redoButton.title = "Redo - Ctrl+Y";
 			if (/win/.test(nav.platform.toLowerCase())) {
-				redoButton.title = "Redo - Ctrl-Y";
+				redoButton.title = "Redo - Ctrl+Y";
 			}
 			else {
 				// mac and other non-Windows platforms
@@ -1101,17 +1101,9 @@ Attacklab.wmdBase = function(){
 				
 				// Check to see if we have a button key and, if so execute the callback.
 				if (key.ctrlKey || key.metaKey) {
-				
+			
 					var keyCode = key.charCode || key.keyCode;
 					var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
-					
-					// Bugfix for messed up DEL and .
-					// if (keyCode === 46) {
-						// keyCodeStr = "";
-					// }
-					// if (keyCode === 190) {
-						// keyCodeStr = ".";
-					// }
 					
 					switch(keyCodeStr) {
 						case "b":
