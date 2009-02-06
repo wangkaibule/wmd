@@ -953,7 +953,7 @@ Attacklab.wmdBase = function(){
 			var quoteButton = document.createElement("li");
 			quoteButton.className = "wmd-button";
 			quoteButton.id = "wmd-quote-button";
-			quoteButton.title = "Blockquote <blockquote> Ctrl-.";
+			quoteButton.title = "Blockquote <blockquote> Ctrl-T";
 			quoteButton.XShift = "-60px";
 			quoteButton.textOp = command.doBlockquote;
 			setupButton(quoteButton, true);
@@ -1106,12 +1106,12 @@ Attacklab.wmdBase = function(){
 					var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
 					
 					// Bugfix for messed up DEL and .
-					if (keyCode === 46) {
-						keyCodeStr = "";
-					}
-					if (keyCode === 190) {
-						keyCodeStr = ".";
-					}
+					// if (keyCode === 46) {
+						// keyCodeStr = "";
+					// }
+					// if (keyCode === 190) {
+						// keyCodeStr = ".";
+					// }
 					
 					switch(keyCodeStr) {
 						case "b":
@@ -1123,7 +1123,7 @@ Attacklab.wmdBase = function(){
 						case "l":
 							doClick(document.getElementById("wmd-link-button"));
 							break;
-						case ".":
+						case "t":
 							doClick(document.getElementById("wmd-quote-button"));
 							break;
 						case "k":
