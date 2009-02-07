@@ -953,7 +953,7 @@ Attacklab.wmdBase = function(){
 			var quoteButton = document.createElement("li");
 			quoteButton.className = "wmd-button";
 			quoteButton.id = "wmd-quote-button";
-			quoteButton.title = "Blockquote <blockquote> Ctrl+T";
+			quoteButton.title = "Blockquote <blockquote> Ctrl+Q";
 			quoteButton.XShift = "-60px";
 			quoteButton.textOp = command.doBlockquote;
 			setupButton(quoteButton, true);
@@ -1115,7 +1115,7 @@ Attacklab.wmdBase = function(){
 						case "l":
 							doClick(document.getElementById("wmd-link-button"));
 							break;
-						case "t":
+						case "q":
 							doClick(document.getElementById("wmd-quote-button"));
 							break;
 						case "k":
