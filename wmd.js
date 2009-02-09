@@ -1175,6 +1175,16 @@ Attacklab.wmdBase = function(){
 				}
 			});
 			
+			// Disable ESC clearing the input textarea on IE
+			if (global.isIE) {
+				util.addEvent(inputBox, "keydown", function(key){
+					var code = key.keyCode;
+					if (code === 27) {
+						return false;
+					}
+				});
+			}
+			
 			if (inputBox.form) {
 				var submitCallback = inputBox.form.onsubmit;
 				inputBox.form.onsubmit = function(){
