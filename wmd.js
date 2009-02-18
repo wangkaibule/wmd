@@ -840,7 +840,8 @@ Attacklab.wmdBase = function(){
 					previewRefreshCallback();
 				};
 				
-				var noCleanup = button.textOp(chunks, fixupInputArea);
+				var useDefaultText = true;
+				var noCleanup = button.textOp(chunks, fixupInputArea, useDefaultText);
 				
 				if(!noCleanup) {
 					fixupInputArea();
@@ -944,7 +945,7 @@ Attacklab.wmdBase = function(){
 			linkButton.id = "wmd-link-button";
 			linkButton.title = "Hyperlink <a> Ctrl+L";
 			linkButton.XShift = "-40px";
-			linkButton.textOp = function(chunk, postProcessing){
+			linkButton.textOp = function(chunk, postProcessing, useDefaultText){
 				return command.doLinkOrImage(chunk, postProcessing, false);
 			};
 			setupButton(linkButton, true);
@@ -973,7 +974,7 @@ Attacklab.wmdBase = function(){
 			imageButton.id = "wmd-image-button";
 			imageButton.title = "Image <img> Ctrl+G";
 			imageButton.XShift = "-100px";
-			imageButton.textOp = function(chunk, postProcessing){
+			imageButton.textOp = function(chunk, postProcessing, useDefaultText){
 				return command.doLinkOrImage(chunk, postProcessing, true);
 			};
 			setupButton(imageButton, true);
@@ -989,8 +990,8 @@ Attacklab.wmdBase = function(){
 			olistButton.id = "wmd-olist-button";
 			olistButton.title = "Numbered List <ol> Ctrl+O";
 			olistButton.XShift = "-120px";
-			olistButton.textOp = function(chunk, postProcessing){
-				command.doList(chunk, postProcessing, true);
+			olistButton.textOp = function(chunk, postProcessing, useDefaultText){
+				command.doList(chunk, postProcessing, true, useDefaultText);
 			};
 			setupButton(olistButton, true);
 			buttonRow.appendChild(olistButton);
@@ -1000,8 +1001,8 @@ Attacklab.wmdBase = function(){
 			ulistButton.id = "wmd-ulist-button";
 			ulistButton.title = "Bulleted List <ul> Ctrl+U";
 			ulistButton.XShift = "-140px";
-			ulistButton.textOp = function(chunk, postProcessing){
-				command.doList(chunk, postProcessing, false);
+			ulistButton.textOp = function(chunk, postProcessing, useDefaultText){
+				command.doList(chunk, postProcessing, false, useDefaultText);
 			};
 			setupButton(ulistButton, true);
 			buttonRow.appendChild(ulistButton);
@@ -1162,11 +1163,12 @@ Attacklab.wmdBase = function(){
 				}
 			});
 			
-			// Auto-indent on shift-enter
+			// Auto-continue lists, code blocks and block quotes when
+			// the enter key is pressed.
 			util.addEvent(inputBox, "keyup", function(key){
-				if (key.shiftKey && !key.ctrlKey && !key.metaKey) {
+				if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
 					var keyCode = key.charCode || key.keyCode;
-					// Character 13 is Enter
+					// Key code 13 is Enter
 					if (keyCode === 13) {
 						fakeButton = {};
 						fakeButton.textOp = command.doAutoindent;
@@ -1179,6 +1181,7 @@ Attacklab.wmdBase = function(){
 			if (global.isIE) {
 				util.addEvent(inputBox, "keydown", function(key){
 					var code = key.keyCode;
+					// Key code 27 is ESC
 					if (code === 27) {
 						return false;
 					}
@@ -1551,18 +1554,18 @@ Attacklab.wmdBase = function(){
 		chunk.selection = chunk.selection.replace(/\s+$/, "");
 	};
 	
-	command.doBold = function(chunk, postProcessing){
-		return command.doBorI(chunk, postProcessing, 2, "strong text");
+	command.doBold = function(chunk, postProcessing, useDefaultText){
+		return command.doBorI(chunk, 2, "strong text");
 	};
 	
-	command.doItalic = function(chunk, postProcessing){
-		return command.doBorI(chunk, postProcessing, 1, "emphasized text");
+	command.doItalic = function(chunk, postProcessing, useDefaultText){
+		return command.doBorI(chunk, 1, "emphasized text");
 	};
 	
 	// chunk: The selected region that will be enclosed with */**
 	// nStars: 1 for italics, 2 for bold
 	// insertText: If you just click the button without highlighting text, this gets inserted
-	command.doBorI = function(chunk, postProcessing, nStars, insertText){
+	command.doBorI = function(chunk, nStars, insertText){
 	
 		// Get rid of whitespace and fixup newlines.
 		chunk.trimWhitespace();
@@ -1978,32 +1981,38 @@ Attacklab.wmdBase = function(){
 		init();
 	};
 
-	// When making a list, hitting shift-enter will put your cursor on the next line
-	// at the current indent level.
-	command.doAutoindent = function(chunk, postProcessing){
+	// Moves the cursor to the next line and continues lists, quotes and code.
+	command.doAutoindent = function(chunk, postProcessing, useDefaultText){
 		
 		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
 		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
 		chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
 		
-		if(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]+.*\n$/.test(chunk.before)){
+		useDefaultText = false;
+		
+		if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(chunk.before)){
 			if(command.doList){
-				command.doList(chunk);
+				command.doList(chunk, postProcessing, false, useDefaultText);
+			}
+		}
+		if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)){
+			if(command.doList){
+				command.doList(chunk, postProcessing, true, useDefaultText);
 			}
 		}
 		if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)){
 			if(command.doBlockquote){
-				command.doBlockquote(chunk);
+				command.doBlockquote(chunk, postProcessing, useDefaultText);
 			}
 		}
 		if(/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)){
 			if(command.doCode){
-				command.doCode(chunk);
+				command.doCode(chunk, postProcessing, useDefaultText);
 			}
 		}
 	};
 	
-	command.doBlockquote = function(chunk, postProcessing){
+	command.doBlockquote = function(chunk, postProcessing, useDefaultText){
 		
 		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
 			function(totalMatch, newlinesBefore, text, newlinesAfter){
@@ -2017,9 +2026,10 @@ Attacklab.wmdBase = function(){
 				chunk.selection = blankLine + chunk.selection;
 				return "";
 			});
-			
+		
+		var defaultText = useDefaultText ? "Blockquote" : "";
 		chunk.selection = chunk.selection.replace(/^(\s|>)+$/ ,"");
-		chunk.selection = chunk.selection || "Blockquote";
+		chunk.selection = chunk.selection || defaultText;
 		
 		if(chunk.before){
 			chunk.before = chunk.before.replace(/\n?$/,"\n");
@@ -2087,7 +2097,7 @@ Attacklab.wmdBase = function(){
 		}
 	};
 
-	command.doCode = function(chunk, postProcessing){
+	command.doCode = function(chunk, postProcessing, useDefaultText){
 		
 		var hasTextBefore = /\S[ ]*$/.test(chunk.before);
 		var hasTextAfter = /^[ ]*\S/.test(chunk.after);
@@ -2105,8 +2115,12 @@ Attacklab.wmdBase = function(){
 			var nLinesBack = 1;
 			var nLinesForward = 1;
 			
+			var beefchunk = chunk.before.replace(/\n/gm, "!");
+			beefchunk = beefchunk.replace(/ /gm, ".");
+			window.alert(beefchunk);
+			
 			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before)){
-				nLinesBack = 0;
+				nLinesBack = 0;  // This needs to happen on line 1
 			}
 			if(/^\n(\t|[ ]{4,})/.test(chunk.after)){
 				nLinesForward = 0;
@@ -2116,7 +2130,7 @@ Attacklab.wmdBase = function(){
 			
 			if(!chunk.selection){
 				chunk.startTag = "    ";
-				chunk.selection = "enter code here";
+				chunk.selection = useDefaultText ? "enter code here" : "";
 			}
 			else {
 				if(/^[ ]{0,3}\S/m.test(chunk.selection)){
@@ -2136,7 +2150,7 @@ Attacklab.wmdBase = function(){
 			if(!chunk.startTag && !chunk.endTag){
 				chunk.startTag = chunk.endTag="`";
 				if(!chunk.selection){
-					chunk.selection = "enter code here";
+					chunk.selection = useDefaultText ? "enter code here" : "";
 				}
 			}
 			else if(chunk.endTag && !chunk.startTag){
@@ -2149,7 +2163,7 @@ Attacklab.wmdBase = function(){
 		}
 	};
 	
-	command.doList = function(chunk, postProcessing, isNumberedList){
+	command.doList = function(chunk, postProcessing, isNumberedList, useDefaultText){
 				
 		// These are identical except at the very beginning and end.
 		// Should probably use the regex extension function to make this clearer.
@@ -2230,7 +2244,7 @@ Attacklab.wmdBase = function(){
 			});
 			
 		if(!chunk.selection){
-			chunk.selection = "List item";
+			chunk.selection = useDefaultText ? "List item" : " ";
 		}
 		
 		var prefix = getItemPrefix();
@@ -2252,7 +2266,7 @@ Attacklab.wmdBase = function(){
 		
 	};
 	
-	command.doHeading = function(chunk, postProcessing){
+	command.doHeading = function(chunk, postProcessing, useDefaultText){
 		
 		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
 		chunk.selection = chunk.selection.replace(/\s+/g, " ");
@@ -2311,7 +2325,7 @@ Attacklab.wmdBase = function(){
 		}
 	};	
 	
-	command.doHorizontalRule = function(chunk, postProcessing){
+	command.doHorizontalRule = function(chunk, postProcessing, useDefaultText){
 		chunk.startTag = "----------\n";
 		chunk.selection = "";
 		chunk.skipLines(2, 1, true);

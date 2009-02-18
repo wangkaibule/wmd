@@ -20,4 +20,10 @@ I'm using Opera 9.61, XP SP3.
 
 --------------------------------------------------------------------------
 
+Auto-indent list quirk.
 
+When creating lists by typing in, say, "1. ", the smart indent will correctly
+place the next numeral but the indenting in the preview is odd until you type
+something.
+
+--------------------------------------------------------------------------
