@@ -11,14 +11,21 @@ body
 	min-width: 500px;
 }
 
+#wmd-editor
+{
+	background-color: Aquamarine;
+}
+
 #wmd-button-bar 
 {
-	background-color: White; 
+	width: 100%;
+	background-color: Silver; 
 }
 
 #wmd-input 
 { 
 	height: 500px;
+	width: 100%;
 	background-color: Gainsboro;
 	border: 1px solid DarkGray;
 }
