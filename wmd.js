@@ -1475,7 +1475,7 @@ Attacklab.wmdBase = function(){
 	};
 	
 	
-	wmd.Chunks.prototype.skipLines = function(nLinesBefore, nLinesAfter, findExtraNewlines){
+	wmd.Chunks.prototype.addBlankLines = function(nLinesBefore, nLinesAfter, findExtraNewlines){
 	
 		if (nLinesBefore === undefined) {
 			nLinesBefore = 1;
@@ -2072,7 +2072,7 @@ Attacklab.wmdBase = function(){
 			command.wrap(chunk, wmd.wmd_env.lineLength - 2);
 			chunk.selection = chunk.selection.replace(/^/gm, "> ");
 			replaceBlanksInTags(true);
-			chunk.skipLines();
+			chunk.addBlankLines();
 		}
 		else{
 			chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
@@ -2112,21 +2112,18 @@ Attacklab.wmdBase = function(){
 					return "";
 				});
 				
-			var nLinesBack = 1;
-			var nLinesForward = 1;
+			var nLinesBefore = 1;
+			var nLinesAfter = 1;
 			
-			var beefchunk = chunk.before.replace(/\n/gm, "!");
-			beefchunk = beefchunk.replace(/ /gm, ".");
-			window.alert(beefchunk);
 			
-			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before)){
-				nLinesBack = 0;  // This needs to happen on line 1
+			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before) || chunk.after === ""){
+				nLinesBefore = 0; 
 			}
 			if(/^\n(\t|[ ]{4,})/.test(chunk.after)){
-				nLinesForward = 0;
+				nLinesAfter = 0; // This needs to happen on line 1
 			}
 			
-			chunk.skipLines(nLinesBack, nLinesForward);
+			chunk.addBlankLines(nLinesBefore, nLinesAfter);
 			
 			if(!chunk.selection){
 				chunk.startTag = "    ";
@@ -2221,7 +2218,7 @@ Attacklab.wmdBase = function(){
 			chunk.startTag = "";
 			chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
 			command.unwrap(chunk);
-			chunk.skipLines();
+			chunk.addBlankLines();
 			
 			if(hasDigits){
 				// Have to renumber the bullet points if this is a numbered list.
@@ -2232,14 +2229,14 @@ Attacklab.wmdBase = function(){
 			}
 		}
 		
-		var nLinesUp = 1;
+		var nLinesBefore = 1;
 		
 		chunk.before = chunk.before.replace(previousItemsRegex,
 			function(itemText){
 				if(/^\s*([*+-])/.test(itemText)){
 					bullet = re.$1;
 				}
-				nLinesUp = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+				nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
 				return getPrefixedItem(itemText);
 			});
 			
@@ -2249,16 +2246,16 @@ Attacklab.wmdBase = function(){
 		
 		var prefix = getItemPrefix();
 		
-		var nLinesDown = 1;
+		var nLinesAfter = 1;
 		
 		chunk.after = chunk.after.replace(nextItemsRegex,
 			function(itemText){
-				nLinesDown = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+				nLinesAfter = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
 				return getPrefixedItem(itemText);
 			});
 			
 		chunk.trimWhitespace(true);
-		chunk.skipLines(nLinesUp, nLinesDown, true);
+		chunk.addBlankLines(nLinesBefore, nLinesAfter, true);
 		chunk.startTag = prefix;
 		var spaces = prefix.replace(/./g, " ");
 		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
@@ -2302,7 +2299,7 @@ Attacklab.wmdBase = function(){
 		
 		// Skip to the next line so we can create the header markdown.
 		chunk.startTag = chunk.endTag = "";
-		chunk.skipLines(1, 1);
+		chunk.addBlankLines(1, 1);
 
 		// We make a level 2 header if there is no current header.
 		// If there is a header level, we substract one from the header level.
@@ -2328,7 +2325,7 @@ Attacklab.wmdBase = function(){
 	command.doHorizontalRule = function(chunk, postProcessing, useDefaultText){
 		chunk.startTag = "----------\n";
 		chunk.selection = "";
-		chunk.skipLines(2, 1, true);
+		chunk.addBlankLines(2, 1, true);
 	}
 };
 
