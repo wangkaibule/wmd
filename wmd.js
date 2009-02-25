@@ -162,13 +162,16 @@ Attacklab.wmdBase = function(){
 		
 		// Replace the flags with empty space and store them.
 		// Technically, this can match incorrect flags like "gmm".
-		pattern = pattern.replace(/\/([gim]*)$/, "");
-		if (re.lastMatch !== "/") {
-			flags = re.$1;
+		var result = pattern.match(/\/([gim]*)$/);
+		if (result === null) {
+			flags = result[0];
+		}
+		else {
+			flags = "";
 		}
 		
-		// Remove the slash delimiters on the regular expression.
-		pattern = pattern.replace(/(^\/|\/$)/g, "");
+		// Remove the flags and slash delimiters from the regular expression.
+		pattern = pattern.replace(/(^\/|\/[gim]*$)/g, "");
 		pattern = pre + pattern + post;
 		
 		return new RegExp(pattern, flags);
