@@ -1992,12 +1992,12 @@ Attacklab.wmdBase = function(){
 		
 		if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(chunk.before)){
 			if(command.doList){
-				command.doList(chunk, postProcessing, false, useDefaultText);
+				command.doList(chunk, postProcessing, false, true);
 			}
 		}
 		if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)){
 			if(command.doList){
-				command.doList(chunk, postProcessing, true, useDefaultText);
+				command.doList(chunk, postProcessing, true, true);
 			}
 		}
 		if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)){
