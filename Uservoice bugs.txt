@@ -45,3 +45,22 @@ since these can only be accessed by pressing AltGr + Q, U, G, K, L, Y and B, res
 
 AltGr = right ALT key.
 I am referring to German keyboard layout.
+
+--------------------------------------------------------------------------
+
+Help button link is off.
+
+If you look at the help button image and link in Firebug they are a little
+bit offset.
+
+--------------------------------------------------------------------------
+
+Fix Markdown to allow underscores in picture URLs
+
+Underscores in image URLs get interpreted as Markdown and then don't show the picture properly.
+
+BUT they do show the picture properly in the post preview.
+
+
+Read more: "fix Markdown to allow underscores in picture URLs" - http://stackoverflow.uservoice.com/pages/general/suggestions/131034-fix-markdown-to-allow-underscores-in-picture-urls#ixzz08aKPzrOv
+
