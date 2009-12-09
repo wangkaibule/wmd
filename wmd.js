@@ -1,9 +1,12 @@
+function setup_wmd(wmd_options) {
+    
 var Attacklab = Attacklab || {};
+wmd_options = wmd_options || top.wmd_options || {};
 
 Attacklab.wmdBase = function(){
 
 	// A few handy aliases for readability.
-	var wmd  = top.Attacklab;
+	var wmd  = Attacklab;
 	var doc  = top.document;
 	var re   = top.RegExp;
 	var nav  = top.navigator;
@@ -13,6 +16,7 @@ Attacklab.wmdBase = function(){
 	wmd.Position = {};
 	wmd.Command = {};
 	wmd.Global = {};
+	wmd.buttons = {};
 	
 	var util = wmd.Util;
 	var position = wmd.Position;
@@ -64,10 +68,10 @@ Attacklab.wmdBase = function(){
 	// A collection of the important regions on the page.
 	// Cached so we don't have to keep traversing the DOM.
 	wmd.PanelCollection = function(){
-		this.buttonBar = doc.getElementById("wmd-button-bar");
-		this.preview = doc.getElementById("wmd-preview");
-		this.output = doc.getElementById("wmd-output");
-		this.input = doc.getElementById("wmd-input");
+		this.buttonBar = doc.getElementById(wmd_options.button_bar || "wmd-button-bar");
+		this.preview = doc.getElementById(wmd_options.preview || "wmd-preview");
+		this.output = doc.getElementById(wmd_options.output || "wmd-output");
+		this.input = doc.getElementById(wmd_options.input || "wmd-input");
 	};
 	
 	// This PanelCollection object can't be filled until after the page
@@ -862,8 +866,8 @@ Attacklab.wmdBase = function(){
 			
 		var setUndoRedoButtonStates = function(){
 			if(undoMgr){
-				setupButton(document.getElementById("wmd-undo-button"), undoMgr.canUndo());
-				setupButton(document.getElementById("wmd-redo-button"), undoMgr.canRedo());
+				setupButton(wmd.buttons["wmd-undo-button"], undoMgr.canUndo());
+				setupButton(wmd.buttons["wmd-redo-button"], undoMgr.canRedo());
 			}
 		};
 		
@@ -912,145 +916,77 @@ Attacklab.wmdBase = function(){
 	
 		var makeSpritedButtonRow = function(){
 		 	
-			var buttonBar = document.getElementById("wmd-button-bar");
+			var buttonBar = document.getElementById(wmd_options.button_bar || "wmd-button-bar");
  	
 			var normalYShift = "0px";
 			var disabledYShift = "-20px";
 			var highlightYShift = "-40px";
 			
 			var buttonRow = document.createElement("ul");
-			buttonRow.id = "wmd-button-row";
+			buttonRow.className = "wmd-button-row"
 			buttonRow = buttonBar.appendChild(buttonRow);
-
 			
-			var boldButton = document.createElement("li");
-			boldButton.className = "wmd-button";
-			boldButton.id = "wmd-bold-button";
-			boldButton.title = "Strong <strong> Ctrl+B";
-			boldButton.XShift = "0px";
-			boldButton.textOp = command.doBold;
-			setupButton(boldButton, true);
-			buttonRow.appendChild(boldButton);
+			var xoffset = 0;
 			
-			var italicButton = document.createElement("li");
-			italicButton.className = "wmd-button";
-			italicButton.id = "wmd-italic-button";
-			italicButton.title = "Emphasis <em> Ctrl+I";
-			italicButton.XShift = "-20px";
-			italicButton.textOp = command.doItalic;
-			setupButton(italicButton, true);
-			buttonRow.appendChild(italicButton);
-
-			var spacer1 = document.createElement("li");
-			spacer1.className = "wmd-spacer";
-			spacer1.id = "wmd-spacer1";
-			buttonRow.appendChild(spacer1); 
-
-			var linkButton = document.createElement("li");
-			linkButton.className = "wmd-button";
-			linkButton.id = "wmd-link-button";
-			linkButton.title = "Hyperlink <a> Ctrl+L";
-			linkButton.XShift = "-40px";
-			linkButton.textOp = function(chunk, postProcessing, useDefaultText){
+			function addButton(name, title, textOp) {
+			    var button = document.createElement("li");
+			    wmd.buttons[name] = button;
+			    
+			    button.className = "wmd-button " + name;
+			    
+			    button.title = title;
+			    if (textOp)
+			        button.textOp = textOp;
+			    
+		        button.XShift = xoffset + "px";
+		        xoffset -= 20;
+		        
+			    setupButton(button, true);
+			    buttonRow.appendChild(button);
+			    
+			    return button;
+			}
+			
+			function addSpacer() {
+			    var spacer = document.createElement("li");
+			    spacer.className = "wmd-spacer";
+			    buttonRow.appendChild(spacer);
+			    return spacer;
+			}
+			
+            var boldButton = addButton("wmd-bold-button", "Strong <strong> Ctrl+B", command.doBold);
+            var italicButton = addButton("wmd-italic-button", "Emphasis <em> Ctrl+I", command.doItalic);
+            var spacer1 = addSpacer();
+			
+			var linkButton = addButton("wmd-link-button", "Hyperlink <a> Ctrl+L", function(chunk, postProcessing, useDefaultText) {
 				return command.doLinkOrImage(chunk, postProcessing, false);
-			};
-			setupButton(linkButton, true);
-			buttonRow.appendChild(linkButton);
-
-			var quoteButton = document.createElement("li");
-			quoteButton.className = "wmd-button";
-			quoteButton.id = "wmd-quote-button";
-			quoteButton.title = "Blockquote <blockquote> Ctrl+Q";
-			quoteButton.XShift = "-60px";
-			quoteButton.textOp = command.doBlockquote;
-			setupButton(quoteButton, true);
-			buttonRow.appendChild(quoteButton);
-			
-			var codeButton = document.createElement("li");
-			codeButton.className = "wmd-button";
-			codeButton.id = "wmd-code-button";
-			codeButton.title = "Code Sample <pre><code> Ctrl+K";
-			codeButton.XShift = "-80px";
-			codeButton.textOp = command.doCode;
-			setupButton(codeButton, true);
-			buttonRow.appendChild(codeButton);
-
-			var imageButton = document.createElement("li");
-			imageButton.className = "wmd-button";
-			imageButton.id = "wmd-image-button";
-			imageButton.title = "Image <img> Ctrl+G";
-			imageButton.XShift = "-100px";
-			imageButton.textOp = function(chunk, postProcessing, useDefaultText){
+			});		
+			var quoteButton = addButton("wmd-quote-button", "Blockquote <blockquote> Ctrl+Q", command.doBlockquote);
+			var codeButton = addButton("wmd-code-button", "Code Sample <pre><code> Ctrl+K", command.doCode);
+			var imageButton = addButton("wmd-image-button", "Image <img> Ctrl+G", function(chunk, postProcessing, useDefaultText) {
 				return command.doLinkOrImage(chunk, postProcessing, true);
-			};
-			setupButton(imageButton, true);
-			buttonRow.appendChild(imageButton);
+			});
+			
+			var spacer2 = addSpacer();
 
-			var spacer2 = document.createElement("li");
-			spacer2.className = "wmd-spacer";
-			spacer2.id = "wmd-spacer2";
-			buttonRow.appendChild(spacer2); 
-
-			var olistButton = document.createElement("li");
-			olistButton.className = "wmd-button";
-			olistButton.id = "wmd-olist-button";
-			olistButton.title = "Numbered List <ol> Ctrl+O";
-			olistButton.XShift = "-120px";
-			olistButton.textOp = function(chunk, postProcessing, useDefaultText){
+			var olistButton = addButton("wmd-olist-button", "Numbered List <ol> Ctrl+O", function(chunk, postProcessing, useDefaultText) {
 				command.doList(chunk, postProcessing, true, useDefaultText);
-			};
-			setupButton(olistButton, true);
-			buttonRow.appendChild(olistButton);
-			
-			var ulistButton = document.createElement("li");
-			ulistButton.className = "wmd-button";
-			ulistButton.id = "wmd-ulist-button";
-			ulistButton.title = "Bulleted List <ul> Ctrl+U";
-			ulistButton.XShift = "-140px";
-			ulistButton.textOp = function(chunk, postProcessing, useDefaultText){
+			});
+			var ulistButton = addButton("wmd-ulist-button", "Bulleted List <ul> Ctrl+U", function(chunk, postProcessing, useDefaultText) {
 				command.doList(chunk, postProcessing, false, useDefaultText);
-			};
-			setupButton(ulistButton, true);
-			buttonRow.appendChild(ulistButton);
+			});
+			var headingButton = addButton("wmd-heading-button", "Heading <h1>/<h2> Ctrl+H", command.doHeading);
+			var hrButton = addButton("wmd-hr-button", "Horizontal Rule <hr> Ctrl+R", command.doHorizontalRule);
+			var spacer3 = addSpacer();
 			
-			var headingButton = document.createElement("li");
-			headingButton.className = "wmd-button";
-			headingButton.id = "wmd-heading-button";
-			headingButton.title = "Heading <h1>/<h2> Ctrl+H";
-			headingButton.XShift = "-160px";
-			headingButton.textOp = command.doHeading;
-			setupButton(headingButton, true);
-			buttonRow.appendChild(headingButton); 
-			
-			var hrButton = document.createElement("li");
-			hrButton.className = "wmd-button";
-			hrButton.id = "wmd-hr-button";
-			hrButton.title = "Horizontal Rule <hr> Ctrl+R";
-			hrButton.XShift = "-180px";
-			hrButton.textOp = command.doHorizontalRule;
-			setupButton(hrButton, true);
-			buttonRow.appendChild(hrButton); 
-			
-			var spacer3 = document.createElement("li");
-			spacer3.className = "wmd-spacer";
-			spacer3.id = "wmd-spacer3";
-			buttonRow.appendChild(spacer3); 
-			
-			var undoButton = document.createElement("li");
-			undoButton.className = "wmd-button";
-			undoButton.id = "wmd-undo-button";
-			undoButton.title = "Undo - Ctrl+Z";
-			undoButton.XShift = "-200px";
+			var undoButton = addButton("wmd-undo-button", "Undo - Ctrl+Z");
 			undoButton.execute = function(manager){
 				manager.undo();
 			};
-			setupButton(undoButton, true);
-			buttonRow.appendChild(undoButton); 
 			
-			var redoButton = document.createElement("li");
-			redoButton.className = "wmd-button";
-			redoButton.id = "wmd-redo-button";
-			redoButton.title = "Redo - Ctrl+Y";
+			var redo_title = null;
+			
+			var redoButton = addButton("wmd-redo-button", "Redo - Ctrl+Y");
 			if (/win/.test(nav.platform.toLowerCase())) {
 				redoButton.title = "Redo - Ctrl+Y";
 			}
@@ -1058,17 +994,11 @@ Attacklab.wmdBase = function(){
 				// mac and other non-Windows platforms
 				redoButton.title = "Redo - Ctrl+Shift+Z";
 			}
-			redoButton.XShift = "-220px";
 			redoButton.execute = function(manager){
 				manager.redo();
 			};
-			setupButton(redoButton, true);
-			buttonRow.appendChild(redoButton); 
 			
-			var helpButton = document.createElement("li");
-			helpButton.className = "wmd-button";
-			helpButton.id = "wmd-help-button";
-			helpButton.XShift = "-240px";
+			var helpButton = addButton("wmd-help-button");
 			helpButton.isHelp = true;
 			
 			var helpAnchor = document.createElement("a");
@@ -1076,10 +1006,7 @@ Attacklab.wmdBase = function(){
 			helpAnchor.target = helpTarget
 			helpAnchor.title = helpHoverTitle;
 			helpButton.appendChild(helpAnchor);
-			
-			setupButton(helpButton, true);
-			buttonRow.appendChild(helpButton);
-			
+						
 			setUndoRedoButtonStates();
 		}
 		
@@ -1114,44 +1041,44 @@ Attacklab.wmdBase = function(){
 					
 					switch(keyCodeStr) {
 						case "b":
-							doClick(document.getElementById("wmd-bold-button"));
+							doClick(wmd.buttons["wmd-bold-button"]);
 							break;
 						case "i":
-							doClick(document.getElementById("wmd-italic-button"));
+							doClick(wmd.buttons["wmd-italic-button"]);
 							break;
 						case "l":
-							doClick(document.getElementById("wmd-link-button"));
+							doClick(wmd.buttons["wmd-link-button"]);
 							break;
 						case "q":
-							doClick(document.getElementById("wmd-quote-button"));
+							doClick(wmd.buttons["wmd-quote-button"]);
 							break;
 						case "k":
-							doClick(document.getElementById("wmd-code-button"));
+							doClick(wmd.buttons["wmd-code-button"]);
 							break;
 						case "g":
-							doClick(document.getElementById("wmd-image-button"));
+							doClick(wmd.buttons["wmd-image-button"]);
 							break;
 						case "o":
-							doClick(document.getElementById("wmd-olist-button"));
+							doClick(wmd.buttons["wmd-olist-button"]);
 							break;
 						case "u":
-							doClick(document.getElementById("wmd-ulist-button"));
+							doClick(wmd.buttons["wmd-ulist-button"]);
 							break;
 						case "h":
-							doClick(document.getElementById("wmd-heading-button"));
+							doClick(wmd.buttons["wmd-heading-button"]);
 							break;
 						case "r":
-							doClick(document.getElementById("wmd-hr-button"));
+							doClick(wmd.buttons["wmd-hr-button"]);
 							break;
 						case "y":
-							doClick(document.getElementById("wmd-redo-button"));
+							doClick(wmd.buttons["wmd-redo-button"]);
 							break;
 						case "z":
 							if(key.shiftKey) {
-								doClick(document.getElementById("wmd-redo-button"));
+								doClick(wmd.buttons["wmd-redo-button"]);
 							}
 							else {
-								doClick(document.getElementById("wmd-undo-button"));
+								doClick(wmd.buttons["wmd-undo-button"]);
 							}
 							break;
 						default:
@@ -2361,7 +2288,7 @@ if(!Attacklab.wmd)
 			
 			mergeEnv(Attacklab.wmd_defaults);
 			mergeEnv(Attacklab.account_options);
-			mergeEnv(top["wmd_options"]);
+			mergeEnv(wmd_options);
 			Attacklab.full = true;
 			
 			var defaultButtons = "bold italic link blockquote code image ol ul heading hr";
@@ -2376,3 +2303,6 @@ if(!Attacklab.wmd)
 	Attacklab.Util.startEditor();
 };
 
+}
+
+setup_wmd();
