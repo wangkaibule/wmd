@@ -18,6 +18,8 @@ Attacklab.wmdBase = function(){
 	wmd.Global = {};
 	wmd.buttons = {};
 	
+	wmd.showdown = top.Attacklab.showdown;
+	
 	var util = wmd.Util;
 	var position = wmd.Position;
 	var command = wmd.Command;
