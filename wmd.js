@@ -2306,5 +2306,3 @@ if(!Attacklab.wmd)
 };
 
 }
-
-setup_wmd();

@@ -16,13 +16,13 @@ body
 	background-color: Aquamarine;
 }
 
-#wmd-button-bar 
+.wmd-button-bar 
 {
 	width: 100%;
 	background-color: Silver; 
 }
 
-#wmd-input 
+.wmd-input 
 { 
 	height: 500px;
 	width: 100%;
