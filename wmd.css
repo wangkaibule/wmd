@@ -1,7 +1,3 @@
-body 
-{ 
-	background-color: White
-}
 
 .wmd-panel
 {
@@ -19,7 +15,9 @@ body
 .wmd-button-bar 
 {
 	width: 100%;
+	/*
 	background-color: Silver; 
+	*/
 }
 
 .wmd-input 
@@ -30,12 +28,12 @@ body
 	border: 1px solid DarkGray;
 }
 
-#wmd-preview 
+.wmd-preview 
 { 
-	background-color: LightSkyBlue; 
+	background-color: LightGray; 
 }
 
-#wmd-output 
+.wmd-output 
 { 
 	background-color: Pink;
 }

@@ -1,5 +1,5 @@
 function setup_wmd(wmd_options) {
-    
+
 var Attacklab = Attacklab || {};
 wmd_options = wmd_options || top.wmd_options || {};
 
@@ -18,7 +18,7 @@ Attacklab.wmdBase = function(){
 	wmd.Global = {};
 	wmd.buttons = {};
 	
-	wmd.showdown = top.Attacklab.showdown;
+	wmd.showdown = top.Attacklab && top.Attacklab.showdown;
 	
 	var util = wmd.Util;
 	var position = wmd.Position;
@@ -43,8 +43,8 @@ Attacklab.wmdBase = function(){
 	
 	// The text that appears on the upper part of the dialog box when
 	// entering links.
-	var imageDialogText = "<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>";
-	var linkDialogText = "<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>";
+	var imageDialogText = wmd_options.imageDialogText || "<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>";
+	var linkDialogText = wmd_options.linkDialogText || "<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>";
 	
 	// The default text that appears in the dialog input box when entering
 	// links.
@@ -59,9 +59,9 @@ Attacklab.wmdBase = function(){
 	var pastePollInterval = 100;
 	
 	// The link and title for the help button
-	var helpLink = "http://wmd-editor.com/";
-	var helpHoverTitle = "WMD website";
-	var helpTarget = "_blank";
+	var helpLink = wmd_options.helpLink || "http://wmd-editor.com/";
+	var helpHoverTitle = wmd_options.helpHoverTitle || "WMD website";
+	var helpTarget = wmd_options.helpTarget || "_blank";
 	
 	// -------------------------------------------------------------------
 	//  END OF YOUR CHANGES
@@ -930,22 +930,27 @@ Attacklab.wmdBase = function(){
 			
 			var xoffset = 0;
 			
-			function addButton(name, title, textOp) {
+			function createButton(name, title, textOp) {
 			    var button = document.createElement("li");
 			    wmd.buttons[name] = button;
-			    
 			    button.className = "wmd-button " + name;
-			    
-			    button.title = title;
-			    if (textOp)
-			        button.textOp = textOp;
-			    
 		        button.XShift = xoffset + "px";
 		        xoffset -= 20;
-		        
+			    
+			    if (title)
+			        button.title = title;
+			        
+			    if (textOp)
+			        button.textOp = textOp;
+
+			    return button;
+			}
+			
+			function addButton(name, title, textOp) {
+		        var button = createButton(name, title, textOp);
+
 			    setupButton(button, true);
 			    buttonRow.appendChild(button);
-			    
 			    return button;
 			}
 			
@@ -1000,8 +1005,10 @@ Attacklab.wmdBase = function(){
 				manager.redo();
 			};
 			
-			var helpButton = addButton("wmd-help-button");
+			var helpButton = createButton("wmd-help-button");
 			helpButton.isHelp = true;
+		    setupButton(helpButton, true);
+		    buttonRow.appendChild(helpButton);
 			
 			var helpAnchor = document.createElement("a");
 			helpAnchor.href = helpLink;
