@@ -1,171 +1,34 @@
 <!DOCTYPE html>
 
 <html>
-
 	<head>
 		<title>Test WMD Page</title>
 		
 		<link rel="stylesheet" type="text/css" href="wmd.css" />
 		
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+		<script type="text/javascript" src="wmd.js"></script>
 		<script type="text/javascript" src="showdown.js"></script>
+		<script type="text/javascript" src="jquery.wmd.js"></script>
 	</head>
 	
 	<body>
-		<div id="xwmd-editor" class="wmd-panel">
-			<div id="xwmd-button-bar" class="wmd-button-bar"></div>
-			<textarea id="xwmd-input" class="wmd-input"></textarea>
-	    </div>
-    	<div id="xwmd-preview" class="wmd-panel wmd-preview"></div>
-
-		<div id="ywmd-editor" class="wmd-panel">
-			<div id="ywmd-button-bar" class="wmd-button-bar"></div>
-			<textarea id="ywmd-input" class="wmd-input"></textarea>
+	    <div style="width: 500px;">
+			<textarea id="xwmd-input" rows="5" style="width: 100%"></textarea>
 		</div>
-		<div id="ywmd-preview" class="wmd-panel wmd-preview"></div>
 		
-		
-		<p>To test that page up/down and arrow keys work, copy this above the WMD
-		control.</p>
-		
-		<p>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		Scroll Down!<br/>
-		</p>
-
-		<script type="text/javascript" src="wmd.js"></script>
+	    <div style="width: 500px;">
+			<textarea id="ywmd-input" rows="5" style="width: 100%"></textarea>
+		</div>
+			
 		<script type="text/javascript">
-		    setup_wmd({
-		        input: 'xwmd-input',
-		        preview: 'xwmd-preview',
-		        button_bar: 'xwmd-button-bar'
+		$().ready(function() {
+		    $("textarea").wmd({
+		        "preview": true,
+		        "helpLink": "http://daringfireball.net/projects/markdown/",
+		        "helpHoverTitle": "Markdown Help",
 		    });
-		    setup_wmd({
-		        input: 'ywmd-input',
-		        preview: 'ywmd-preview',
-		        button_bar: 'ywmd-button-bar'
-		    });		    
+		});
 		</script>
 	</body>
 </html>
