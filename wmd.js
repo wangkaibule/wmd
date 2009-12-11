@@ -1153,7 +1153,7 @@ Attacklab.wmdBase = function(){
 				inputBox.value = text;
 			};
 			
-			if (!/markdown/.test(wmd.wmd_env.output.toLowerCase())) {
+			if (!/markdown/.test(wmd.wmd_env.output_format.toLowerCase())) {
 				if (markdownConverter) {
 					inputBox.value = markdownConverter.makeHtml(text);
 					top.setTimeout(callback, 0);
@@ -2274,7 +2274,7 @@ Attacklab.wmdBase = function(){
 
 Attacklab.wmd_env = {};
 Attacklab.account_options = {};
-Attacklab.wmd_defaults = {version:1, output:"HTML", lineLength:40, delayLoad:false};
+Attacklab.wmd_defaults = {version:1, output_format:"markdown", lineLength:40, delayLoad:false};
 
 if(!Attacklab.wmd)
 {
