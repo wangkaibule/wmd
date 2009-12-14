@@ -2274,7 +2274,7 @@ Attacklab.wmdBase = function(){
 
 Attacklab.wmd_env = {};
 Attacklab.account_options = {};
-Attacklab.wmd_defaults = {version:1, output_format:"markdown", lineLength:40, delayLoad:false};
+Attacklab.wmd_defaults = {version:2.0, output_format:"markdown", lineLength:40, delayLoad:false};
 
 if(!Attacklab.wmd)
 {
