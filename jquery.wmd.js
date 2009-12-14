@@ -37,9 +37,6 @@
             this.id = this.id || "wmd-input-" + counter;
             options.input = this.id;
             
-            if (window.console)
-                console.log(options);
-            
             setup_wmd(options);
             counter++;
         });
