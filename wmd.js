@@ -98,17 +98,9 @@ Attacklab.wmdBase = function(){
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
 	util.isVisible = function (elem) {
-	
-	    if (window.getComputedStyle) {
-	        // Most browsers
-			return window.getComputedStyle(elem, null).getPropertyValue("display") !== "none";
-		}
-		else if (elem.currentStyle) {
-		    // IE
-			return elem.currentStyle["display"] !== "none";
-		}
-	};
-	
+            // shamelessly copied from jQuery
+            return elem.offsetWidth > 0 || elem.offsetHeight > 0;
+        };
 	
 	// Adds a listener callback to a DOM element which is fired on a specified
 	// event.
