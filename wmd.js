@@ -3,7 +3,8 @@
 WMDEditor = function(options) {
     this.options = WMDEditor.util.extend({}, WMDEditor.defaults, options || {});
     wmdBase(this, this.options);
-    WMDEditor.util.startEditor();
+
+    this.startEditor();
 };
 top.WMDEditor = WMDEditor;
 
@@ -40,6 +41,25 @@ WMDEditor.defaults = { // {{{
 
 	buttons: "bold italic link blockquote code image ol ul heading hr"
 }; // }}}
+
+WMDEditor.prototype = {
+    getPanels: function() {
+        return {
+            buttonBar: doc.getElementById(this.options.button_bar),
+            preview: doc.getElementById(this.options.preview),
+            output: doc.getElementById(this.options.output),
+            input: doc.getElementById(this.options.input)
+        };
+    },
+
+    startEditor: function() {
+        this.panels = this.getPanels();
+        this.previewMgr = new this.previewManager();
+        edit = new this.editor(this.previewMgr.refresh);
+        this.previewMgr.refresh(true);
+    }
+};
+
 
 var util = { // {{{
 
@@ -210,10 +230,10 @@ var util = { // {{{
     		// so we make the whole window transparent.
     		//
     		// Is this necessary on modern konqueror browsers?
-    		if (global.isKonqueror){
+    		if (browser.isKonqueror){
     			style.backgroundColor = "transparent";
     		}
-    		else if (global.isIE){
+    		else if (browser.isIE){
     			style.filter = "alpha(opacity=50)";
     		}
     		else {
@@ -223,7 +243,7 @@ var util = { // {{{
     		var pageSize = position.getPageSize();
     		style.height = pageSize[1] + "px";
 		
-    		if(global.isIE){
+    		if(browser.isIE){
     			style.left = doc.documentElement.scrollLeft;
     			style.width = doc.documentElement.clientWidth;
     		}
@@ -309,7 +329,7 @@ var util = { // {{{
     		dialog.style.top = "50%";
     		dialog.style.left = "50%";
     		dialog.style.display = "block";
-    		if(global.isIE_5or6){
+    		if(browser.isIE_5or6){
     			dialog.style.position = "absolute";
     			dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
     			dialog.style.left = "50%";
@@ -445,8 +465,7 @@ function get_browser() {
 }
 
 // Used to work around some browser bugs where we can't use feature testing.
-WMDEditor.browser = get_browser();
-global = WMDEditor.browser;
+var browser = get_browser();
 
 var wmdBase = function(wmd, wmd_options){ // {{{
 
@@ -468,7 +487,6 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 	var util = WMDEditor.util;
 	var position = WMDEditor.position;
 	var command = wmd.Command;
-	var global = WMDEditor.browser;
 	
 	// -------------------------------------------------------------------
 	//  YOUR CHANGES GO HERE
@@ -620,7 +638,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 				}
 			}
 			
-			if (!global.isIE || mode != "moving") {
+			if (!browser.isIE || mode != "moving") {
 				timer = top.setTimeout(refreshState, 1);
 			}
 			else {
@@ -806,7 +824,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 			});
 			
 			var handlePaste = function(){
-				if (global.isIE || (inputStateObj && inputStateObj.text != wmd.panels.input.value)) {
+				if (browser.isIE || (inputStateObj && inputStateObj.text != wmd.panels.input.value)) {
 					if (timer == undefined) {
 						mode = "paste";
 						saveState();
@@ -954,7 +972,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 				// IE tries to select the background image "button" text (it's
 				// implemented in a list item) so we have to cache the selection
 				// on mousedown.
-				if(global.isIE) {
+				if(browser.isIE) {
 					button.onmousedown =  function() { 
 						wmd.ieRetardedClick = true;
 						wmd.ieCachedRange = document.selection.createRange(); 
@@ -1098,7 +1116,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 			
 			
 			var keyEvent = "keydown";
-			if (global.isOpera) {
+			if (browser.isOpera) {
 				keyEvent = "keypress";
 			}
 			
@@ -1182,7 +1200,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 			});
 			
 			// Disable ESC clearing the input textarea on IE
-			if (global.isIE) {
+			if (browser.isIE) {
 				util.addEvent(inputBox, "keydown", function(key){
 					var code = key.keyCode;
 					// Key code 27 is ESC
@@ -1289,7 +1307,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 				return;
 			}
 			
-			if (inputArea.selectionStart !== undefined && !global.isOpera) {
+			if (inputArea.selectionStart !== undefined && !browser.isOpera) {
 			
 				inputArea.focus();
 				inputArea.selectionStart = stateObj.start;
@@ -1393,7 +1411,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 			chunk.before = chunk.before + chunk.startTag;
 			chunk.after = chunk.endTag + chunk.after;
 			
-			if (global.isOpera) {
+			if (browser.isOpera) {
 				chunk.before = chunk.before.replace(/\n/g, "\r\n");
 				chunk.selection = chunk.selection.replace(/\n/g, "\r\n");
 				chunk.after = chunk.after.replace(/\n/g, "\r\n");
@@ -2092,40 +2110,6 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 
         // }}}
 	
-	util.makeAPI = function(){
-		wmd.wmd = {};
-		wmd.wmd.editor = wmd.editor;
-		wmd.wmd.previewManager = wmd.previewManager;
-	};
-	
-	util.startEditor = function(){
-	
-		if (wmd_options.autostart === false) {
-			util.makeAPI();
-			return;
-		}
-
-		var edit;		// The editor (buttons + input + outputs) - the main object.
-		var previewMgr;	// The preview manager.
-		
-		// Fired after the page has fully loaded.
-		var loadListener = function(){
-		
-			wmd.panels = new wmd.PanelCollection();
-			
-			previewMgr = new wmd.previewManager();
-			var previewRefreshCallback = previewMgr.refresh;
-						
-			edit = new wmd.editor(previewRefreshCallback);
-			
-			previewMgr.refresh(true);
-			
-		};
-		
-		util.addEvent(top, "load", loadListener);
-	};
-	
-
 	wmd.previewManager = function(){ // {{{
 		
 		var managerObj = this;
@@ -2309,7 +2293,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 			
 			var fullTop = position.getTop(wmd.panels.input) - getDocScrollTop();
 			
-			if (global.isIE) {
+			if (browser.isIE) {
 				top.setTimeout(function(){
 					top.scrollBy(0, fullTop - emptyTop);
 				}, 0);
@@ -2345,6 +2329,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
 
 })();
 
+// For backward compatibility
 function setup_wmd(options) {
     return new WMDEditor(options);
 }
