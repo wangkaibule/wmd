@@ -2,7 +2,8 @@
     
 WMDEditor = function(options) {
     this.options = WMDEditor.util.extend({}, WMDEditor.defaults, options || {});
-    setup_wmd(this, this.options);
+    wmdBase(this, this.options);
+    WMDEditor.util.startEditor();
 };
 top.WMDEditor = WMDEditor;
 
@@ -363,20 +364,91 @@ var util = { // {{{
     }
 }; // }}}
 
+var position = { // {{{ 
+
+    // UNFINISHED
+    // The assignment in the while loop makes jslint cranky.
+    // I'll change it to a better loop later.
+    getTop: function(elem, isInner){
+            var result = elem.offsetTop;
+            if (!isInner) {
+                    while (elem = elem.offsetParent) {
+                            result += elem.offsetTop;
+                    }
+            }
+            return result;
+    },
+
+    getHeight: function (elem) {
+            return elem.offsetHeight || elem.scrollHeight;
+    },
+
+    getWidth: function (elem) {
+            return elem.offsetWidth || elem.scrollWidth;
+    },
+
+    getPageSize: function() {
+            
+            var scrollWidth, scrollHeight;
+            var innerWidth, innerHeight;
+            
+            // It's not very clear which blocks work with which browsers.
+            if(self.innerHeight && self.scrollMaxY){
+                    scrollWidth = doc.body.scrollWidth;
+                    scrollHeight = self.innerHeight + self.scrollMaxY;
+            }
+            else if(doc.body.scrollHeight > doc.body.offsetHeight){
+                    scrollWidth = doc.body.scrollWidth;
+                    scrollHeight = doc.body.scrollHeight;
+            }
+            else{
+                    scrollWidth = doc.body.offsetWidth;
+                    scrollHeight = doc.body.offsetHeight;
+            }
+            
+            if(self.innerHeight){
+                    // Non-IE browser
+                    innerWidth = self.innerWidth;
+                    innerHeight = self.innerHeight;
+            }
+            else if(doc.documentElement && doc.documentElement.clientHeight){
+                    // Some versions of IE (IE 6 w/ a DOCTYPE declaration)
+                    innerWidth = doc.documentElement.clientWidth;
+                    innerHeight = doc.documentElement.clientHeight;
+            }
+            else if(doc.body){
+                    // Other versions of IE
+                    innerWidth = doc.body.clientWidth;
+                    innerHeight = doc.body.clientHeight;
+            }
+            
+        var maxWidth = Math.max(scrollWidth, innerWidth);
+        var maxHeight = Math.max(scrollHeight, innerHeight);
+        return [maxWidth, maxHeight, innerWidth, innerHeight];
+    }
+}; // }}}
+
 WMDEditor.util = util;
+WMDEditor.position = position;
 
-})();
+var doc = document;
+var nav = top.navigator;
 
-/*** OLD CODE ***/
+function get_browser() {
+    var b = {};
+    b.isIE 		= /msie/.test(nav.userAgent.toLowerCase());
+    b.isIE_5or6 	= /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase());
+    b.isIE_7plus 	= b.isIE && !b.isIE_5or6;
+    b.isOpera 		= /opera/.test(nav.userAgent.toLowerCase());
+    b.isKonqueror 	= /konqueror/.test(nav.userAgent.toLowerCase());
+    return b;
+}
 
-function setup_wmd(wmd, options) {
+// Used to work around some browser bugs where we can't use feature testing.
+WMDEditor.browser = get_browser();
+global = WMDEditor.browser;
 
-    var wmd_options = options;
-
-var Attacklab = Attacklab || {};
-//wmd_options = wmd_options || top.wmd_options || {};
-
-Attacklab.wmdBase = function(){ // {{{
+var wmdBase = function(wmd, wmd_options){ // {{{
 
 	// A few handy aliases for readability.
 	//var wmd  = Attacklab;
@@ -386,7 +458,7 @@ Attacklab.wmdBase = function(){ // {{{
 	
 	// Some namespaces.
 	//wmd.Util = {};
-	wmd.Position = {};
+	//wmd.Position = {};
 	wmd.Command = {};
 	wmd.Global = {};
 	wmd.buttons = {};
@@ -394,18 +466,9 @@ Attacklab.wmdBase = function(){ // {{{
 	wmd.showdown = top.Attacklab && top.Attacklab.showdown;
 	
 	var util = WMDEditor.util;
-	var position = wmd.Position;
+	var position = WMDEditor.position;
 	var command = wmd.Command;
-	var global = wmd.Global;
-	
-	
-	// Used to work around some browser bugs where we can't use feature testing.
-	global.isIE 		= /msie/.test(nav.userAgent.toLowerCase());
-	global.isIE_5or6 	= /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase());
-	global.isIE_7plus 	= global.isIE && !global.isIE_5or6;
-	global.isOpera 		= /opera/.test(nav.userAgent.toLowerCase());
-	global.isKonqueror 	= /konqueror/.test(nav.userAgent.toLowerCase());
-	
+	var global = WMDEditor.browser;
 	
 	// -------------------------------------------------------------------
 	//  YOUR CHANGES GO HERE
@@ -469,71 +532,6 @@ Attacklab.wmdBase = function(){ // {{{
 	// normally since the focus never leaves the textarea.
 	wmd.ieCachedRange = null;		// cached textarea selection
 	wmd.ieRetardedClick = false;	// flag
-	
-        // {{{ Position
-
-	// UNFINISHED
-	// The assignment in the while loop makes jslint cranky.
-	// I'll change it to a better loop later.
-	position.getTop = function(elem, isInner){
-		var result = elem.offsetTop;
-		if (!isInner) {
-			while (elem = elem.offsetParent) {
-				result += elem.offsetTop;
-			}
-		}
-		return result;
-	};
-	
-	position.getHeight = function (elem) {
-		return elem.offsetHeight || elem.scrollHeight;
-	};
-
-	position.getWidth = function (elem) {
-		return elem.offsetWidth || elem.scrollWidth;
-	};
-
-	position.getPageSize = function(){
-		
-		var scrollWidth, scrollHeight;
-		var innerWidth, innerHeight;
-		
-		// It's not very clear which blocks work with which browsers.
-		if(self.innerHeight && self.scrollMaxY){
-			scrollWidth = doc.body.scrollWidth;
-			scrollHeight = self.innerHeight + self.scrollMaxY;
-		}
-		else if(doc.body.scrollHeight > doc.body.offsetHeight){
-			scrollWidth = doc.body.scrollWidth;
-			scrollHeight = doc.body.scrollHeight;
-		}
-		else{
-			scrollWidth = doc.body.offsetWidth;
-			scrollHeight = doc.body.offsetHeight;
-		}
-		
-		if(self.innerHeight){
-			// Non-IE browser
-			innerWidth = self.innerWidth;
-			innerHeight = self.innerHeight;
-		}
-		else if(doc.documentElement && doc.documentElement.clientHeight){
-			// Some versions of IE (IE 6 w/ a DOCTYPE declaration)
-			innerWidth = doc.documentElement.clientWidth;
-			innerHeight = doc.documentElement.clientHeight;
-		}
-		else if(doc.body){
-			// Other versions of IE
-			innerWidth = doc.body.clientWidth;
-			innerHeight = doc.body.clientHeight;
-		}
-		
-        var maxWidth = Math.max(scrollWidth, innerWidth);
-        var maxHeight = Math.max(scrollHeight, innerHeight);
-        return [maxWidth, maxHeight, innerWidth, innerHeight];
-	};
-
-        // }}}
 	
 	// Watches the input textarea, polling at an interval and runs
 	// a callback function if anything has changed.
@@ -2343,51 +2341,10 @@ Attacklab.wmdBase = function(){ // {{{
 		init();
 	}; // }}}
 
-};
+}; // }}}
 
+})();
 
-/*
-Attacklab.wmd_env = {};
-Attacklab.account_options = {};
-Attacklab.wmd_defaults = {version:2.0, output_format:"markdown", lineLength:40, delayLoad:false};
-
-if(!Attacklab.wmd)
-{
-	Attacklab.wmd = function()
-	{
-		Attacklab.loadEnv = function()
-		{
-			var mergeEnv = function(env)
-			{
-				if(!env)
-				{
-					return;
-				}
-			
-				for(var key in env)
-				{
-					Attacklab.wmd_env[key] = env[key];
-				}
-			};
-			
-			mergeEnv(Attacklab.wmd_defaults);
-			mergeEnv(Attacklab.account_options);
-			mergeEnv(wmd_options);
-			Attacklab.full = true;
-			
-			var defaultButtons = "bold italic link blockquote code image ol ul heading hr";
-			Attacklab.wmd_env.buttons = Attacklab.wmd_env.buttons || defaultButtons;
-		};
-		Attacklab.loadEnv();
-
-	};
-	
-	Attacklab.wmd();
-	Attacklab.wmdBase();
-	Attacklab.Util.startEditor();
-};
-*/ 
-
-    Attacklab.wmdBase();
-    WMDEditor.util.startEditor();
+function setup_wmd(options) {
+    return new WMDEditor(options);
 }
