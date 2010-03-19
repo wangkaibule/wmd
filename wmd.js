@@ -448,12 +448,295 @@ var position = { // {{{
     }
 }; // }}}
 
+// The input textarea state/contents.
+// This is used to implement undo/redo by the undo manager.
+TextareaState = function(textarea){ // {{{
+    // Aliases
+    var stateObj = this;
+    var inputArea = textarea;
+    
+    this.init = function() {
+    
+        if (!util.isVisible(inputArea)) {
+            return;
+        }
+            
+        this.setInputAreaSelectionStartEnd();
+        this.scrollTop = inputArea.scrollTop;
+        if (!this.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
+            this.text = inputArea.value;
+        }
+        
+    }
+    
+    // Sets the selected text in the input box after we've performed an
+    // operation.
+    this.setInputAreaSelection = function(){
+    
+        if (!util.isVisible(inputArea)) {
+            return;
+        }
+        
+        if (inputArea.selectionStart !== undefined && !browser.isOpera) {
+        
+            inputArea.focus();
+            inputArea.selectionStart = stateObj.start;
+            inputArea.selectionEnd = stateObj.end;
+            inputArea.scrollTop = stateObj.scrollTop;
+        }
+        else if (doc.selection) {
+            
+            if (doc.activeElement && doc.activeElement !== inputArea) {
+                return;
+            }
+                
+            inputArea.focus();
+            var range = inputArea.createTextRange();
+            range.moveStart("character", -inputArea.value.length);
+            range.moveEnd("character", -inputArea.value.length);
+            range.moveEnd("character", stateObj.end);
+            range.moveStart("character", stateObj.start);
+            range.select();
+        }
+    };
+    
+    this.setInputAreaSelectionStartEnd = function(){
+    
+        if (inputArea.selectionStart || inputArea.selectionStart === 0) {
+        
+            stateObj.start = inputArea.selectionStart;
+            stateObj.end = inputArea.selectionEnd;
+        }
+        else if (doc.selection) {
+            
+            stateObj.text = util.fixEolChars(inputArea.value);
+            
+            // IE loses the selection in the textarea when buttons are
+            // clicked.  On IE we cache the selection and set a flag
+            // which we check for here.
+            var range;
+            if(wmd.ieRetardedClick && wmd.ieCachedRange) {
+                range = wmd.ieCachedRange;
+                wmd.ieRetardedClick = false;
+            }
+            else {
+                range = doc.selection.createRange();
+            }
+
+            var fixedRange = util.fixEolChars(range.text);
+            var marker = "\x07";
+            var markedRange = marker + fixedRange + marker;
+            range.text = markedRange;
+            var inputText = util.fixEolChars(inputArea.value);
+                
+            range.moveStart("character", -markedRange.length);
+            range.text = fixedRange;
+
+            stateObj.start = inputText.indexOf(marker);
+            stateObj.end = inputText.lastIndexOf(marker) - marker.length;
+                
+            var len = stateObj.text.length - util.fixEolChars(inputArea.value).length;
+                
+            if (len) {
+                range.moveStart("character", -fixedRange.length);
+                while (len--) {
+                    fixedRange += "\n";
+                    stateObj.end += 1;
+                }
+                range.text = fixedRange;
+            }
+                
+            this.setInputAreaSelection();
+        }
+    };
+    
+    // Restore this state into the input area.
+    this.restore = function(){
+    
+        if (stateObj.text != undefined && stateObj.text != inputArea.value) {
+            inputArea.value = stateObj.text;
+        }
+        this.setInputAreaSelection();
+        inputArea.scrollTop = stateObj.scrollTop;
+    };
+    
+    // Gets a collection of HTML chunks from the inptut textarea.
+    this.getChunks = function(){
+    
+        var chunk = new Chunks();
+        
+        chunk.before = util.fixEolChars(stateObj.text.substring(0, stateObj.start));
+        chunk.startTag = "";
+        chunk.selection = util.fixEolChars(stateObj.text.substring(stateObj.start, stateObj.end));
+        chunk.endTag = "";
+        chunk.after = util.fixEolChars(stateObj.text.substring(stateObj.end));
+        chunk.scrollTop = stateObj.scrollTop;
+        
+        return chunk;
+    };
+    
+    // Sets the TextareaState properties given a chunk of markdown.
+    this.setChunks = function(chunk){
+    
+        chunk.before = chunk.before + chunk.startTag;
+        chunk.after = chunk.endTag + chunk.after;
+        
+        if (browser.isOpera) {
+            chunk.before = chunk.before.replace(/\n/g, "\r\n");
+            chunk.selection = chunk.selection.replace(/\n/g, "\r\n");
+            chunk.after = chunk.after.replace(/\n/g, "\r\n");
+        }
+        
+        this.start = chunk.before.length;
+        this.end = chunk.before.length + chunk.selection.length;
+        this.text = chunk.before + chunk.selection + chunk.after;
+        this.scrollTop = chunk.scrollTop;
+    };
+
+    this.init();
+}; // }}}
+
+// Chunks {{{
+
+// before: contains all the text in the input box BEFORE the selection.
+// after: contains all the text in the input box AFTER the selection.
+Chunks = function(){
+};
+
+// startRegex: a regular expression to find the start tag
+// endRegex: a regular expresssion to find the end tag
+Chunks.prototype.findTags = function(startRegex, endRegex){
+
+    var chunkObj = this;
+    var regex;
+    
+    if (startRegex) {
+        
+        regex = util.extendRegExp(startRegex, "", "$");
+        
+        this.before = this.before.replace(regex, 
+            function(match){
+                chunkObj.startTag = chunkObj.startTag + match;
+                return "";
+            });
+        
+        regex = util.extendRegExp(startRegex, "^", "");
+        
+        this.selection = this.selection.replace(regex, 
+            function(match){
+                chunkObj.startTag = chunkObj.startTag + match;
+                return "";
+            });
+    }
+    
+    if (endRegex) {
+        
+        regex = util.extendRegExp(endRegex, "", "$");
+        
+        this.selection = this.selection.replace(regex,
+            function(match){
+                chunkObj.endTag = match + chunkObj.endTag;
+                return "";
+            });
+
+        regex = util.extendRegExp(endRegex, "^", "");
+        
+        this.after = this.after.replace(regex,
+            function(match){
+                chunkObj.endTag = match + chunkObj.endTag;
+                return "";
+            });
+    }
+};
+
+// If remove is false, the whitespace is transferred
+// to the before/after regions.
+//
+// If remove is true, the whitespace disappears.
+Chunks.prototype.trimWhitespace = function(remove){
+
+    this.selection = this.selection.replace(/^(\s*)/, "");
+    
+    if (!remove) {
+        this.before += re.$1;
+    }
+    
+    this.selection = this.selection.replace(/(\s*)$/, "");
+    
+    if (!remove) {
+        this.after = re.$1 + this.after;
+    }
+};
+
+
+Chunks.prototype.addBlankLines = function(nLinesBefore, nLinesAfter, findExtraNewlines){
+
+    if (nLinesBefore === undefined) {
+        nLinesBefore = 1;
+    }
+    
+    if (nLinesAfter === undefined) {
+        nLinesAfter = 1;
+    }
+    
+    nLinesBefore++;
+    nLinesAfter++;
+    
+    var regexText;
+    var replacementText;
+    
+    this.selection = this.selection.replace(/(^\n*)/, "");
+    this.startTag = this.startTag + re.$1;
+    this.selection = this.selection.replace(/(\n*$)/, "");
+    this.endTag = this.endTag + re.$1;
+    this.startTag = this.startTag.replace(/(^\n*)/, "");
+    this.before = this.before + re.$1;
+    this.endTag = this.endTag.replace(/(\n*$)/, "");
+    this.after = this.after + re.$1;
+    
+    if (this.before) {
+    
+        regexText = replacementText = "";
+        
+        while (nLinesBefore--) {
+            regexText += "\\n?";
+            replacementText += "\n";
+        }
+        
+        if (findExtraNewlines) {
+            regexText = "\\n*";
+        }
+        this.before = this.before.replace(new re(regexText + "$", ""), replacementText);
+    }
+    
+    if (this.after) {
+    
+        regexText = replacementText = "";
+        
+        while (nLinesAfter--) {
+            regexText += "\\n?";
+            replacementText += "\n";
+        }
+        if (findExtraNewlines) {
+            regexText = "\\n*";
+        }
+        
+        this.after = this.after.replace(new re(regexText, ""), replacementText);
+    }
+}; 
+// }}} - END CHUNKS
+    
+
 WMDEditor.util = util;
 WMDEditor.position = position;
 
-var doc = document;
-var nav = top.navigator;
 
+// A few handy aliases for readability.
+//var wmd  = Attacklab;
+var doc  = top.document;
+var re   = top.RegExp;
+var nav  = top.navigator;
+    
 function get_browser() {
     var b = {};
     b.isIE         = /msie/.test(nav.userAgent.toLowerCase());
@@ -469,12 +752,6 @@ var browser = get_browser();
 
 var wmdBase = function(wmd, wmd_options){ // {{{
 
-    // A few handy aliases for readability.
-    //var wmd  = Attacklab;
-    var doc  = top.document;
-    var re   = top.RegExp;
-    var nav  = top.navigator;
-    
     // Some namespaces.
     //wmd.Util = {};
     //wmd.Position = {};
@@ -598,7 +875,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
         };
         
         var refreshState = function(){
-            inputStateObj = new wmd.TextareaState();
+            inputStateObj = new TextareaState(wmd.panels.input);
             poller.tick();
             timer = undefined;
         };
@@ -630,7 +907,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                     lastState = null;
                 }
                 else {
-                    undoStack[stackPtr] = new wmd.TextareaState();
+                    undoStack[stackPtr] = new TextareaState(wmd.panels.input);
                     undoStack[--stackPtr].restore();
                     
                     if (callback) {
@@ -664,7 +941,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
         // Push the input area state to the stack.
         var saveState = function(){
         
-            var currState = inputStateObj || new wmd.TextareaState();
+            var currState = inputStateObj || new TextareaState(wmd.panels.input);
             
             if (!currState) {
                 return false;
@@ -845,7 +1122,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                     undoMgr.setCommandMode();
                 }
                 
-                var state = new wmd.TextareaState();
+                var state = new TextareaState(wmd.panels.input);
                 
                 if (!state) {
                     return;
@@ -1227,285 +1504,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
         init();
     }; // }}}
     
-    // The input textarea state/contents.
-    // This is used to implement undo/redo by the undo manager.
-    wmd.TextareaState = function(){ // {{{
-    
-        // Aliases
-        var stateObj = this;
-        var inputArea = wmd.panels.input;
-        
-        this.init = function() {
-        
-            if (!util.isVisible(inputArea)) {
-                return;
-            }
-                
-            this.setInputAreaSelectionStartEnd();
-            this.scrollTop = inputArea.scrollTop;
-            if (!this.text && inputArea.selectionStart || inputArea.selectionStart === 0) {
-                this.text = inputArea.value;
-            }
-            
-        }
-        
-        // Sets the selected text in the input box after we've performed an
-        // operation.
-        this.setInputAreaSelection = function(){
-        
-            if (!util.isVisible(inputArea)) {
-                return;
-            }
-            
-            if (inputArea.selectionStart !== undefined && !browser.isOpera) {
-            
-                inputArea.focus();
-                inputArea.selectionStart = stateObj.start;
-                inputArea.selectionEnd = stateObj.end;
-                inputArea.scrollTop = stateObj.scrollTop;
-            }
-            else if (doc.selection) {
-                
-                if (doc.activeElement && doc.activeElement !== inputArea) {
-                    return;
-                }
-                    
-                inputArea.focus();
-                var range = inputArea.createTextRange();
-                range.moveStart("character", -inputArea.value.length);
-                range.moveEnd("character", -inputArea.value.length);
-                range.moveEnd("character", stateObj.end);
-                range.moveStart("character", stateObj.start);
-                range.select();
-            }
-        };
-        
-        this.setInputAreaSelectionStartEnd = function(){
-        
-            if (inputArea.selectionStart || inputArea.selectionStart === 0) {
-            
-                stateObj.start = inputArea.selectionStart;
-                stateObj.end = inputArea.selectionEnd;
-            }
-            else if (doc.selection) {
-                
-                stateObj.text = util.fixEolChars(inputArea.value);
-                
-                // IE loses the selection in the textarea when buttons are
-                // clicked.  On IE we cache the selection and set a flag
-                // which we check for here.
-                var range;
-                if(wmd.ieRetardedClick && wmd.ieCachedRange) {
-                    range = wmd.ieCachedRange;
-                    wmd.ieRetardedClick = false;
-                }
-                else {
-                    range = doc.selection.createRange();
-                }
 
-                var fixedRange = util.fixEolChars(range.text);
-                var marker = "\x07";
-                var markedRange = marker + fixedRange + marker;
-                range.text = markedRange;
-                var inputText = util.fixEolChars(inputArea.value);
-                    
-                range.moveStart("character", -markedRange.length);
-                range.text = fixedRange;
-
-                stateObj.start = inputText.indexOf(marker);
-                stateObj.end = inputText.lastIndexOf(marker) - marker.length;
-                    
-                var len = stateObj.text.length - util.fixEolChars(inputArea.value).length;
-                    
-                if (len) {
-                    range.moveStart("character", -fixedRange.length);
-                    while (len--) {
-                        fixedRange += "\n";
-                        stateObj.end += 1;
-                    }
-                    range.text = fixedRange;
-                }
-                    
-                this.setInputAreaSelection();
-            }
-        };
-        
-        // Restore this state into the input area.
-        this.restore = function(){
-        
-            if (stateObj.text != undefined && stateObj.text != inputArea.value) {
-                inputArea.value = stateObj.text;
-            }
-            this.setInputAreaSelection();
-            inputArea.scrollTop = stateObj.scrollTop;
-        };
-        
-        // Gets a collection of HTML chunks from the inptut textarea.
-        this.getChunks = function(){
-        
-            var chunk = new wmd.Chunks();
-            
-            chunk.before = util.fixEolChars(stateObj.text.substring(0, stateObj.start));
-            chunk.startTag = "";
-            chunk.selection = util.fixEolChars(stateObj.text.substring(stateObj.start, stateObj.end));
-            chunk.endTag = "";
-            chunk.after = util.fixEolChars(stateObj.text.substring(stateObj.end));
-            chunk.scrollTop = stateObj.scrollTop;
-            
-            return chunk;
-        };
-        
-        // Sets the TextareaState properties given a chunk of markdown.
-        this.setChunks = function(chunk){
-        
-            chunk.before = chunk.before + chunk.startTag;
-            chunk.after = chunk.endTag + chunk.after;
-            
-            if (browser.isOpera) {
-                chunk.before = chunk.before.replace(/\n/g, "\r\n");
-                chunk.selection = chunk.selection.replace(/\n/g, "\r\n");
-                chunk.after = chunk.after.replace(/\n/g, "\r\n");
-            }
-            
-            this.start = chunk.before.length;
-            this.end = chunk.before.length + chunk.selection.length;
-            this.text = chunk.before + chunk.selection + chunk.after;
-            this.scrollTop = chunk.scrollTop;
-        };
-
-        this.init();
-    }; // }}}
-
-        // Chunks {{{
-
-    // before: contains all the text in the input box BEFORE the selection.
-    // after: contains all the text in the input box AFTER the selection.
-    wmd.Chunks = function(){
-    };
-    
-    // startRegex: a regular expression to find the start tag
-    // endRegex: a regular expresssion to find the end tag
-    wmd.Chunks.prototype.findTags = function(startRegex, endRegex){
-    
-        var chunkObj = this;
-        var regex;
-        
-        if (startRegex) {
-            
-            regex = util.extendRegExp(startRegex, "", "$");
-            
-            this.before = this.before.replace(regex, 
-                function(match){
-                    chunkObj.startTag = chunkObj.startTag + match;
-                    return "";
-                });
-            
-            regex = util.extendRegExp(startRegex, "^", "");
-            
-            this.selection = this.selection.replace(regex, 
-                function(match){
-                    chunkObj.startTag = chunkObj.startTag + match;
-                    return "";
-                });
-        }
-        
-        if (endRegex) {
-            
-            regex = util.extendRegExp(endRegex, "", "$");
-            
-            this.selection = this.selection.replace(regex,
-                function(match){
-                    chunkObj.endTag = match + chunkObj.endTag;
-                    return "";
-                });
-
-            regex = util.extendRegExp(endRegex, "^", "");
-            
-            this.after = this.after.replace(regex,
-                function(match){
-                    chunkObj.endTag = match + chunkObj.endTag;
-                    return "";
-                });
-        }
-    };
-    
-    // If remove is false, the whitespace is transferred
-    // to the before/after regions.
-    //
-    // If remove is true, the whitespace disappears.
-    wmd.Chunks.prototype.trimWhitespace = function(remove){
-    
-        this.selection = this.selection.replace(/^(\s*)/, "");
-        
-        if (!remove) {
-            this.before += re.$1;
-        }
-        
-        this.selection = this.selection.replace(/(\s*)$/, "");
-        
-        if (!remove) {
-            this.after = re.$1 + this.after;
-        }
-    };
-    
-    
-    wmd.Chunks.prototype.addBlankLines = function(nLinesBefore, nLinesAfter, findExtraNewlines){
-    
-        if (nLinesBefore === undefined) {
-            nLinesBefore = 1;
-        }
-        
-        if (nLinesAfter === undefined) {
-            nLinesAfter = 1;
-        }
-        
-        nLinesBefore++;
-        nLinesAfter++;
-        
-        var regexText;
-        var replacementText;
-        
-        this.selection = this.selection.replace(/(^\n*)/, "");
-        this.startTag = this.startTag + re.$1;
-        this.selection = this.selection.replace(/(\n*$)/, "");
-        this.endTag = this.endTag + re.$1;
-        this.startTag = this.startTag.replace(/(^\n*)/, "");
-        this.before = this.before + re.$1;
-        this.endTag = this.endTag.replace(/(\n*$)/, "");
-        this.after = this.after + re.$1;
-        
-        if (this.before) {
-        
-            regexText = replacementText = "";
-            
-            while (nLinesBefore--) {
-                regexText += "\\n?";
-                replacementText += "\n";
-            }
-            
-            if (findExtraNewlines) {
-                regexText = "\\n*";
-            }
-            this.before = this.before.replace(new re(regexText + "$", ""), replacementText);
-        }
-        
-        if (this.after) {
-        
-            regexText = replacementText = "";
-            
-            while (nLinesAfter--) {
-                regexText += "\\n?";
-                replacementText += "\n";
-            }
-            if (findExtraNewlines) {
-                regexText = "\\n*";
-            }
-            
-            this.after = this.after.replace(new re(regexText, ""), replacementText);
-        }
-    }; 
-    // }}} - END CHUNKS
-    
     // command {{{
 
     // The markdown symbols - 4 spaces = code, > = blockquote, etc.
