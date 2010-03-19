@@ -1,18 +1,391 @@
-function setup_wmd(wmd_options) {
+;(function() {
+    
+WMDEditor = function(options) {
+    this.options = WMDEditor.util.extend({}, WMDEditor.defaults, options || {});
+    setup_wmd(this, this.options);
+};
+top.WMDEditor = WMDEditor;
+
+WMDEditor.defaults = { // {{{
+    imageDialogText: 
+        "<p style='margin-top: 0px'><b>Enter the image URL.</b></p>" + 
+        "<p>You can also add a title, which will be displayed as a tool tip.</p>" +
+        "<p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>",
+	linkDialogText: 
+	    "<p style='margin-top: 0px'><b>Enter the web address.</b></p>" + 
+	    "<p>You can also add a title, which will be displayed as a tool tip.</p>" + 
+	    "<p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>",
+
+	imageDefaultText: "http://",
+	linkDefaultText: "http://",
+	imageDirectory: "images/",
+
+    helpLink: "http://wmd-editor.com/",
+	helpHoverTitle: "WMD website",
+	helpTarget: "_blank",
+
+	button_bar: "wmd-button-bar",
+	preview: "wmd-preview",
+	output: "wmd-output",
+	input: "wmd-input",
+
+	version: 2.0, 
+	output_format:"markdown", 
+	lineLength:40, 
+	delayLoad:false,
+	
+	previewPollInterval: 500,
+	pastePollInterval: 100,
+
+	buttons: "bold italic link blockquote code image ol ul heading hr"
+}; // }}}
+
+var util = { // {{{
+
+    // Returns true if the DOM element is visible, false if it's hidden.
+    // Checks if display is anything other than none.
+    isVisible: function (elem) {
+        // shamelessly copied from jQuery
+        return elem.offsetWidth > 0 || elem.offsetHeight > 0;
+    },
+
+    // Adds a listener callback to a DOM element which is fired on a specified
+    // event.
+    addEvent: function(elem, event, listener){
+    	if (elem.attachEvent) {
+    		// IE only.  The "on" is mandatory.
+    		elem.attachEvent("on" + event, listener);
+    	}
+    	else {
+    		// Other browsers.
+    		elem.addEventListener(event, listener, false);
+    	}
+    },
+
+    // Removes a listener callback from a DOM element which is fired on a specified
+    // event.
+    removeEvent: function(elem, event, listener){
+    	if (elem.detachEvent) {
+    		// IE only.  The "on" is mandatory.
+    		elem.detachEvent("on" + event, listener);
+    	}
+    	else {
+    		// Other browsers.
+    		elem.removeEventListener(event, listener, false);
+    	}
+    },
+
+    // Converts \r\n and \r to \n.
+    fixEolChars: function(text){
+    	text = text.replace(/\r\n/g, "\n");
+    	text = text.replace(/\r/g, "\n");
+    	return text;
+    },
+
+    // Extends a regular expression.  Returns a new RegExp
+    // using pre + regex + post as the expression.
+    // Used in a few functions where we have a base
+    // expression and we want to pre- or append some
+    // conditions to it (e.g. adding "$" to the end).
+    // The flags are unchanged.
+    //
+    // regex is a RegExp, pre and post are strings.
+    extendRegExp: function(regex, pre, post){
+	
+    	if (pre === null || pre === undefined)
+    	{
+    		pre = "";
+    	}
+    	if(post === null || post === undefined)
+    	{
+    		post = "";
+    	}
+	
+    	var pattern = regex.toString();
+    	var flags = "";
+	
+    	// Replace the flags with empty space and store them.
+    	// Technically, this can match incorrect flags like "gmm".
+    	var result = pattern.match(/\/([gim]*)$/);
+    	if (result === null) {
+    		flags = result[0];
+    	}
+    	else {
+    		flags = "";
+    	}
+	
+    	// Remove the flags and slash delimiters from the regular expression.
+    	pattern = pattern.replace(/(^\/|\/[gim]*$)/g, "");
+    	pattern = pre + pattern + post;
+	
+    	return new RegExp(pattern, flags);
+    },
+
+    // Sets the image for a button passed to the WMD editor.
+    // Returns a new element with the image attached.
+    // Adds several style properties to the image.
+    //
+    // XXX-ANAND: Is this used anywhere?
+    createImage: function(img){
+	
+    	var imgPath = imageDirectory + img;
+	
+    	var elem = doc.createElement("img");
+    	elem.className = "wmd-button";
+    	elem.src = imgPath;
+
+    	return elem;
+    },
+
+    // This simulates a modal dialog box and asks for the URL when you
+    // click the hyperlink or image buttons.
+    //
+    // text: The html for the input box.
+    // defaultInputText: The default value that appears in the input box.
+    // makeLinkMarkdown: The function which is executed when the prompt is dismissed, either via OK or Cancel
+    prompt: function(text, defaultInputText, makeLinkMarkdown){
+
+    	// These variables need to be declared at this level since they are used
+    	// in multiple functions.
+    	var dialog;			// The dialog box.
+    	var background;		// The background beind the dialog box.
+    	var input;			// The text box where you enter the hyperlink.
+	
+
+    	if (defaultInputText === undefined) {
+    		defaultInputText = "";
+    	}
+	
+    	// Used as a keydown event handler. Esc dismisses the prompt.
+    	// Key code 27 is ESC.
+    	var checkEscape = function(key){
+    		var code = (key.charCode || key.keyCode);
+    		if (code === 27) {
+    			close(true);
+    		}
+    	};
+	
+    	// Dismisses the hyperlink input box.
+    	// isCancel is true if we don't care about the input text.
+    	// isCancel is false if we are going to keep the text.
+    	var close = function(isCancel){
+    		util.removeEvent(doc.body, "keydown", checkEscape);
+    		var text = input.value;
+
+    		if (isCancel){
+    			text = null;
+    		}
+    		else{
+    			// Fixes common pasting errors.
+    			text = text.replace('http://http://', 'http://');
+    			text = text.replace('http://https://', 'https://');
+    			text = text.replace('http://ftp://', 'ftp://');
+			
+    			if (text.indexOf('http://') === -1 && text.indexOf('ftp://') === -1 && text.indexOf('https://') === -1) {
+    				text = 'http://' + text;
+    			}
+    		}
+		
+    		dialog.parentNode.removeChild(dialog);
+    		background.parentNode.removeChild(background);
+    		makeLinkMarkdown(text);
+    		return false;
+    	};
+	
+    	// Creates the background behind the hyperlink text entry box.
+    	// Most of this has been moved to CSS but the div creation and
+    	// browser-specific hacks remain here.
+    	var createBackground = function(){
+	
+    		background = doc.createElement("div");
+    		background.className = "wmd-prompt-background";
+    		style = background.style;
+    		style.position = "absolute";
+    		style.top = "0";
+		
+    		style.zIndex = "1000";
+		
+    		// Some versions of Konqueror don't support transparent colors
+    		// so we make the whole window transparent.
+    		//
+    		// Is this necessary on modern konqueror browsers?
+    		if (global.isKonqueror){
+    			style.backgroundColor = "transparent";
+    		}
+    		else if (global.isIE){
+    			style.filter = "alpha(opacity=50)";
+    		}
+    		else {
+    			style.opacity = "0.5";
+    		}
+		
+    		var pageSize = position.getPageSize();
+    		style.height = pageSize[1] + "px";
+		
+    		if(global.isIE){
+    			style.left = doc.documentElement.scrollLeft;
+    			style.width = doc.documentElement.clientWidth;
+    		}
+    		else {
+    			style.left = "0";
+    			style.width = "100%";
+    		}
+		
+    		doc.body.appendChild(background);
+    	};
+	
+    	// Create the text input box form/window.
+    	var createDialog = function(){
+	
+    		// The main dialog box.
+    		dialog = doc.createElement("div");
+    		dialog.className = "wmd-prompt-dialog";
+    		dialog.style.padding = "10px;";
+    		dialog.style.position = "fixed";
+    		dialog.style.width = "400px";
+    		dialog.style.zIndex = "1001";
+		
+    		// The dialog text.
+    		var question = doc.createElement("div");
+    		question.innerHTML = text;
+    		question.style.padding = "5px";
+    		dialog.appendChild(question);
+		
+    		// The web form container for the text box and buttons.
+    		var form = doc.createElement("form");
+    		form.onsubmit = function(){ return close(false); };
+    		style = form.style;
+    		style.padding = "0";
+    		style.margin = "0";
+    		style.cssFloat = "left";
+    		style.width = "100%";
+    		style.textAlign = "center";
+    		style.position = "relative";
+    		dialog.appendChild(form);
+		
+    		// The input text box
+    		input = doc.createElement("input");
+    		input.type = "text";
+    		input.value = defaultInputText;
+    		style = input.style;
+    		style.display = "block";
+    		style.width = "80%";
+    		style.marginLeft = style.marginRight = "auto";
+    		form.appendChild(input);
+		
+    		// The ok button
+    		var okButton = doc.createElement("input");
+    		okButton.type = "button";
+    		okButton.onclick = function(){ return close(false); };
+    		okButton.value = "OK";
+    		style = okButton.style;
+    		style.margin = "10px";
+    		style.display = "inline";
+    		style.width = "7em";
+
+		
+    		// The cancel button
+    		var cancelButton = doc.createElement("input");
+    		cancelButton.type = "button";
+    		cancelButton.onclick = function(){ return close(true); };
+    		cancelButton.value = "Cancel";
+    		style = cancelButton.style;
+    		style.margin = "10px";
+    		style.display = "inline";
+    		style.width = "7em";
+
+    		// The order of these buttons is different on macs.
+    		if (/mac/.test(nav.platform.toLowerCase())) {
+    			form.appendChild(cancelButton);
+    			form.appendChild(okButton);
+    		}
+    		else {
+    			form.appendChild(okButton);
+    			form.appendChild(cancelButton);
+    		}
+
+    		util.addEvent(doc.body, "keydown", checkEscape);
+    		dialog.style.top = "50%";
+    		dialog.style.left = "50%";
+    		dialog.style.display = "block";
+    		if(global.isIE_5or6){
+    			dialog.style.position = "absolute";
+    			dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
+    			dialog.style.left = "50%";
+    		}
+    		doc.body.appendChild(dialog);
+		
+    		// This has to be done AFTER adding the dialog to the form if you
+    		// want it to be centered.
+    		dialog.style.marginTop = -(position.getHeight(dialog) / 2) + "px";
+    		dialog.style.marginLeft = -(position.getWidth(dialog) / 2) + "px";
+		
+    	};
+	
+    	createBackground();
+	
+    	// Why is this in a zero-length timeout?
+    	// Is it working around a browser bug?
+    	top.setTimeout(function(){
+	
+    		createDialog();
+
+    		var defTextLen = defaultInputText.length;
+    		if (input.selectionStart !== undefined) {
+    			input.selectionStart = 0;
+    			input.selectionEnd = defTextLen;
+    		}
+    		else if (input.createTextRange) {
+    			var range = input.createTextRange();
+    			range.collapse(false);
+    			range.moveStart("character", -defTextLen);
+    			range.moveEnd("character", defTextLen);
+    			range.select();
+    		}
+		
+    		input.focus();
+    	}, 0);
+    },
+    
+    extend: function() {
+        function _update(a, b) {
+            for (var k in b) {
+                a[k] = b[k];
+            }
+            return a;
+        }
+        
+        var d = {};
+        for (var i=0; i < arguments.length; i++) {
+            _update(d, arguments[i]);
+        }
+        return d;
+    }
+}; // }}}
+
+WMDEditor.util = util;
+
+})();
+
+/*** OLD CODE ***/
+
+function setup_wmd(wmd, options) {
+
+    var wmd_options = options;
 
 var Attacklab = Attacklab || {};
-wmd_options = wmd_options || top.wmd_options || {};
+//wmd_options = wmd_options || top.wmd_options || {};
 
-Attacklab.wmdBase = function(){
+Attacklab.wmdBase = function(){ // {{{
 
 	// A few handy aliases for readability.
-	var wmd  = Attacklab;
+	//var wmd  = Attacklab;
 	var doc  = top.document;
 	var re   = top.RegExp;
 	var nav  = top.navigator;
 	
 	// Some namespaces.
-	wmd.Util = {};
+	//wmd.Util = {};
 	wmd.Position = {};
 	wmd.Command = {};
 	wmd.Global = {};
@@ -20,7 +393,7 @@ Attacklab.wmdBase = function(){
 	
 	wmd.showdown = top.Attacklab && top.Attacklab.showdown;
 	
-	var util = wmd.Util;
+	var util = WMDEditor.util;
 	var position = wmd.Position;
 	var command = wmd.Command;
 	var global = wmd.Global;
@@ -40,28 +413,30 @@ Attacklab.wmdBase = function(){
 	// I've tried to localize the things you are likely to change to 
 	// this area.
 	// -------------------------------------------------------------------
-	
-	// The text that appears on the upper part of the dialog box when
-	// entering links.
-	var imageDialogText = wmd_options.imageDialogText || "<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>";
-	var linkDialogText = wmd_options.linkDialogText || "<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>";
-	
-	// The default text that appears in the dialog input box when entering
-	// links.
-	var imageDefaultText = "http://";
-	var linkDefaultText = "http://";
-	
-	// The location of your button images relative to the base directory.
-	var imageDirectory = "images/";
-	
-	// Some intervals in ms.  These can be adjusted to reduce the control's load.
-	var previewPollInterval = 500;
-	var pastePollInterval = 100;
-	
-	// The link and title for the help button
-	var helpLink = wmd_options.helpLink || "http://wmd-editor.com/";
-	var helpHoverTitle = wmd_options.helpHoverTitle || "WMD website";
-	var helpTarget = wmd_options.helpTarget || "_blank";
+
+    
+        // The text that appears on the upper part of the dialog box when
+        // entering links.
+        var imageDialogText = wmd.options.imageDialogText;
+        var linkDialogText = wmd.options.linkDialogText;
+        
+        // The default text that appears in the dialog input box when entering
+        // links.
+        var imageDefaultText = "http://";
+        var linkDefaultText = "http://";
+        
+        // The location of your button images relative to the base directory.
+        var imageDirectory = "images/";
+        
+        // Some intervals in ms.  These can be adjusted to reduce the control's load.
+        var previewPollInterval = 500;
+        var pastePollInterval = 100;
+        
+        // The link and title for the help button
+        var helpLink = wmd_options.helpLink; 
+        var helpHoverTitle = wmd_options.helpHoverTitle;
+        var helpTarget = wmd_options.helpTarget;
+
 	
 	// -------------------------------------------------------------------
 	//  END OF YOUR CHANGES
@@ -95,313 +470,8 @@ Attacklab.wmdBase = function(){
 	wmd.ieCachedRange = null;		// cached textarea selection
 	wmd.ieRetardedClick = false;	// flag
 	
-	// Returns true if the DOM element is visible, false if it's hidden.
-	// Checks if display is anything other than none.
-	util.isVisible = function (elem) {
-            // shamelessly copied from jQuery
-            return elem.offsetWidth > 0 || elem.offsetHeight > 0;
-        };
-	
-	// Adds a listener callback to a DOM element which is fired on a specified
-	// event.
-	util.addEvent = function(elem, event, listener){
-		if (elem.attachEvent) {
-			// IE only.  The "on" is mandatory.
-			elem.attachEvent("on" + event, listener);
-		}
-		else {
-			// Other browsers.
-			elem.addEventListener(event, listener, false);
-		}
-	};
+        // {{{ Position
 
-	
-	// Removes a listener callback from a DOM element which is fired on a specified
-	// event.
-	util.removeEvent = function(elem, event, listener){
-		if (elem.detachEvent) {
-			// IE only.  The "on" is mandatory.
-			elem.detachEvent("on" + event, listener);
-		}
-		else {
-			// Other browsers.
-			elem.removeEventListener(event, listener, false);
-		}
-	};
-
-	// Converts \r\n and \r to \n.
-	util.fixEolChars = function(text){
-		text = text.replace(/\r\n/g, "\n");
-		text = text.replace(/\r/g, "\n");
-		return text;
-	};
-
-	// Extends a regular expression.  Returns a new RegExp
-	// using pre + regex + post as the expression.
-	// Used in a few functions where we have a base
-	// expression and we want to pre- or append some
-	// conditions to it (e.g. adding "$" to the end).
-	// The flags are unchanged.
-	//
-	// regex is a RegExp, pre and post are strings.
-	util.extendRegExp = function(regex, pre, post){
-		
-		if (pre === null || pre === undefined)
-		{
-			pre = "";
-		}
-		if(post === null || post === undefined)
-		{
-			post = "";
-		}
-		
-		var pattern = regex.toString();
-		var flags = "";
-		
-		// Replace the flags with empty space and store them.
-		// Technically, this can match incorrect flags like "gmm".
-		var result = pattern.match(/\/([gim]*)$/);
-		if (result === null) {
-			flags = result[0];
-		}
-		else {
-			flags = "";
-		}
-		
-		// Remove the flags and slash delimiters from the regular expression.
-		pattern = pattern.replace(/(^\/|\/[gim]*$)/g, "");
-		pattern = pre + pattern + post;
-		
-		return new RegExp(pattern, flags);
-	}
-
-	
-	// Sets the image for a button passed to the WMD editor.
-	// Returns a new element with the image attached.
-	// Adds several style properties to the image.
-	util.createImage = function(img){
-		
-		var imgPath = imageDirectory + img;
-		
-		var elem = doc.createElement("img");
-		elem.className = "wmd-button";
-		elem.src = imgPath;
-
-		return elem;
-	};
-	
-
-	// This simulates a modal dialog box and asks for the URL when you
-	// click the hyperlink or image buttons.
-	//
-	// text: The html for the input box.
-	// defaultInputText: The default value that appears in the input box.
-	// makeLinkMarkdown: The function which is executed when the prompt is dismissed, either via OK or Cancel
-	util.prompt = function(text, defaultInputText, makeLinkMarkdown){
-	
-		// These variables need to be declared at this level since they are used
-		// in multiple functions.
-		var dialog;			// The dialog box.
-		var background;		// The background beind the dialog box.
-		var input;			// The text box where you enter the hyperlink.
-		
-
-		if (defaultInputText === undefined) {
-			defaultInputText = "";
-		}
-		
-		// Used as a keydown event handler. Esc dismisses the prompt.
-		// Key code 27 is ESC.
-		var checkEscape = function(key){
-			var code = (key.charCode || key.keyCode);
-			if (code === 27) {
-				close(true);
-			}
-		};
-		
-		// Dismisses the hyperlink input box.
-		// isCancel is true if we don't care about the input text.
-		// isCancel is false if we are going to keep the text.
-		var close = function(isCancel){
-			util.removeEvent(doc.body, "keydown", checkEscape);
-			var text = input.value;
-
-			if (isCancel){
-				text = null;
-			}
-			else{
-				// Fixes common pasting errors.
-				text = text.replace('http://http://', 'http://');
-				text = text.replace('http://https://', 'https://');
-				text = text.replace('http://ftp://', 'ftp://');
-				
-				if (text.indexOf('http://') === -1 && text.indexOf('ftp://') === -1 && text.indexOf('https://') === -1) {
-					text = 'http://' + text;
-				}
-			}
-			
-			dialog.parentNode.removeChild(dialog);
-			background.parentNode.removeChild(background);
-			makeLinkMarkdown(text);
-			return false;
-		};
-		
-		// Creates the background behind the hyperlink text entry box.
-		// Most of this has been moved to CSS but the div creation and
-		// browser-specific hacks remain here.
-		var createBackground = function(){
-		
-			background = doc.createElement("div");
-			background.className = "wmd-prompt-background";
-			style = background.style;
-			style.position = "absolute";
-			style.top = "0";
-			
-			style.zIndex = "1000";
-			
-			// Some versions of Konqueror don't support transparent colors
-			// so we make the whole window transparent.
-			//
-			// Is this necessary on modern konqueror browsers?
-			if (global.isKonqueror){
-				style.backgroundColor = "transparent";
-			}
-			else if (global.isIE){
-				style.filter = "alpha(opacity=50)";
-			}
-			else {
-				style.opacity = "0.5";
-			}
-			
-			var pageSize = position.getPageSize();
-			style.height = pageSize[1] + "px";
-			
-			if(global.isIE){
-				style.left = doc.documentElement.scrollLeft;
-				style.width = doc.documentElement.clientWidth;
-			}
-			else {
-				style.left = "0";
-				style.width = "100%";
-			}
-			
-			doc.body.appendChild(background);
-		};
-		
-		// Create the text input box form/window.
-		var createDialog = function(){
-		
-			// The main dialog box.
-			dialog = doc.createElement("div");
-			dialog.className = "wmd-prompt-dialog";
-			dialog.style.padding = "10px;";
-			dialog.style.position = "fixed";
-			dialog.style.width = "400px";
-			dialog.style.zIndex = "1001";
-			
-			// The dialog text.
-			var question = doc.createElement("div");
-			question.innerHTML = text;
-			question.style.padding = "5px";
-			dialog.appendChild(question);
-			
-			// The web form container for the text box and buttons.
-			var form = doc.createElement("form");
-			form.onsubmit = function(){ return close(false); };
-			style = form.style;
-			style.padding = "0";
-			style.margin = "0";
-			style.cssFloat = "left";
-			style.width = "100%";
-			style.textAlign = "center";
-			style.position = "relative";
-			dialog.appendChild(form);
-			
-			// The input text box
-			input = doc.createElement("input");
-			input.type = "text";
-			input.value = defaultInputText;
-			style = input.style;
-			style.display = "block";
-			style.width = "80%";
-			style.marginLeft = style.marginRight = "auto";
-			form.appendChild(input);
-			
-			// The ok button
-			var okButton = doc.createElement("input");
-			okButton.type = "button";
-			okButton.onclick = function(){ return close(false); };
-			okButton.value = "OK";
-			style = okButton.style;
-			style.margin = "10px";
-			style.display = "inline";
-			style.width = "7em";
-
-			
-			// The cancel button
-			var cancelButton = doc.createElement("input");
-			cancelButton.type = "button";
-			cancelButton.onclick = function(){ return close(true); };
-			cancelButton.value = "Cancel";
-			style = cancelButton.style;
-			style.margin = "10px";
-			style.display = "inline";
-			style.width = "7em";
-
-			// The order of these buttons is different on macs.
-			if (/mac/.test(nav.platform.toLowerCase())) {
-				form.appendChild(cancelButton);
-				form.appendChild(okButton);
-			}
-			else {
-				form.appendChild(okButton);
-				form.appendChild(cancelButton);
-			}
-
-			util.addEvent(doc.body, "keydown", checkEscape);
-			dialog.style.top = "50%";
-			dialog.style.left = "50%";
-			dialog.style.display = "block";
-			if(global.isIE_5or6){
-				dialog.style.position = "absolute";
-				dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
-				dialog.style.left = "50%";
-			}
-			doc.body.appendChild(dialog);
-			
-			// This has to be done AFTER adding the dialog to the form if you
-			// want it to be centered.
-			dialog.style.marginTop = -(position.getHeight(dialog) / 2) + "px";
-			dialog.style.marginLeft = -(position.getWidth(dialog) / 2) + "px";
-			
-		};
-		
-		createBackground();
-		
-		// Why is this in a zero-length timeout?
-		// Is it working around a browser bug?
-		top.setTimeout(function(){
-		
-			createDialog();
-
-			var defTextLen = defaultInputText.length;
-			if (input.selectionStart !== undefined) {
-				input.selectionStart = 0;
-				input.selectionEnd = defTextLen;
-			}
-			else if (input.createTextRange) {
-				var range = input.createTextRange();
-				range.collapse(false);
-				range.moveStart("character", -defTextLen);
-				range.moveEnd("character", defTextLen);
-				range.select();
-			}
-			
-			input.focus();
-		}, 0);
-	};
-	
-	
 	// UNFINISHED
 	// The assignment in the while loop makes jslint cranky.
 	// I'll change it to a better loop later.
@@ -462,10 +532,12 @@ Attacklab.wmdBase = function(){
         var maxHeight = Math.max(scrollHeight, innerHeight);
         return [maxWidth, maxHeight, innerWidth, innerHeight];
 	};
+
+        // }}}
 	
 	// Watches the input textarea, polling at an interval and runs
 	// a callback function if anything has changed.
-	wmd.inputPoller = function(callback, interval){
+	wmd.inputPoller = function(callback, interval){ // {{{
 	
 		var pollerObj = this;
 		var inputArea = wmd.panels.input;
@@ -525,11 +597,11 @@ Attacklab.wmdBase = function(){
 		};
 		
 		assignInterval();
-	};
+	}; // }}}
 	
 	// Handles pushing and popping TextareaStates for undo/redo commands.
 	// I should rename the stack variables to list.
-	wmd.undoManager = function(callback){
+	wmd.undoManager = function(callback){ // {{{
 	
 		var undoObj = this;
 		var undoStack = []; // A stack of undo states
@@ -771,10 +843,10 @@ Attacklab.wmdBase = function(){
 		};
 		
 		init();
-	};
+	}; //}}}
 	
 	// I think my understanding of how the buttons and callbacks are stored in the array is incomplete.
-	wmd.editor = function(previewRefreshCallback){
+	wmd.editor = function(previewRefreshCallback){ // {{{
 	
 		if (!previewRefreshCallback) {
 			previewRefreshCallback = function(){};
@@ -1145,7 +1217,7 @@ Attacklab.wmdBase = function(){
 				inputBox.value = text;
 			};
 			
-			if (!/markdown/.test(wmd.wmd_env.output_format.toLowerCase())) {
+			if (!/markdown/.test(wmd_options.output_format.toLowerCase())) {
 				if (markdownConverter) {
 					inputBox.value = markdownConverter.makeHtml(text);
 					top.setTimeout(callback, 0);
@@ -1187,11 +1259,11 @@ Attacklab.wmdBase = function(){
 		};
 		
 		init();
-	};
+	}; // }}}
 	
 	// The input textarea state/contents.
 	// This is used to implement undo/redo by the undo manager.
-	wmd.TextareaState = function(){
+	wmd.TextareaState = function(){ // {{{
 	
 		// Aliases
 		var stateObj = this;
@@ -1336,8 +1408,11 @@ Attacklab.wmdBase = function(){
 		};
 
 		this.init();
-	};
+	}; // }}}
 	
+
+        // Chunks {{{
+
 	// before: contains all the text in the input box BEFORE the selection.
 	// after: contains all the text in the input box AFTER the selection.
 	wmd.Chunks = function(){
@@ -1463,8 +1538,11 @@ Attacklab.wmdBase = function(){
 			
 			this.after = this.after.replace(new re(regexText, ""), replacementText);
 		}
-	};
+	}; 
+        // }}} - END CHUNKS
 	
+        // command {{{
+
 	// The markdown symbols - 4 spaces = code, > = blockquote, etc.
 	command.prefixes = "(?:\\s{4,}|\\s*>|\\s*-\\s+|\\s*\\d+\\.|=|\\+|-|_|\\*|#|\\s*\\[[^\n]]+\\]:)";
 	
@@ -1666,6 +1744,355 @@ Attacklab.wmdBase = function(){
 			return true;
 		}
 	};
+
+	// Moves the cursor to the next line and continues lists, quotes and code.
+	command.doAutoindent = function(chunk, postProcessing, useDefaultText){
+		
+		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
+		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
+		chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+		
+		useDefaultText = false;
+		
+		if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(chunk.before)){
+			if(command.doList){
+				command.doList(chunk, postProcessing, false, true);
+			}
+		}
+		if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)){
+			if(command.doList){
+				command.doList(chunk, postProcessing, true, true);
+			}
+		}
+		if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)){
+			if(command.doBlockquote){
+				command.doBlockquote(chunk, postProcessing, useDefaultText);
+			}
+		}
+		if(/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)){
+			if(command.doCode){
+				command.doCode(chunk, postProcessing, useDefaultText);
+			}
+		}
+	};
+	
+	command.doBlockquote = function(chunk, postProcessing, useDefaultText){
+		
+		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
+			function(totalMatch, newlinesBefore, text, newlinesAfter){
+				chunk.before += newlinesBefore;
+				chunk.after = newlinesAfter + chunk.after;
+				return text;
+			});
+			
+		chunk.before = chunk.before.replace(/(>[ \t]*)$/,
+			function(totalMatch, blankLine){
+				chunk.selection = blankLine + chunk.selection;
+				return "";
+			});
+		
+		var defaultText = useDefaultText ? "Blockquote" : "";
+		chunk.selection = chunk.selection.replace(/^(\s|>)+$/ ,"");
+		chunk.selection = chunk.selection || defaultText;
+		
+		if(chunk.before){
+			chunk.before = chunk.before.replace(/\n?$/,"\n");
+		}
+		if(chunk.after){
+			chunk.after = chunk.after.replace(/^\n?/,"\n");
+		}
+		
+		chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
+			function(totalMatch){
+				chunk.startTag = totalMatch;
+				return "";
+			});
+			
+		chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
+			function(totalMatch){
+				chunk.endTag = totalMatch;
+				return "";
+			});
+		
+		var replaceBlanksInTags = function(useBracket){
+			
+			var replacement = useBracket ? "> " : "";
+			
+			if(chunk.startTag){
+				chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/,
+					function(totalMatch, markdown){
+						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+					});
+			}
+			if(chunk.endTag){
+				chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/,
+					function(totalMatch, markdown){
+						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+					});
+			}
+		};
+		
+		if(/^(?![ ]{0,3}>)/m.test(chunk.selection)){
+			command.wrap(chunk, wmd_options.lineLength - 2);
+			chunk.selection = chunk.selection.replace(/^/gm, "> ");
+			replaceBlanksInTags(true);
+			chunk.addBlankLines();
+		}
+		else{
+			chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
+			command.unwrap(chunk);
+			replaceBlanksInTags(false);
+			
+			if(!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag){
+				chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
+			}
+			
+			if(!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag){
+				chunk.endTag=chunk.endTag.replace(/^\n{0,2}/, "\n\n");
+			}
+		}
+		
+		if(!/\n/.test(chunk.selection)){
+			chunk.selection = chunk.selection.replace(/^(> *)/,
+			function(wholeMatch, blanks){
+				chunk.startTag += blanks;
+				return "";
+			});
+		}
+	};
+
+	command.doCode = function(chunk, postProcessing, useDefaultText){
+		
+		var hasTextBefore = /\S[ ]*$/.test(chunk.before);
+		var hasTextAfter = /^[ ]*\S/.test(chunk.after);
+		
+		// Use 'four space' markdown if the selection is on its own
+		// line or is multiline.
+		if((!hasTextAfter && !hasTextBefore) || /\n/.test(chunk.selection)){
+			
+			chunk.before = chunk.before.replace(/[ ]{4}$/,
+				function(totalMatch){
+					chunk.selection = totalMatch + chunk.selection;
+					return "";
+				});
+				
+			var nLinesBefore = 1;
+			var nLinesAfter = 1;
+			
+			
+			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before) || chunk.after === ""){
+				nLinesBefore = 0; 
+			}
+			if(/^\n(\t|[ ]{4,})/.test(chunk.after)){
+				nLinesAfter = 0; // This needs to happen on line 1
+			}
+			
+			chunk.addBlankLines(nLinesBefore, nLinesAfter);
+			
+			if(!chunk.selection){
+				chunk.startTag = "    ";
+				chunk.selection = useDefaultText ? "enter code here" : "";
+			}
+			else {
+				if(/^[ ]{0,3}\S/m.test(chunk.selection)){
+					chunk.selection = chunk.selection.replace(/^/gm, "    ");
+				}
+				else{
+					chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+				}
+			}
+		}
+		else{
+			// Use backticks (`) to delimit the code block.
+			
+			chunk.trimWhitespace();
+			chunk.findTags(/`/, /`/);
+			
+			if(!chunk.startTag && !chunk.endTag){
+				chunk.startTag = chunk.endTag="`";
+				if(!chunk.selection){
+					chunk.selection = useDefaultText ? "enter code here" : "";
+				}
+			}
+			else if(chunk.endTag && !chunk.startTag){
+				chunk.before += chunk.endTag;
+				chunk.endTag = "";
+			}
+			else{
+				chunk.startTag = chunk.endTag="";
+			}
+		}
+	};
+	
+	command.doList = function(chunk, postProcessing, isNumberedList, useDefaultText){
+				
+		// These are identical except at the very beginning and end.
+		// Should probably use the regex extension function to make this clearer.
+		var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
+		var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
+		
+		// The default bullet is a dash but others are possible.
+		// This has nothing to do with the particular HTML bullet,
+		// it's just a markdown bullet.
+		var bullet = "-";
+		
+		// The number in a numbered list.
+		var num = 1;
+		
+		// Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
+		var getItemPrefix = function(){
+			var prefix;
+			if(isNumberedList){
+				prefix = " " + num + ". ";
+				num++;
+			}
+			else{
+				prefix = " " + bullet + " ";
+			}
+			return prefix;
+		};
+		
+		// Fixes the prefixes of the other list items.
+		var getPrefixedItem = function(itemText){
+		
+			// The numbering flag is unset when called by autoindent.
+			if(isNumberedList === undefined){
+				isNumberedList = /^\s*\d/.test(itemText);
+			}
+			
+			// Renumber/bullet the list element.
+			itemText = itemText.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
+				function( _ ){
+					return getItemPrefix();
+				});
+				
+			return itemText;
+		};
+		
+		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
+		
+		if(chunk.before && !/\n$/.test(chunk.before) && !/^\n/.test(chunk.startTag)){
+			chunk.before += chunk.startTag;
+			chunk.startTag = "";
+		}
+		
+		if(chunk.startTag){
+			
+			var hasDigits = /\d+[.]/.test(chunk.startTag);
+			chunk.startTag = "";
+			chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
+			command.unwrap(chunk);
+			chunk.addBlankLines();
+			
+			if(hasDigits){
+				// Have to renumber the bullet points if this is a numbered list.
+				chunk.after = chunk.after.replace(nextItemsRegex, getPrefixedItem);
+			}
+			if(isNumberedList == hasDigits){
+				return;
+			}
+		}
+		
+		var nLinesBefore = 1;
+		
+		chunk.before = chunk.before.replace(previousItemsRegex,
+			function(itemText){
+				if(/^\s*([*+-])/.test(itemText)){
+					bullet = re.$1;
+				}
+				nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+				return getPrefixedItem(itemText);
+			});
+			
+		if(!chunk.selection){
+			chunk.selection = useDefaultText ? "List item" : " ";
+		}
+		
+		var prefix = getItemPrefix();
+		
+		var nLinesAfter = 1;
+		
+		chunk.after = chunk.after.replace(nextItemsRegex,
+			function(itemText){
+				nLinesAfter = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+				return getPrefixedItem(itemText);
+			});
+			
+		chunk.trimWhitespace(true);
+		chunk.addBlankLines(nLinesBefore, nLinesAfter, true);
+		chunk.startTag = prefix;
+		var spaces = prefix.replace(/./g, " ");
+		command.wrap(chunk, wmd_options.lineLength - spaces.length);
+		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
+		
+	};
+	
+	command.doHeading = function(chunk, postProcessing, useDefaultText){
+		
+		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
+		chunk.selection = chunk.selection.replace(/\s+/g, " ");
+		chunk.selection = chunk.selection.replace(/(^\s+|\s+$)/g, "");
+		
+		// If we clicked the button with no selected text, we just
+		// make a level 2 hash header around some default text.
+		if(!chunk.selection){
+			chunk.startTag = "## ";
+			chunk.selection = "Heading";
+			chunk.endTag = " ##";
+			return;
+		}
+		
+		var headerLevel = 0;		// The existing header level of the selected text.
+		
+		// Remove any existing hash heading markdown and save the header level.
+		chunk.findTags(/#+[ ]*/, /[ ]*#+/);
+		if(/#+/.test(chunk.startTag)){
+			headerLevel = re.lastMatch.length;
+		}
+		chunk.startTag = chunk.endTag = "";
+		
+		// Try to get the current header level by looking for - and = in the line
+		// below the selection.
+		chunk.findTags(null, /\s?(-+|=+)/);
+		if(/=+/.test(chunk.endTag)){
+			headerLevel = 1;
+		}
+		if(/-+/.test(chunk.endTag)){
+			headerLevel = 2;
+		}
+		
+		// Skip to the next line so we can create the header markdown.
+		chunk.startTag = chunk.endTag = "";
+		chunk.addBlankLines(1, 1);
+
+		// We make a level 2 header if there is no current header.
+		// If there is a header level, we substract one from the header level.
+		// If it's already a level 1 header, it's removed.
+		var headerLevelToCreate = headerLevel == 0 ? 2 : headerLevel - 1;
+		
+		if(headerLevelToCreate > 0){
+			
+			// The button only creates level 1 and 2 underline headers.
+			// Why not have it iterate over hash header levels?  Wouldn't that be easier and cleaner?
+			var headerChar = headerLevelToCreate >= 2 ? "-" : "=";
+			var len = chunk.selection.length;
+			if(len > wmd_options.lineLength){
+				len = wmd_options.lineLength;
+			}
+			chunk.endTag = "\n";
+			while(len--){
+				chunk.endTag += headerChar;
+			}
+		}
+	};	
+	
+	command.doHorizontalRule = function(chunk, postProcessing, useDefaultText){
+		chunk.startTag = "----------\n";
+		chunk.selection = "";
+		chunk.addBlankLines(2, 1, true);
+	}
+
+        // }}}
 	
 	util.makeAPI = function(){
 		wmd.wmd = {};
@@ -1675,7 +2102,7 @@ Attacklab.wmdBase = function(){
 	
 	util.startEditor = function(){
 	
-		if (wmd.wmd_env.autostart === false) {
+		if (wmd_options.autostart === false) {
 			util.makeAPI();
 			return;
 		}
@@ -1700,7 +2127,8 @@ Attacklab.wmdBase = function(){
 		util.addEvent(top, "load", loadListener);
 	};
 	
-	wmd.previewManager = function(){
+
+	wmd.previewManager = function(){ // {{{
 		
 		var managerObj = this;
 		var converter;
@@ -1913,357 +2341,12 @@ Attacklab.wmdBase = function(){
 		};
 		
 		init();
-	};
+	}; // }}}
 
-	// Moves the cursor to the next line and continues lists, quotes and code.
-	command.doAutoindent = function(chunk, postProcessing, useDefaultText){
-		
-		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
-		chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
-		chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
-		
-		useDefaultText = false;
-		
-		if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(chunk.before)){
-			if(command.doList){
-				command.doList(chunk, postProcessing, false, true);
-			}
-		}
-		if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)){
-			if(command.doList){
-				command.doList(chunk, postProcessing, true, true);
-			}
-		}
-		if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)){
-			if(command.doBlockquote){
-				command.doBlockquote(chunk, postProcessing, useDefaultText);
-			}
-		}
-		if(/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)){
-			if(command.doCode){
-				command.doCode(chunk, postProcessing, useDefaultText);
-			}
-		}
-	};
-	
-	command.doBlockquote = function(chunk, postProcessing, useDefaultText){
-		
-		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
-			function(totalMatch, newlinesBefore, text, newlinesAfter){
-				chunk.before += newlinesBefore;
-				chunk.after = newlinesAfter + chunk.after;
-				return text;
-			});
-			
-		chunk.before = chunk.before.replace(/(>[ \t]*)$/,
-			function(totalMatch, blankLine){
-				chunk.selection = blankLine + chunk.selection;
-				return "";
-			});
-		
-		var defaultText = useDefaultText ? "Blockquote" : "";
-		chunk.selection = chunk.selection.replace(/^(\s|>)+$/ ,"");
-		chunk.selection = chunk.selection || defaultText;
-		
-		if(chunk.before){
-			chunk.before = chunk.before.replace(/\n?$/,"\n");
-		}
-		if(chunk.after){
-			chunk.after = chunk.after.replace(/^\n?/,"\n");
-		}
-		
-		chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
-			function(totalMatch){
-				chunk.startTag = totalMatch;
-				return "";
-			});
-			
-		chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
-			function(totalMatch){
-				chunk.endTag = totalMatch;
-				return "";
-			});
-		
-		var replaceBlanksInTags = function(useBracket){
-			
-			var replacement = useBracket ? "> " : "";
-			
-			if(chunk.startTag){
-				chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/,
-					function(totalMatch, markdown){
-						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
-					});
-			}
-			if(chunk.endTag){
-				chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/,
-					function(totalMatch, markdown){
-						return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
-					});
-			}
-		};
-		
-		if(/^(?![ ]{0,3}>)/m.test(chunk.selection)){
-			command.wrap(chunk, wmd.wmd_env.lineLength - 2);
-			chunk.selection = chunk.selection.replace(/^/gm, "> ");
-			replaceBlanksInTags(true);
-			chunk.addBlankLines();
-		}
-		else{
-			chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
-			command.unwrap(chunk);
-			replaceBlanksInTags(false);
-			
-			if(!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag){
-				chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
-			}
-			
-			if(!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag){
-				chunk.endTag=chunk.endTag.replace(/^\n{0,2}/, "\n\n");
-			}
-		}
-		
-		if(!/\n/.test(chunk.selection)){
-			chunk.selection = chunk.selection.replace(/^(> *)/,
-			function(wholeMatch, blanks){
-				chunk.startTag += blanks;
-				return "";
-			});
-		}
-	};
-
-	command.doCode = function(chunk, postProcessing, useDefaultText){
-		
-		var hasTextBefore = /\S[ ]*$/.test(chunk.before);
-		var hasTextAfter = /^[ ]*\S/.test(chunk.after);
-		
-		// Use 'four space' markdown if the selection is on its own
-		// line or is multiline.
-		if((!hasTextAfter && !hasTextBefore) || /\n/.test(chunk.selection)){
-			
-			chunk.before = chunk.before.replace(/[ ]{4}$/,
-				function(totalMatch){
-					chunk.selection = totalMatch + chunk.selection;
-					return "";
-				});
-				
-			var nLinesBefore = 1;
-			var nLinesAfter = 1;
-			
-			
-			if(/\n(\t|[ ]{4,}).*\n$/.test(chunk.before) || chunk.after === ""){
-				nLinesBefore = 0; 
-			}
-			if(/^\n(\t|[ ]{4,})/.test(chunk.after)){
-				nLinesAfter = 0; // This needs to happen on line 1
-			}
-			
-			chunk.addBlankLines(nLinesBefore, nLinesAfter);
-			
-			if(!chunk.selection){
-				chunk.startTag = "    ";
-				chunk.selection = useDefaultText ? "enter code here" : "";
-			}
-			else {
-				if(/^[ ]{0,3}\S/m.test(chunk.selection)){
-					chunk.selection = chunk.selection.replace(/^/gm, "    ");
-				}
-				else{
-					chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
-				}
-			}
-		}
-		else{
-			// Use backticks (`) to delimit the code block.
-			
-			chunk.trimWhitespace();
-			chunk.findTags(/`/, /`/);
-			
-			if(!chunk.startTag && !chunk.endTag){
-				chunk.startTag = chunk.endTag="`";
-				if(!chunk.selection){
-					chunk.selection = useDefaultText ? "enter code here" : "";
-				}
-			}
-			else if(chunk.endTag && !chunk.startTag){
-				chunk.before += chunk.endTag;
-				chunk.endTag = "";
-			}
-			else{
-				chunk.startTag = chunk.endTag="";
-			}
-		}
-	};
-	
-	command.doList = function(chunk, postProcessing, isNumberedList, useDefaultText){
-				
-		// These are identical except at the very beginning and end.
-		// Should probably use the regex extension function to make this clearer.
-		var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
-		var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
-		
-		// The default bullet is a dash but others are possible.
-		// This has nothing to do with the particular HTML bullet,
-		// it's just a markdown bullet.
-		var bullet = "-";
-		
-		// The number in a numbered list.
-		var num = 1;
-		
-		// Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
-		var getItemPrefix = function(){
-			var prefix;
-			if(isNumberedList){
-				prefix = " " + num + ". ";
-				num++;
-			}
-			else{
-				prefix = " " + bullet + " ";
-			}
-			return prefix;
-		};
-		
-		// Fixes the prefixes of the other list items.
-		var getPrefixedItem = function(itemText){
-		
-			// The numbering flag is unset when called by autoindent.
-			if(isNumberedList === undefined){
-				isNumberedList = /^\s*\d/.test(itemText);
-			}
-			
-			// Renumber/bullet the list element.
-			itemText = itemText.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
-				function( _ ){
-					return getItemPrefix();
-				});
-				
-			return itemText;
-		};
-		
-		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
-		
-		if(chunk.before && !/\n$/.test(chunk.before) && !/^\n/.test(chunk.startTag)){
-			chunk.before += chunk.startTag;
-			chunk.startTag = "";
-		}
-		
-		if(chunk.startTag){
-			
-			var hasDigits = /\d+[.]/.test(chunk.startTag);
-			chunk.startTag = "";
-			chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
-			command.unwrap(chunk);
-			chunk.addBlankLines();
-			
-			if(hasDigits){
-				// Have to renumber the bullet points if this is a numbered list.
-				chunk.after = chunk.after.replace(nextItemsRegex, getPrefixedItem);
-			}
-			if(isNumberedList == hasDigits){
-				return;
-			}
-		}
-		
-		var nLinesBefore = 1;
-		
-		chunk.before = chunk.before.replace(previousItemsRegex,
-			function(itemText){
-				if(/^\s*([*+-])/.test(itemText)){
-					bullet = re.$1;
-				}
-				nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
-				return getPrefixedItem(itemText);
-			});
-			
-		if(!chunk.selection){
-			chunk.selection = useDefaultText ? "List item" : " ";
-		}
-		
-		var prefix = getItemPrefix();
-		
-		var nLinesAfter = 1;
-		
-		chunk.after = chunk.after.replace(nextItemsRegex,
-			function(itemText){
-				nLinesAfter = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
-				return getPrefixedItem(itemText);
-			});
-			
-		chunk.trimWhitespace(true);
-		chunk.addBlankLines(nLinesBefore, nLinesAfter, true);
-		chunk.startTag = prefix;
-		var spaces = prefix.replace(/./g, " ");
-		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
-		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
-		
-	};
-	
-	command.doHeading = function(chunk, postProcessing, useDefaultText){
-		
-		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
-		chunk.selection = chunk.selection.replace(/\s+/g, " ");
-		chunk.selection = chunk.selection.replace(/(^\s+|\s+$)/g, "");
-		
-		// If we clicked the button with no selected text, we just
-		// make a level 2 hash header around some default text.
-		if(!chunk.selection){
-			chunk.startTag = "## ";
-			chunk.selection = "Heading";
-			chunk.endTag = " ##";
-			return;
-		}
-		
-		var headerLevel = 0;		// The existing header level of the selected text.
-		
-		// Remove any existing hash heading markdown and save the header level.
-		chunk.findTags(/#+[ ]*/, /[ ]*#+/);
-		if(/#+/.test(chunk.startTag)){
-			headerLevel = re.lastMatch.length;
-		}
-		chunk.startTag = chunk.endTag = "";
-		
-		// Try to get the current header level by looking for - and = in the line
-		// below the selection.
-		chunk.findTags(null, /\s?(-+|=+)/);
-		if(/=+/.test(chunk.endTag)){
-			headerLevel = 1;
-		}
-		if(/-+/.test(chunk.endTag)){
-			headerLevel = 2;
-		}
-		
-		// Skip to the next line so we can create the header markdown.
-		chunk.startTag = chunk.endTag = "";
-		chunk.addBlankLines(1, 1);
-
-		// We make a level 2 header if there is no current header.
-		// If there is a header level, we substract one from the header level.
-		// If it's already a level 1 header, it's removed.
-		var headerLevelToCreate = headerLevel == 0 ? 2 : headerLevel - 1;
-		
-		if(headerLevelToCreate > 0){
-			
-			// The button only creates level 1 and 2 underline headers.
-			// Why not have it iterate over hash header levels?  Wouldn't that be easier and cleaner?
-			var headerChar = headerLevelToCreate >= 2 ? "-" : "=";
-			var len = chunk.selection.length;
-			if(len > wmd.wmd_env.lineLength){
-				len = wmd.wmd_env.lineLength;
-			}
-			chunk.endTag = "\n";
-			while(len--){
-				chunk.endTag += headerChar;
-			}
-		}
-	};	
-	
-	command.doHorizontalRule = function(chunk, postProcessing, useDefaultText){
-		chunk.startTag = "----------\n";
-		chunk.selection = "";
-		chunk.addBlankLines(2, 1, true);
-	}
 };
 
 
+/*
 Attacklab.wmd_env = {};
 Attacklab.account_options = {};
 Attacklab.wmd_defaults = {version:2.0, output_format:"markdown", lineLength:40, delayLoad:false};
@@ -2303,5 +2386,8 @@ if(!Attacklab.wmd)
 	Attacklab.wmdBase();
 	Attacklab.Util.startEditor();
 };
+*/ 
 
+    Attacklab.wmdBase();
+    WMDEditor.util.startEditor();
 }
