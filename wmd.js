@@ -450,7 +450,7 @@ var position = { // {{{
 
 // The input textarea state/contents.
 // This is used to implement undo/redo by the undo manager.
-TextareaState = function(textarea){ // {{{
+var TextareaState = function(textarea){ // {{{
     // Aliases
     var stateObj = this;
     var inputArea = textarea;
@@ -600,7 +600,7 @@ TextareaState = function(textarea){ // {{{
 
 // before: contains all the text in the input box BEFORE the selection.
 // after: contains all the text in the input box AFTER the selection.
-Chunks = function(){
+var Chunks = function(){
 };
 
 // startRegex: a regular expression to find the start tag
@@ -725,6 +725,69 @@ Chunks.prototype.addBlankLines = function(nLinesBefore, nLinesAfter, findExtraNe
     }
 }; 
 // }}} - END CHUNKS
+
+// Watches the input textarea, polling at an interval and runs
+// a callback function if anything has changed.
+var InputPoller = function(textarea, callback, interval){ // {{{
+
+    var pollerObj = this;
+    var inputArea = textarea;
+    
+    // Stored start, end and text.  Used to see if there are changes to the input.
+    var lastStart;
+    var lastEnd;
+    var markdown;
+    
+    var killHandle; // Used to cancel monitoring on destruction.
+    // Checks to see if anything has changed in the textarea.
+    // If so, it runs the callback.
+    this.tick = function(){
+    
+        if (!util.isVisible(inputArea)) {
+            return;
+        }
+        
+        // Update the selection start and end, text.
+        if (inputArea.selectionStart || inputArea.selectionStart === 0) {
+            var start = inputArea.selectionStart;
+            var end = inputArea.selectionEnd;
+            if (start != lastStart || end != lastEnd) {
+                lastStart = start;
+                lastEnd = end;
+                
+                if (markdown != inputArea.value) {
+                    markdown = inputArea.value;
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    
+    
+    var doTickCallback = function(){
+    
+        if (!util.isVisible(inputArea)) {
+            return;
+        }
+        
+        // If anything has changed, call the function.
+        if (pollerObj.tick()) {
+            callback();
+        }
+    };
+    
+    // Set how often we poll the textarea for changes.
+    var assignInterval = function(){
+        killHandle = top.setInterval(doTickCallback, interval);
+    };
+    
+    this.destroy = function(){
+        top.clearInterval(killHandle);
+    };
+    
+    assignInterval();
+}; // }}}
     
 var PreviewManager = function(wmd){ // {{{
     var managerObj = this;
@@ -747,7 +810,7 @@ var PreviewManager = function(wmd){ // {{{
         util.addEvent(inputElem, "keypress", listener);
         util.addEvent(inputElem, "keydown", listener);
         // previewPollInterval is set at the top of this file.
-        poller = new wmd.inputPoller(listener, wmd.options.previewPollInterval);
+        poller = new InputPoller(wmd.panels.input, listener, wmd.options.previewPollInterval);
     };
     
     var getDocScrollTop = function(){
@@ -993,69 +1056,6 @@ var wmdBase = function(wmd, wmd_options){ // {{{
     wmd.ieCachedRange = null;        // cached textarea selection
     wmd.ieRetardedClick = false;    // flag
     
-    // Watches the input textarea, polling at an interval and runs
-    // a callback function if anything has changed.
-    wmd.inputPoller = function(callback, interval){ // {{{
-    
-        var pollerObj = this;
-        var inputArea = wmd.panels.input;
-        
-        // Stored start, end and text.  Used to see if there are changes to the input.
-        var lastStart;
-        var lastEnd;
-        var markdown;
-        
-        var killHandle; // Used to cancel monitoring on destruction.
-        // Checks to see if anything has changed in the textarea.
-        // If so, it runs the callback.
-        this.tick = function(){
-        
-            if (!util.isVisible(inputArea)) {
-                return;
-            }
-            
-            // Update the selection start and end, text.
-            if (inputArea.selectionStart || inputArea.selectionStart === 0) {
-                var start = inputArea.selectionStart;
-                var end = inputArea.selectionEnd;
-                if (start != lastStart || end != lastEnd) {
-                    lastStart = start;
-                    lastEnd = end;
-                    
-                    if (markdown != inputArea.value) {
-                        markdown = inputArea.value;
-                        return true;
-                    }
-                }
-            }
-            return false;
-        };
-        
-        
-        var doTickCallback = function(){
-        
-            if (!util.isVisible(inputArea)) {
-                return;
-            }
-            
-            // If anything has changed, call the function.
-            if (pollerObj.tick()) {
-                callback();
-            }
-        };
-        
-        // Set how often we poll the textarea for changes.
-        var assignInterval = function(){
-            killHandle = top.setInterval(doTickCallback, interval);
-        };
-        
-        this.destroy = function(){
-            top.clearInterval(killHandle);
-        };
-        
-        assignInterval();
-    }; // }}}
-    
     // Handles pushing and popping TextareaStates for undo/redo commands.
     // I should rename the stack variables to list.
     wmd.undoManager = function(callback){ // {{{
@@ -1274,7 +1274,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                 }
             };
             
-            poller = new wmd.inputPoller(handlePaste, wmd_options.pastePollInterval);
+            poller = new InputPoller(wmd.panels.input, handlePaste, wmd_options.pastePollInterval);
             
             util.addEvent(wmd.panels.input, "keydown", handleCtrlYZ);
             util.addEvent(wmd.panels.input, "keydown", handleModeChange);
