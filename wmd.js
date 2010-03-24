@@ -1250,10 +1250,13 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
 
 WMDEditor.util = util;
 WMDEditor.position = position;
-
+WMDEditor.TextareaState = TextareaState;
+WMDEditor.Checks = Checks;
+WMDEditor.InputPoller = InputPoller;
+WMDEditor.PreviewManager = PreviewManager;
+WMDEditor.UndoManager = UndoManager;
 
 // A few handy aliases for readability.
-//var wmd  = Attacklab;
 var doc  = top.document;
 var re   = top.RegExp;
 var nav  = top.navigator;
@@ -1716,7 +1719,6 @@ var wmdBase = function(wmd, wmd_options){ // {{{
         
         init();
     }; // }}}
-    
 
     // command {{{
 
