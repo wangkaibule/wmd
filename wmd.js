@@ -1,3 +1,6 @@
+/**
+ * WMD Editor - v3.0
+ */
 ;(function() {
     
 WMDEditor = function(options) {
@@ -467,7 +470,7 @@ var TextareaState = function(textarea){ // {{{
             this.text = inputArea.value;
         }
         
-    }
+    };
     
     // Sets the selected text in the input box after we've performed an
     // operation.
@@ -553,7 +556,7 @@ var TextareaState = function(textarea){ // {{{
     // Restore this state into the input area.
     this.restore = function(){
     
-        if (stateObj.text != undefined && stateObj.text != inputArea.value) {
+        if (stateObj.text !== undefined && stateObj.text != inputArea.value) {
             inputArea.value = stateObj.text;
         }
         this.setInputAreaSelection();
@@ -901,12 +904,10 @@ var PreviewManager = function(wmd){ // {{{
     
         if (wmd.panels.preview) {
             wmd.panels.preview.scrollTop = (wmd.panels.preview.scrollHeight - wmd.panels.preview.clientHeight) * getScaleFactor(wmd.panels.preview);
-            ;
         }
         
         if (wmd.panels.output) {
             wmd.panels.output.scrollTop = (wmd.panels.output.scrollHeight - wmd.panels.output.clientHeight) * getScaleFactor(wmd.panels.output);
-            ;
         }
     };
     
@@ -1213,7 +1214,7 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
         
         var handlePaste = function(){
             if (browser.isIE || (inputStateObj && inputStateObj.text != textarea.value)) {
-                if (timer == undefined) {
+                if (timer === undefined) {
                     mode = "paste";
                     saveState();
                     refreshState();
@@ -1429,14 +1430,14 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                         }
                         doClick(this);
                         return false;
-                    }
+                    };
                 }
             }
             else {
                 button.style.backgroundPosition = button.XShift + " " + disabledYShift;
                 button.onmouseover = button.onmouseout = button.onclick = function(){};
             }
-        }
+        };
     
         var makeSpritedButtonRow = function(){
              
@@ -1447,7 +1448,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
             var highlightYShift = "-40px";
             
             var buttonRow = document.createElement("ul");
-            buttonRow.className = "wmd-button-row"
+            buttonRow.className = "wmd-button-row";
             buttonRow = buttonBar.appendChild(buttonRow);
             
             var xoffset = 0;
@@ -1459,11 +1460,13 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                             button.XShift = xoffset + "px";
                             xoffset -= 20;
                 
-                if (title)
+                if (title) {
                     button.title = title;
-                    
-                if (textOp)
+                }
+
+                if (textOp) {
                     button.textOp = textOp;
+                }
 
                 return button;
             }
@@ -1534,12 +1537,12 @@ var wmdBase = function(wmd, wmd_options){ // {{{
             
             var helpAnchor = document.createElement("a");
             helpAnchor.href = wmd_options.helpLink;
-            helpAnchor.target = wmd_options.helpTarget
+            helpAnchor.target = wmd_options.helpTarget;
             helpAnchor.title = wmd_options.helpHoverTitle;
             helpButton.appendChild(helpAnchor);
                         
             setUndoRedoButtonStates();
-        }
+        };
         
         var setupEditor = function(){
         
@@ -2232,7 +2235,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
         // Try to get the current header level by looking for - and = in the line
         // below the selection.
         chunk.findTags(null, /\s?(-+|=+)/);
-        if(/=+/.test(chunk.endTag)){
+        if(/\=+/.test(chunk.endTag)){
             headerLevel = 1;
         }
         if(/-+/.test(chunk.endTag)){
@@ -2268,7 +2271,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
         chunk.startTag = "----------\n";
         chunk.selection = "";
         chunk.addBlankLines(2, 1, true);
-    }
+    };
     // }}}
     
 }; // }}}
