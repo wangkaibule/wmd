@@ -61,7 +61,7 @@ Example without using jquery:
             </div>
     
             <script type="text/javascript">
-                new WMDEditor({
+                setup_wmd({
                     "input": "notes",
                     "button_bar": "notes-button-bar",
                     "preview": "notes-preview",
