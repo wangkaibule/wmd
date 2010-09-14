@@ -4,75 +4,51 @@ WMD: The Wysiwym Markdown Editor
 Introduction
 ------------
 
-This is the branch of wmd for [Open Library](http://openlibrary.org), forked from the [Stackoverflow branch of wmd](http://github.com/derobins/wmd).
+This is a branch of wmd for ChiperSoft Systems, forked from the [Open Library](http://github.com/openlibrary/wmd) branch of WMD, which was forked from the [Stackoverflow branch](http://github.com/derobins/wmd).
 
-Major Changes
+Major Changes from Open Library Revision
 -------------
 
-* Explicit function call is required to enable WMD editor for a textarea
-* Can work with multiple textareas in the same page
-* jquery plugin to simplify the usage
+* Removed top level frame pollution, forcing WMD to run only in its own document.
+* Removed the automatic conversion from Markdown to HTML when the form is submitted.
+* Removed the automatic addition of http:// to image urls, preventing the entry of relative addresses.
+* Bug fixes
 
 How to use
 ----------
 
-Example using jquery plugin:
+	<html>
+	    <head>
+	        <title>WMD Example</title>
+        
+	        <link rel="stylesheet" type="text/css" href="wmd.css"/>
+	        <script type="text/javascript" src="wmd.js"></script>
+	        <script type="text/javascript" src="showdown.js"></script>
+	    </head>
+	    <body>
+	        <h1>WMD Example</h1>
 
-    <html>
-        <head>
-            <title>WMD Example using jquery</title>
-            <link rel="stylesheet" type="text/css" href="wmd.css"/>
+	        <div>
+	            <div id="notes-button-bar"></div>
+	            <textarea id="notes"></textarea>
+	            <div id="notes-preview"></div>
+				<input type="text" name="copy_html" value="" id="copy_html">
+	        </div>
 
-            <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-            <script type="text/javascript" src="jquery.wmd.min.js"></script>
-        </head>
-        <body>
-            <h1>WMD Example using jquery</h1>
-            <div>
-                <textarea id="notes"/>
-            </div>
-    
-            <script type="text/javascript">
-                $().ready(function() {
-                   $("#notes").wmd(); 
-                });
-            </script>
-        </body>
-    </html>
-    
-Example without using jquery:
-
-    <html>
-        <head>
-            <title>WMD Example</title>
-            
-            <link rel="stylesheet" type="text/css" href="wmd.css"/>
-            
-            <script type="text/javascript" src="wmd.js"></script>
-            <script type="text/javascript" src="showdown.js"></script>
-        </head>
-        <body>
-            <h1>WMD Example</h1>
-
-            <div>
-                <div id="notes-button-bar"/>
-                <textarea id="notes"/>
-                <div id="notes-preview"/>
-            </div>
-    
-            <script type="text/javascript">
-                setup_wmd({
-                    "input": "notes",
-                    "button_bar": "notes-button-bar",
-                    "preview": "notes-preview",
-                });
-            </script>
-        </body>
-    </html>
+	        <script type="text/javascript">
+	            setup_wmd({
+	                input: "notes",
+	                button_bar: "notes-button-bar",
+	                preview: "notes-preview",
+					output: "copy_html"
+	            });
+	        </script>
+	    </body>
+	</html>
 
 License
 -------
 
-WMD Editor is licensed under [MIT License](http://github.com/openlibrary/wmd/raw/master/License.txt).
+WMD Editor is licensed under [MIT License](http://github.com/chipersoft/wmd/raw/master/License.txt).
 
 
