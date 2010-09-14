@@ -206,10 +206,6 @@ var util = { // {{{
                 text = text.replace('http://http://', 'http://');
                 text = text.replace('http://https://', 'https://');
                 text = text.replace('http://ftp://', 'ftp://');
-                
-                if (text.indexOf('http://') === -1 && text.indexOf('ftp://') === -1 && text.indexOf('https://') === -1) {
-                    text = 'http://' + text;
-                }
             }
             
             dialog.parentNode.removeChild(dialog);
