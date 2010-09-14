@@ -1436,7 +1436,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
     
         var makeSpritedButtonRow = function(){
              
-            var buttonBar = document.getElementById(wmd_options.button_bar || "wmd-button-bar");
+            var buttonBar =  (typeof wmd_options.button_bar == 'string')?document.getElementById(wmd_options.button_bar || "wmd-button-bar"):wmd_options.button_bar;
      
             var normalYShift = "0px";
             var disabledYShift = "-20px";
