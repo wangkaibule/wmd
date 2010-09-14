@@ -6,7 +6,7 @@ WMDEditor = function(options) {
 
     this.startEditor();
 };
-top.WMDEditor = WMDEditor;
+window.WMDEditor = WMDEditor;
 
 WMDEditor.defaults = { // {{{
     version: 2.0, 
@@ -350,7 +350,7 @@ var util = { // {{{
     
         // Why is this in a zero-length timeout?
         // Is it working around a browser bug?
-        top.setTimeout(function(){
+        window.setTimeout(function(){
             createDialog();
 
             var defTextLen = defaultInputText.length;
@@ -779,11 +779,11 @@ var InputPoller = function(textarea, callback, interval){ // {{{
     
     // Set how often we poll the textarea for changes.
     var assignInterval = function(){
-        killHandle = top.setInterval(doTickCallback, interval);
+        killHandle = window.setInterval(doTickCallback, interval);
     };
     
     this.destroy = function(){
-        top.clearInterval(killHandle);
+        window.clearInterval(killHandle);
     };
     
     assignInterval();
@@ -817,8 +817,8 @@ var PreviewManager = function(wmd){ // {{{
     
         var result = 0;
         
-        if (top.innerHeight) {
-            result = top.pageYOffset;
+        if (window.innerHeight) {
+            result = window.pageYOffset;
         }
         else 
             if (doc.documentElement && doc.documentElement.scrollTop) {
@@ -871,7 +871,7 @@ var PreviewManager = function(wmd){ // {{{
     var applyTimeout = function(){
     
         if (timeout) {
-            top.clearTimeout(timeout);
+            window.clearTimeout(timeout);
             timeout = undefined;
         }
         
@@ -886,7 +886,7 @@ var PreviewManager = function(wmd){ // {{{
             if (delay > maxDelay) {
                 delay = maxDelay;
             }
-            timeout = top.setTimeout(makePreviewHtml, delay);
+            timeout = window.setTimeout(makePreviewHtml, delay);
         }
     };
     
@@ -972,12 +972,12 @@ var PreviewManager = function(wmd){ // {{{
         var fullTop = position.getTop(wmd.panels.input) - getDocScrollTop();
         
         if (browser.isIE) {
-            top.setTimeout(function(){
-                top.scrollBy(0, fullTop - emptyTop);
+            window.setTimeout(function(){
+                window.scrollBy(0, fullTop - emptyTop);
             }, 0);
         }
         else {
-            top.scrollBy(0, fullTop - emptyTop);
+            window.scrollBy(0, fullTop - emptyTop);
         }
     };
     
@@ -1027,7 +1027,7 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
         }
         
         if (!browser.isIE || mode != "moving") {
-            timer = top.setTimeout(refreshState, 1);
+            timer = window.setTimeout(refreshState, 1);
         }
         else {
             inputStateObj = null;
@@ -1043,7 +1043,7 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
     this.setCommandMode = function(){
         mode = "command";
         saveState();
-        timer = top.setTimeout(refreshState, 0);
+        timer = window.setTimeout(refreshState, 0);
     };
     
     this.canUndo = function(){
@@ -1158,8 +1158,8 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
             if (event.preventDefault) {
                 event.preventDefault();
             }
-            if (top.event) {
-                top.event.returnValue = false;
+            if (window.event) {
+                window.event.returnValue = false;
             }
             return;
         }
@@ -1257,9 +1257,9 @@ WMDEditor.PreviewManager = PreviewManager;
 WMDEditor.UndoManager = UndoManager;
 
 // A few handy aliases for readability.
-var doc  = top.document;
-var re   = top.RegExp;
-var nav  = top.navigator;
+var doc  = window.document;
+var re   = window.RegExp;
+var nav  = window.navigator;
     
 function get_browser() {
     var b = {};
@@ -1283,7 +1283,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
     wmd.Global = {};
     wmd.buttons = {};
     
-    wmd.showdown = top.Attacklab && top.Attacklab.showdown;
+    wmd.showdown = window.Attacklab && window.Attacklab.showdown;
     
     var util = WMDEditor.util;
     var position = WMDEditor.position;
@@ -1622,8 +1622,8 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                         key.preventDefault();
                     }
                     
-                    if (top.event) {
-                        top.event.returnValue = false;
+                    if (window.event) {
+                        window.event.returnValue = false;
                     }
                 }
             });
@@ -1679,7 +1679,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
             if (!/markdown/.test(wmd_options.output_format.toLowerCase())) {
                 if (markdownConverter) {
                     inputBox.value = markdownConverter.makeHtml(text);
-                    top.setTimeout(callback, 0);
+                    window.setTimeout(callback, 0);
                 }
             }
             return true;
@@ -1714,7 +1714,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
             if (inputBox) {
                 inputBox.style.marginTop = "";
             }
-            top.clearInterval(creationHandle);
+            window.clearInterval(creationHandle);
         };
         
         init();
