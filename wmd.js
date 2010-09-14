@@ -1648,16 +1648,6 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                     }
                 });
             }
-            
-            if (inputBox.form) {
-                var submitCallback = inputBox.form.onsubmit;
-                inputBox.form.onsubmit = function(){
-                    convertToHtml();
-                    if (submitCallback) {
-                        return submitCallback.apply(this, arguments);
-                    }
-                };
-            }
         };
         
         // Convert the contents of the input textarea to HTML in the output/preview panels.
