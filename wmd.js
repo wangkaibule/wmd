@@ -50,10 +50,10 @@ WMDEditor.defaults = { // {{{
 WMDEditor.prototype = {
     getPanels: function() {
         return {
-            buttonBar: doc.getElementById(this.options.button_bar),
-            preview: doc.getElementById(this.options.preview),
-            output: doc.getElementById(this.options.output),
-            input: doc.getElementById(this.options.input)
+            buttonBar: (typeof this.options.button_bar == 'string')?doc.getElementById(this.options.button_bar):this.options.button_bar,
+            preview:   (typeof this.options.preview    == 'string')?doc.getElementById(this.options.preview):this.options.preview,
+            output:    (typeof this.options.output     == 'string')?doc.getElementById(this.options.output):this.options.output,
+            input:     (typeof this.options.input      == 'string')?doc.getElementById(this.options.input):this.options.input
         };
     },
 
