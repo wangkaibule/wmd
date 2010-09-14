@@ -1,10 +1,10 @@
 
-JSFILES=jquery-wmd-plugin.js wmd.js showdown.js
+JSFILES=wmd.js showdown.js
 
-all: jquery.wmd.js jquery.wmd.min.js
+all: wmd.combined.js wmd.combined.min.js
 
-jquery.wmd.js: $(JSFILES)
+wmd.combined.js: $(JSFILES)
 	cat $(JSFILES) > $@
 
-jquery.wmd.min.js: $(JSFILES)
+wmd.combined.min.js: $(JSFILES)
 	cat $(JSFILES) | python jsmin.py > $@
