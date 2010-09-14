@@ -1,32 +1,29 @@
-<!DOCTYPE html>
-
 <html>
-	<head>
-		<title>Test WMD Page</title>
-		
-		<link rel="stylesheet" type="text/css" href="wmd.css" />
-		
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-		<script type="text/javascript" src="jquery.wmd.min.js"></script>
-	</head>
-	
-	<body>
-	    <div style="width: 500px;">
-			<textarea id="xwmd-input" rows="5" style="width: 100%"></textarea>
-		</div>
-		
-	    <div style="width: 500px;">
-			<textarea id="ywmd-input" rows="5" style="width: 100%"></textarea>
-		</div>
-			
-		<script type="text/javascript">
-		$().ready(function() {
-		    $("textarea").wmd({
-		        "preview": true,
-		        "helpLink": "http://daringfireball.net/projects/markdown/",
-		        "helpHoverTitle": "Markdown Help",
-		    });
-		});
-		</script>
-	</body>
+    <head>
+        <title>WMD Example</title>
+        
+        <link rel="stylesheet" type="text/css" href="wmd.css"/>
+        
+        <script type="text/javascript" src="wmd.js"></script>
+        <script type="text/javascript" src="showdown.js"></script>
+    </head>
+    <body>
+        <h1>WMD Example</h1>
+
+        <div>
+            <div id="notes-button-bar"></div>
+            <textarea id="notes"></textarea>
+            <div id="notes-preview"></div>
+			<input type="text" name="copy_html" value="" id="copy_html">
+        </div>
+
+        <script type="text/javascript">
+            setup_wmd({
+                input: "notes",
+                button_bar: "notes-button-bar",
+                preview: "notes-preview",
+				output: "copy_html"
+            });
+        </script>
+    </body>
 </html>
