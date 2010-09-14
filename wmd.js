@@ -1650,27 +1650,6 @@ var wmdBase = function(wmd, wmd_options){ // {{{
             }
         };
         
-        // Convert the contents of the input textarea to HTML in the output/preview panels.
-        var convertToHtml = function(){
-        
-            if (wmd.showdown) {
-                var markdownConverter = new wmd.showdown.converter();
-            }
-            var text = inputBox.value;
-            
-            var callback = function(){
-                inputBox.value = text;
-            };
-            
-            if (!/markdown/.test(wmd_options.output_format.toLowerCase())) {
-                if (markdownConverter) {
-                    inputBox.value = markdownConverter.makeHtml(text);
-                    window.setTimeout(callback, 0);
-                }
-            }
-            return true;
-        };
-        
         
         this.undo = function(){
             if (undoMgr) {
