@@ -446,7 +446,7 @@ var position = { // {{{
 
 // The input textarea state/contents.
 // This is used to implement undo/redo by the undo manager.
-var TextareaState = function(textarea){ // {{{
+var TextareaState = function(textarea, wmd) { // {{{
     // Aliases
     var stateObj = this;
     var inputArea = textarea;
@@ -1001,7 +1001,7 @@ var PreviewManager = function(wmd){ // {{{
 
 // Handles pushing and popping TextareaStates for undo/redo commands.
 // I should rename the stack variables to list.
-var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
+var UndoManager = function(wmd, textarea, pastePollInterval, callback){ // {{{
 
     var undoObj = this;
     var undoStack = []; // A stack of undo states
@@ -1031,7 +1031,7 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
     };
     
     var refreshState = function(){
-        inputStateObj = new TextareaState(textarea);
+        inputStateObj = new TextareaState(textarea, wmd);
         poller.tick();
         timer = undefined;
     };
@@ -1063,7 +1063,7 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
                 lastState = null;
             }
             else {
-                undoStack[stackPtr] = new TextareaState(textarea);
+                undoStack[stackPtr] = new TextareaState(textarea, wmd);
                 undoStack[--stackPtr].restore();
                 
                 if (callback) {
@@ -1097,7 +1097,7 @@ var UndoManager = function(textarea, pastePollInterval, callback){ // {{{
     // Push the input area state to the stack.
     var saveState = function(){
     
-        var currState = inputStateObj || new TextareaState(textarea);
+        var currState = inputStateObj || new TextareaState(textarea, wmd);
         
         if (!currState) {
             return false;
@@ -1333,7 +1333,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
                     undoMgr.setCommandMode();
                 }
                 
-                var state = new TextareaState(wmd.panels.input);
+                var state = new TextareaState(wmd.panels.input, wmd);
                 
                 if (!state) {
                     return;
@@ -1544,7 +1544,7 @@ var wmdBase = function(wmd, wmd_options){ // {{{
             }
             
             if (!wmd.nativeUndo) {
-                undoMgr = new UndoManager(wmd.panels.input, wmd.options.pastePollInterval, function(){
+                undoMgr = new UndoManager(wmd, wmd.panels.input, wmd.options.pastePollInterval, function(){
                     previewRefreshCallback();
                     setUndoRedoButtonStates();
                 });
