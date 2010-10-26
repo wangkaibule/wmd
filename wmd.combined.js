@@ -1063,7 +1063,7 @@ var UndoManager = function(wmd, textarea, pastePollInterval, callback){ // {{{
                 lastState = null;
             }
             else {
-                undoStack[stackPtr] = new TextareaState(textareawmd, wmd);
+                undoStack[stackPtr] = new TextareaState(textarea, wmd);
                 undoStack[--stackPtr].restore();
                 
                 if (callback) {
@@ -3215,6 +3215,13 @@ var _EncodeCode = function(text) {
 	// Do the angle bracket song and dance:
 	text = text.replace(/</g,"&lt;");
 	text = text.replace(/>/g,"&gt;");
+	
+	// Encode "smart" quotes
+	text = text.replace(/‘/g,"&lsquo;");
+	text = text.replace(/’/g,"&rsquo;");
+	text = text.replace(/“/g,"&ldquo;");
+	text = text.replace(/”/g,"&rdquo;");
+	
 
 	// Now, escape characters that are magic in Markdown:
 	text = escapeCharacters(text,"\*_{}[]\\",false);
@@ -3356,6 +3363,13 @@ var _EncodeAmpsAndAngles = function(text) {
 	
 	// Encode naked <'s
 	text = text.replace(/<(?![a-z\/?\$!])/gi,"&lt;");
+	
+	// Encode "smart" quotes
+	text = text.replace(/‘/g,"&lsquo;");
+	text = text.replace(/’/g,"&rsquo;");
+	text = text.replace(/“/g,"&ldquo;");
+	text = text.replace(/”/g,"&rdquo;");
+	
 	
 	return text;
 }
