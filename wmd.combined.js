@@ -3221,6 +3221,7 @@ var _EncodeCode = function(text) {
 	text = text.replace(/’/g,"&rsquo;");
 	text = text.replace(/“/g,"&ldquo;");
 	text = text.replace(/”/g,"&rdquo;");
+	text = text.replace(/–/g,"&dash;");
 	
 
 	// Now, escape characters that are magic in Markdown:
@@ -3369,6 +3370,7 @@ var _EncodeAmpsAndAngles = function(text) {
 	text = text.replace(/’/g,"&rsquo;");
 	text = text.replace(/“/g,"&ldquo;");
 	text = text.replace(/”/g,"&rdquo;");
+	text = text.replace(/–/g,"&dash;");
 	
 	
 	return text;
