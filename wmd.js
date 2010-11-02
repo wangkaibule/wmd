@@ -920,7 +920,6 @@
 				// The value property is only defined if the output is a textarea.
 				if (wmd.panels.output.value !== undefined) {
 					wmd.panels.output.value = text;
-					wmd.panels.output.readOnly = true;
 				}
 				// Otherwise we are just replacing the text in a div.
 				// Send the HTML wrapped in <pre><code>
