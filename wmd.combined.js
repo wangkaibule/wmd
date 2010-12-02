@@ -920,7 +920,6 @@
 				// The value property is only defined if the output is a textarea.
 				if (wmd.panels.output.value !== undefined) {
 					wmd.panels.output.value = text;
-					wmd.panels.output.readOnly = true;
 				}
 				// Otherwise we are just replacing the text in a div.
 				// Send the HTML wrapped in <pre><code>
@@ -3135,7 +3134,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/’/g, "&rsquo;");
 		text = text.replace(/“/g, "&ldquo;");
 		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&dash;");
+		text = text.replace(/–/g, "&mdash;");
 
 
 		// Now, escape characters that are magic in Markdown:
@@ -3269,7 +3268,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/’/g, "&rsquo;");
 		text = text.replace(/“/g, "&ldquo;");
 		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&dash;");
+		text = text.replace(/–/g, "&mdash;");
 
 
 		return text;
