@@ -941,7 +941,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/’/g, "&rsquo;");
 		text = text.replace(/“/g, "&ldquo;");
 		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&dash;");
+		text = text.replace(/–/g, "&mdash;");
 
 
 		// Now, escape characters that are magic in Markdown:
@@ -1075,7 +1075,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/’/g, "&rsquo;");
 		text = text.replace(/“/g, "&ldquo;");
 		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&dash;");
+		text = text.replace(/–/g, "&mdash;");
 
 
 		return text;
