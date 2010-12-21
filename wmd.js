@@ -44,10 +44,10 @@
 	WMDEditor.prototype = {
 		getPanels: function () {
 			return {
-				buttonBar: (typeof this.options.button_bar == 'string') ? doc.getElementById(this.options.button_bar) : this.options.button_bar,
-				preview: (typeof this.options.preview == 'string') ? doc.getElementById(this.options.preview) : this.options.preview,
-				output: (typeof this.options.output == 'string') ? doc.getElementById(this.options.output) : this.options.output,
-				input: (typeof this.options.input == 'string') ? doc.getElementById(this.options.input) : this.options.input
+				buttonBar: (typeof this.options.button_bar == 'string') ? document.getElementById(this.options.button_bar) : this.options.button_bar,
+				preview: (typeof this.options.preview == 'string') ? document.getElementById(this.options.preview) : this.options.preview,
+				output: (typeof this.options.output == 'string') ? document.getElementById(this.options.output) : this.options.output,
+				input: (typeof this.options.input == 'string') ? document.getElementById(this.options.input) : this.options.input
 			};
 		},
 
@@ -147,7 +147,7 @@
 
 			var imgPath = imageDirectory + img;
 
-			var elem = doc.createElement("img");
+			var elem = document.createElement("img");
 			elem.className = "wmd-button";
 			elem.src = imgPath;
 
@@ -184,7 +184,7 @@
 			// isCancel is true if we don't care about the input text.
 			// isCancel is false if we are going to keep the text.
 			var close = function (isCancel) {
-				util.removeEvent(doc.body, "keydown", checkEscape);
+				util.removeEvent(document.body, "keydown", checkEscape);
 				var text = input.value;
 
 				if (isCancel) {
@@ -207,7 +207,7 @@
 			// Most of this has been moved to CSS but the div creation and
 			// browser-specific hacks remain here.
 			var createBackground = function () {
-				background = doc.createElement("div");
+				background = document.createElement("div");
 				background.className = "wmd-prompt-background";
 				style = background.style;
 				style.position = "absolute";
@@ -233,22 +233,22 @@
 				style.height = pageSize[1] + "px";
 
 				if (browser.isIE) {
-					style.left = doc.documentElement.scrollLeft;
-					style.width = doc.documentElement.clientWidth;
+					style.left = document.documentElement.scrollLeft;
+					style.width = document.documentElement.clientWidth;
 				}
 				else {
 					style.left = "0";
 					style.width = "100%";
 				}
 
-				doc.body.appendChild(background);
+				document.body.appendChild(background);
 			};
 
 			// Create the text input box form/window.
 			var createDialog = function () {
 
 				// The main dialog box.
-				dialog = doc.createElement("div");
+				dialog = document.createElement("div");
 				dialog.className = "wmd-prompt-dialog";
 				dialog.style.padding = "10px;";
 				dialog.style.position = "fixed";
@@ -256,13 +256,13 @@
 				dialog.style.zIndex = "1001";
 
 				// The dialog text.
-				var question = doc.createElement("div");
+				var question = document.createElement("div");
 				question.innerHTML = text;
 				question.style.padding = "5px";
 				dialog.appendChild(question);
 
 				// The web form container for the text box and buttons.
-				var form = doc.createElement("form");
+				var form = document.createElement("form");
 				form.onsubmit = function () {
 					return close(false);
 				};
@@ -276,7 +276,7 @@
 				dialog.appendChild(form);
 
 				// The input text box
-				input = doc.createElement("input");
+				input = document.createElement("input");
 				input.type = "text";
 				input.value = defaultInputText;
 				style = input.style;
@@ -286,7 +286,7 @@
 				form.appendChild(input);
 
 				// The ok button
-				var okButton = doc.createElement("input");
+				var okButton = document.createElement("input");
 				okButton.type = "button";
 				okButton.onclick = function () {
 					return close(false);
@@ -299,7 +299,7 @@
 
 
 				// The cancel button
-				var cancelButton = doc.createElement("input");
+				var cancelButton = document.createElement("input");
 				cancelButton.type = "button";
 				cancelButton.onclick = function () {
 					return close(true);
@@ -320,16 +320,16 @@
 					form.appendChild(cancelButton);
 				}
 
-				util.addEvent(doc.body, "keydown", checkEscape);
+				util.addEvent(document.body, "keydown", checkEscape);
 				dialog.style.top = "50%";
 				dialog.style.left = "50%";
 				dialog.style.display = "block";
 				if (browser.isIE_5or6) {
 					dialog.style.position = "absolute";
-					dialog.style.top = doc.documentElement.scrollTop + 200 + "px";
+					dialog.style.top = document.documentElement.scrollTop + 200 + "px";
 					dialog.style.left = "50%";
 				}
-				doc.body.appendChild(dialog);
+				document.body.appendChild(dialog);
 
 				// This has to be done AFTER adding the dialog to the form if you
 				// want it to be centered.
@@ -403,16 +403,16 @@
 
 			// It's not very clear which blocks work with which browsers.
 			if (self.innerHeight && self.scrollMaxY) {
-				scrollWidth = doc.body.scrollWidth;
+				scrollWidth = document.body.scrollWidth;
 				scrollHeight = self.innerHeight + self.scrollMaxY;
 			}
-			else if (doc.body.scrollHeight > doc.body.offsetHeight) {
-				scrollWidth = doc.body.scrollWidth;
-				scrollHeight = doc.body.scrollHeight;
+			else if (document.body.scrollHeight > document.body.offsetHeight) {
+				scrollWidth = document.body.scrollWidth;
+				scrollHeight = document.body.scrollHeight;
 			}
 			else {
-				scrollWidth = doc.body.offsetWidth;
-				scrollHeight = doc.body.offsetHeight;
+				scrollWidth = document.body.offsetWidth;
+				scrollHeight = document.body.offsetHeight;
 			}
 
 			if (self.innerHeight) {
@@ -420,15 +420,15 @@
 				innerWidth = self.innerWidth;
 				innerHeight = self.innerHeight;
 			}
-			else if (doc.documentElement && doc.documentElement.clientHeight) {
+			else if (document.documentElement && document.documentElement.clientHeight) {
 				// Some versions of IE (IE 6 w/ a DOCTYPE declaration)
-				innerWidth = doc.documentElement.clientWidth;
-				innerHeight = doc.documentElement.clientHeight;
+				innerWidth = document.documentElement.clientWidth;
+				innerHeight = document.documentElement.clientHeight;
 			}
-			else if (doc.body) {
+			else if (document.body) {
 				// Other versions of IE
-				innerWidth = doc.body.clientWidth;
-				innerHeight = doc.body.clientHeight;
+				innerWidth = document.body.clientWidth;
+				innerHeight = document.body.clientHeight;
 			}
 
 			var maxWidth = Math.max(scrollWidth, innerWidth);
@@ -495,7 +495,7 @@
 				stateObj.start = inputArea.selectionStart;
 				stateObj.end = inputArea.selectionEnd;
 			}
-			else if (doc.selection) {
+			else if (document.selection) {
 
 				stateObj.text = util.fixEolChars(inputArea.value);
 
@@ -508,7 +508,7 @@
 					wmd.ieRetardedClick = false;
 				}
 				else {
-					range = doc.selection.createRange();
+					range = document.selection.createRange();
 				}
 
 				var fixedRange = util.fixEolChars(range.text);
@@ -797,11 +797,11 @@
 			if (window.innerHeight) {
 				result = window.pageYOffset;
 			}
-			else if (doc.documentElement && doc.documentElement.scrollTop) {
-				result = doc.documentElement.scrollTop;
+			else if (document.documentElement && document.documentElement.scrollTop) {
+				result = document.documentElement.scrollTop;
 			}
-			else if (doc.body) {
-				result = doc.body.scrollTop;
+			else if (document.body) {
+				result = document.body.scrollTop;
 			}
 
 			return result;
@@ -1504,7 +1504,7 @@
 
 			var setupEditor = function () {
 
-				if (/\?noundo/.test(doc.location.href)) {
+				if (/\?noundo/.test(document.location.href)) {
 					wmd.nativeUndo = true;
 				}
 
