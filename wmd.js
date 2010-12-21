@@ -472,9 +472,9 @@
 				inputArea.selectionEnd = stateObj.end;
 				inputArea.scrollTop = stateObj.scrollTop;
 			}
-			else if (doc.selection) {
+			else if (document.selection) {
 
-				if (doc.activeElement && doc.activeElement !== inputArea) {
+				if (typeof(document.activeElement)!="unknown" && document.activeElement && document.activeElement !== inputArea) {
 					return;
 				}
 
