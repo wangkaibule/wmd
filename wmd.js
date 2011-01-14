@@ -213,7 +213,7 @@
 				style.position = "absolute";
 				style.top = "0";
 
-				style.zIndex = "1000";
+				style.zIndex = "10000";
 
 				// Some versions of Konqueror don't support transparent colors
 				// so we make the whole window transparent.
@@ -253,7 +253,7 @@
 				dialog.style.padding = "10px;";
 				dialog.style.position = "fixed";
 				dialog.style.width = "400px";
-				dialog.style.zIndex = "1001";
+				dialog.style.zIndex = "10001";
 
 				// The dialog text.
 				var question = document.createElement("div");
@@ -931,6 +931,19 @@
 			}
 
 			if (wmd.panels.preview) {
+				// original WMD code allowed javascript injection, like this:
+				//	  <img src="http://www.google.com/intl/en_ALL/images/srpr/logo1w.png" onload="alert('haha');"/>
+				// now, we first ensure elements (and attributes of IMG and A elements) are in a whitelist
+				// and if not in whitelist, replace with blanks in preview to prevent XSS attacks
+				// when editing malicious markdown
+				// code courtesy of https://github.com/polestarsoft/wmd/commit/e7a09c9170ea23e7e806425f46d7423af2a74641
+				var okTags = /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul)>|<(br|hr)\s?\/?>)$/i;
+				var okLinks = /^(<a\shref="(\#\d+|(https?|ftp):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\stitle="[^"<>]+")?\s?>|<\/a>)$/i;
+				var okImg = /^(<img\ssrc="https?:(\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i;
+				text = text.replace(/<[^<>]*>?/gi, function (tag) {
+					return (tag.match(okTags) || tag.match(okLinks) || tag.match(okImg)) ? tag : "";
+				});
+
 				wmd.panels.preview.innerHTML = text;
 			}
 
