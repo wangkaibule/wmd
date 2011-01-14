@@ -455,7 +455,7 @@
 				this.text = inputArea.value;
 			}
 
-		}
+		};
 
 		// Sets the selected text in the input box after we've performed an
 		// operation.
@@ -1392,14 +1392,14 @@
 							}
 							doClick(this);
 							return false;
-						}
+						};
 					}
 				}
 				else {
 					button.style.backgroundPosition = button.XShift + " " + disabledYShift;
 					button.onmouseover = button.onmouseout = button.onclick = function () {};
 				}
-			}
+			};
 
 			var makeSpritedButtonRow = function () {
 
@@ -1410,7 +1410,7 @@
 				var highlightYShift = "-40px";
 
 				var buttonRow = document.createElement("ul");
-				buttonRow.className = "wmd-button-row"
+				buttonRow.className = "wmd-button-row";
 				buttonRow = buttonBar.appendChild(buttonRow);
 
 				var xoffset = 0;
@@ -1495,12 +1495,12 @@
 
 				var helpAnchor = document.createElement("a");
 				helpAnchor.href = wmd_options.helpLink;
-				helpAnchor.target = wmd_options.helpTarget
+				helpAnchor.target = wmd_options.helpTarget;
 				helpAnchor.title = wmd_options.helpHoverTitle;
 				helpButton.appendChild(helpAnchor);
 
 				setUndoRedoButtonStates();
-			}
+			};
 
 			var setupEditor = function () {
 
@@ -2182,7 +2182,7 @@
 			chunk.startTag = "----------\n";
 			chunk.selection = "";
 			chunk.addBlankLines(2, 1, true);
-		}
+		};
 		// }}}
 	}; // }}}
 })();
