@@ -5,6 +5,10 @@
         <link rel="stylesheet" type="text/css" href="wmd.css"/>
         <script type="text/javascript" src="wmd.js"></script>
         <script type="text/javascript" src="showdown.js"></script>
+		<style type="text/css" media="screen">
+			textarea {width:100%;margin:0;}
+			textarea, #notes-preview {border:1px solid gray;height:100px;}
+		</style>
     </head>
     <body>
         <h1>WMD Example</h1>
@@ -12,8 +16,12 @@
         <div>
             <div id="notes-button-bar"></div>
             <textarea id="notes"></textarea>
+
+			Preview:
             <div id="notes-preview"></div>
-			<input type="text" name="copy_html" value="" id="copy_html">
+
+			Output:
+			<textarea type="text" name="copy_html" value="" id="copy_html"></textarea>
         </div>
 
         <script type="text/javascript">
