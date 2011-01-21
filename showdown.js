@@ -1104,7 +1104,7 @@ Attacklab.showdown.converter = function () {
 
 	var _DoAutoLinks = function (text) {
 
-		text = text.replace(/<((https?|ftp|dict):[^'">\s]+)>/gi, "<a href=\"$1\">$1</a>");
+		text = text.replace(/(?:")<((https?|ftp|dict):[^'">\s]+)>/gi, "<a href=\"$1\">$1</a>");
 
 		// Email addresses: <address@domain.foo>
 /*
