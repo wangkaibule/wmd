@@ -39,7 +39,14 @@
 		previewPollInterval: 500,
 		pastePollInterval: 100,
 
-		buttons: "bold italic link blockquote code image ol ul heading hr"
+		buttons: "bold italic link blockquote code image ol ul heading hr",
+		
+		tagFilter: {
+			enabled: true,
+			allowedTags: /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul)>|<(br|hr)\s?\/?>)$/i,
+			patternLink: /^(<a\shref="(\#\d+|(https?|ftp):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\stitle="[^"<>]+")?\s?>|<\/a>)$/i,
+			patternImage: /^(<img\ssrc="https?:(\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i
+		}
 	}; // }}}
 	WMDEditor.prototype = {
 		getPanels: function () {
@@ -937,13 +944,11 @@
 				// and if not in whitelist, replace with blanks in preview to prevent XSS attacks
 				// when editing malicious markdown
 				// code courtesy of https://github.com/polestarsoft/wmd/commit/e7a09c9170ea23e7e806425f46d7423af2a74641
-				var okTags = /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul)>|<(br|hr)\s?\/?>)$/i;
-				var okLinks = /^(<a\shref="(\#\d+|(https?|ftp):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\stitle="[^"<>]+")?\s?>|<\/a>)$/i;
-				var okImg = /^(<img\ssrc="https?:(\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i;
-				text = text.replace(/<[^<>]*>?/gi, function (tag) {
-					return (tag.match(okTags) || tag.match(okLinks) || tag.match(okImg)) ? tag : "";
-				});
-
+				if (wmd.options.tagFilter.enabled) {
+					text = text.replace(/<[^<>]*>?/gi, function (tag) {
+						return (tag.match(wmd.options.tagFilter.allowedTags) || tag.match(wmd.options.tagFilter.patternLink) || tag.match(wmd.options.tagFilter.patternImage)) ? tag : "";
+					});
+				}
 				wmd.panels.preview.innerHTML = text;
 			}
 
