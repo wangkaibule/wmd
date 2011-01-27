@@ -2,7 +2,7 @@ The MIT License
 
 Original WMD and Showdwon code copyright (c) 2007 John Fraser
 Modifications and bugfixes (c) 2009-2010 Chris Jester-Young, Dana Robinson, Anand Chitipothu
-Further modifications (c) 2010-2011 Jarvis Badgley, Wenqiang Wang
+Further modifications (c) 2010-2011 Jarvis Badgley, Wenqiang Wang, Helder Ribeiro
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
