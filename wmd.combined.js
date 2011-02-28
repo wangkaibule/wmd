@@ -44,7 +44,7 @@
 		tagFilter: {
 			enabled: true,
 			allowedTags: /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul)>|<(br|hr)\s?\/?>)$/i,
-			patternLink: /^(<a\shref="(\#\d+|(https?|ftp):\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\stitle="[^"<>]+")?\s?>|<\/a>)$/i,
+			patternLink: /^(<a\shref=("|')(\#\d+|(https?:\/\/|ftp:\/\/|mailto:)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)\2(\stitle="[^"<>]+")?\s?>|<\/a>)$/i;
 			patternImage: /^(<img\ssrc="https?:(\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i
 		}
 	}; // }}}
@@ -2276,12 +2276,12 @@ function setup_wmd(options) {
 //
 // Attacklab namespace
 //
-var Attacklab = Attacklab || {}
+var Attacklab = Attacklab || {};
 
 //
 // Showdown namespace
 //
-Attacklab.showdown = Attacklab.showdown || {}
+Attacklab.showdown = Attacklab.showdown || {};
 
 //
 // converter
@@ -2315,9 +2315,9 @@ Attacklab.showdown.converter = function () {
 		// from other articles when generating a page which contains more than
 		// one article (e.g. an index page that shows the N most recent
 		// articles):
-		g_urls = new Array();
-		g_titles = new Array();
-		g_html_blocks = new Array();
+		g_urls = [];
+		g_titles = [];
+		g_html_blocks = [];
 
 		// attacklab: Replace ~ with ~T
 		// This lets us use tilde as an escape char to avoid md5 hashes
@@ -2365,9 +2365,7 @@ Attacklab.showdown.converter = function () {
 	    text = text.replace(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g, function (wholeMatch, matchIndex){
 			var left = text.slice(0, matchIndex);
 			var right = text.slice(matchIndex);
-			if (left.match(/<[^>]+$/) && right.match(/^[^>]*>/)) {
-				return wholeMatch
-			}
+			if (left.match(/<(a|img)[^>]+>?$/) && right.match(/^[^>]*>/)) {return wholeMatch;}
 			return "<a href='" + wholeMatch + "'>" + wholeMatch + "</a>";
 		});
 		text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9-]+)+/ig, function (wholeMatch) {
@@ -2433,8 +2431,8 @@ Attacklab.showdown.converter = function () {
 		// "paragraphs" that are wrapped in non-block-level tags, such as anchors,
 		// phrase emphasis, and spans. The list of tags we're looking for is
 		// hard-coded:
-		var block_tags_a = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del"
-		var block_tags_b = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math"
+		var block_tags_a = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del";
+		var block_tags_b = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math";
 
 		// First, look for nested blocks, e.g.:
 		//   <div>
@@ -2701,7 +2699,7 @@ Attacklab.showdown.converter = function () {
 		//
 /*
 		text = text.replace(/
-		(		 					// wrap whole match in $1
+		(							// wrap whole match in $1
 			\[
 			([^\[\]]+)				// link text = $2; can't contain '[' or ']'
 			\]
@@ -2714,7 +2712,7 @@ Attacklab.showdown.converter = function () {
 	}
 
 	var writeAnchorTag = function (wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
-		if (m7 == undefined) m7 = "";
+		if (m7 === undefined) m7 = "";
 		var whole_match = m1;
 		var link_text = m2;
 		var link_id = m3.toLowerCase();
@@ -2728,9 +2726,9 @@ Attacklab.showdown.converter = function () {
 			}
 			url = "#" + link_id;
 
-			if (g_urls[link_id] != undefined) {
+			if (g_urls[link_id] !== undefined) {
 				url = g_urls[link_id];
-				if (g_titles[link_id] != undefined) {
+				if (g_titles[link_id] !== undefined) {
 					title = g_titles[link_id];
 				}
 			}
@@ -2830,9 +2828,9 @@ Attacklab.showdown.converter = function () {
 			}
 			url = "#" + link_id;
 
-			if (g_urls[link_id] != undefined) {
+			if (g_urls[link_id] !== undefined) {
 				url = g_urls[link_id];
-				if (g_titles[link_id] != undefined) {
+				if (g_titles[link_id] !== undefined) {
 					title = g_titles[link_id];
 				}
 			}
@@ -2943,7 +2941,7 @@ Attacklab.showdown.converter = function () {
 
 				// Turn double returns into triple returns, so that we can make a
 				// paragraph for the last item in a list, if necessary:
-				list = list.replace(/\n{2,}/g, "\n\n\n");;
+				list = list.replace(/\n{2,}/g, "\n\n\n");
 				var result = _ProcessListItems(list);
 
 				// Trim any trailing whitespace, to put the closing `</$list_type>`
@@ -2963,7 +2961,7 @@ Attacklab.showdown.converter = function () {
 				var list_type = (m3.search(/[*+-]/g) > -1) ? "ul" : "ol";
 				// Turn double returns into triple returns, so that we can make a
 				// paragraph for the last item in a list, if necessary:
-				var list = list.replace(/\n{2,}/g, "\n\n\n");;
+				var list = list.replace(/\n{2,}/g, "\n\n\n");
 				var result = _ProcessListItems(list);
 				result = runup + "<" + list_type + ">\n" + result + "</" + list_type + ">\n";
 				return result;
@@ -3180,7 +3178,7 @@ Attacklab.showdown.converter = function () {
 		// <strong> must go first:
 		text = text.replace(/(\*\*|__)(?=\S)([^\r]*?\S[*_]*)\1/g, "<strong>$2</strong>");
 
-		text = text.replace(/(\w)_(\w)/g, "$1~E95E$2") // ** GFM **  "~E95E" == escaped "_"
+		text = text.replace(/(\w)_(\w)/g, "$1~E95E$2"); // ** GFM **  "~E95E" == escaped "_"
 		text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g, "<em>$2</em>");
 
 		return text;
@@ -3256,7 +3254,7 @@ Attacklab.showdown.converter = function () {
 				str = _RunSpanGamut(str);
 				str = str.replace(/\n/g, "<br />"); // ** GFM **
 				str = str.replace(/^([ \t]*)/g, "<p>");
-				str += "</p>"
+				str += "</p>";
 				grafsOut.push(str);
 			}
 
