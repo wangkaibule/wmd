@@ -21,8 +21,8 @@
 
 		// The text that appears on the upper part of the dialog box when
 		// entering links.
-		imageDialogText: "<p style='margin-top: 0px'><b>Enter the image URL.</b></p>" + "<p>You can also add a title, which will be displayed as a tool tip.</p>" + "<p>Example:<br />http://wmd-editor.com/images/cloud1.jpg   \"Optional title\"</p>",
-		linkDialogText: "<p style='margin-top: 0px'><b>Enter the web address.</b></p>" + "<p>You can also add a title, which will be displayed as a tool tip.</p>" + "<p>Example:<br />http://wmd-editor.com/   \"Optional title\"</p>",
+		imageDialogText: "<p style='margin-top: 0px'><b>Enter the image URL.</b></p>" + "<p>You can also add a title, which will be displayed as a tool tip.</p>" + "<p>Example:<br />http://i.imgur.com/1cZl4.jpg   \"Optional title\"</p>",
+		linkDialogText: "<p style='margin-top: 0px'><b>Enter the web address.</b></p>" + "<p>You can also add a title, which will be displayed as a tool tip.</p>" + "<p>Example:<br />http://www.google.com/   \"Optional title\"</p>",
 
 		// The default text that appears in the dialog input box when entering
 		// links.
@@ -31,8 +31,8 @@
 		imageDirectory: "images/",
 
 		// The link and title for the help button
-		helpLink: "http://wmd-editor.com/",
-		helpHoverTitle: "WMD website",
+		helpLink: "/wmd/markdownhelp.html",
+		helpHoverTitle: "Markdown Syntax",
 		helpTarget: "_blank",
 
 		// Some intervals in ms.  These can be adjusted to reduce the control's load.
