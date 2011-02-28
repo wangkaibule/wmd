@@ -147,9 +147,7 @@ Attacklab.showdown.converter = function () {
 	    text = text.replace(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g, function (wholeMatch, matchIndex){
 			var left = text.slice(0, matchIndex);
 			var right = text.slice(matchIndex);
-			if (left.match(/<[^>]+$/) && right.match(/^[^>]*>/)) {
-				return wholeMatch
-			}
+			if (left.match(/<(a|img)[^>]+>?$/) && right.match(/^[^>]*>/)) {return wholeMatch;}
 			return "<a href='" + wholeMatch + "'>" + wholeMatch + "</a>";
 		});
 		text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9-]+)+/ig, function (wholeMatch) {
