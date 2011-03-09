@@ -500,11 +500,17 @@ Attacklab.showdown.converter = function () {
 		var link_id = m3.toLowerCase();
 		var url = m4;
 		var title = m7;
+		var blank_target = false;
 
 		if (url == "") {
 			if (link_id == "") {
 				// lower-case and turn embedded newlines into spaces
 				link_id = link_text.toLowerCase().replace(/ ?\n/g, " ");
+			} else {
+				if (link_id[0]=="!") {
+					blank_target = true;
+					link_id = link_id.substr(1);
+				}
 			}
 			url = "#" + link_id;
 
@@ -522,6 +528,11 @@ Attacklab.showdown.converter = function () {
 					return whole_match;
 				}
 			}
+		} else {
+			if (url[0]=="!") {
+				blank_target = true;
+				url = url.substr(1);
+			}
 		}
 
 		url = escapeCharacters(url, "*_");
@@ -531,6 +542,10 @@ Attacklab.showdown.converter = function () {
 			title = title.replace(/"/g, "&quot;");
 			title = escapeCharacters(title, "*_");
 			result += " title=\"" + title + "\"";
+		}
+		
+		if (blank_target) {
+			result += " target=\"_blank\"";
 		}
 
 		result += ">" + link_text + "</a>";
