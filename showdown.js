@@ -936,6 +936,36 @@ Attacklab.showdown.converter = function () {
 			return m1 + "<code>" + c + "</code>";
 		});
 
+
+		// Process ^superscript^ notation
+		text = text.replace(/(^|[^\\])(\^+)([^\r]*?[^\^])\2(?!\^)/gm, function (wholeMatch, m1, m2, m3, m4) {
+			var c = m3;
+			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+			c = _EncodeCode(c);
+			return m1 + "<sup>" + c + "</sup>";
+		});
+
+		// Process ,,subscript,, notation
+		text = text.replace(/(^|[^\\])(,{2})([^\r]*?[^,]{2})\2(?!,)/gm, function (wholeMatch, m1, m2, m3, m4) {
+			var c = m3;
+			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+			c = _EncodeCode(c);
+			return m1 + "<sub>" + c + "</sub>";
+		});
+
+		// Process ~~strike~~ notation
+		text = text.replace(/(^|[^\\])(~T~T)([^\r]*?[^~]{2})\2(?!~)/gm, function (wholeMatch, m1, m2, m3, m4) {
+			var c = m3;
+			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+			c = _EncodeCode(c);
+			return m1 + "<strike>" + c + "</strike>";
+		});
+		
+		console.log(text);
+
 		return text;
 	};
 
