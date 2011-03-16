@@ -2603,6 +2603,7 @@ Attacklab.showdown.converter = function () {
 		// delimiters in inline links like [this](<url>).
 		text = _DoAutoLinks(text);
 		text = _EncodeAmpsAndAngles(text);
+		text = _ConvertExtraSpecialCharacters(text);
 		text = _DoItalicsAndBold(text);
 
 		// Do hard breaks:
@@ -3153,6 +3154,36 @@ Attacklab.showdown.converter = function () {
 			return m1 + "<code>" + c + "</code>";
 		});
 
+
+		// Process ^superscript^ notation
+		text = text.replace(/(^|[^\\])(\^+)([^\r]*?[^\^])\2(?!\^)/gm, function (wholeMatch, m1, m2, m3, m4) {
+			var c = m3;
+			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+			c = _EncodeCode(c);
+			return m1 + "<sup>" + c + "</sup>";
+		});
+
+		// Process ,,subscript,, notation
+		text = text.replace(/(^|[^\\])(,{2})([^\r]*?[^,]{2})\2(?!,)/gm, function (wholeMatch, m1, m2, m3, m4) {
+			var c = m3;
+			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+			c = _EncodeCode(c);
+			return m1 + "<sub>" + c + "</sub>";
+		});
+
+		// Process ~~strike~~ notation
+		text = text.replace(/(^|[^\\])(~T~T)([^\r]*?[^~]{2})\2(?!~)/gm, function (wholeMatch, m1, m2, m3, m4) {
+			var c = m3;
+			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+			c = _EncodeCode(c);
+			return m1 + "<strike>" + c + "</strike>";
+		});
+		
+		console.log(text);
+
 		return text;
 	};
 
@@ -3172,15 +3203,24 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/>/g, "&gt;");
 
 		// Encode "smart" quotes
-		text = text.replace(/‘/g, "&lsquo;");
-		text = text.replace(/’/g, "&rsquo;");
-		text = text.replace(/“/g, "&ldquo;");
-		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&mdash;");
+		text = text.
+			replace( /\u2026/g	, '&hellip;').
+			replace( /\u00AB/g	, '&laquo;'	).
+			replace( /\u00BB/g	, '&raquo;'	).
+			replace( /\u201C/g	, '&ldquo;'	).
+			replace( /\u201D/g	, '&rdquo;'	).
+			replace( /\u2018/g	, '&lsquo;'	).
+			replace( /\u2019/g	, '&rsquo;'	).
+			replace( /\u2014/g	, '&mdash;'	).
+			replace( /\u2013/g	, '&ndash;'	).
+			replace( /\u2022/g	, '&bull;'	).
+			replace( /\u2122/g	, '&trade;'	).
+			replace( /\u00A9/g	, '&copy;'	).
+			replace( /\u00AE/g	, '&reg;'	);
 
 
 		// Now, escape characters that are magic in Markdown:
-		text = escapeCharacters(text, "\*_{}[]\\", false);
+		text = escapeCharacters(text, "*_{}[]\\", false);
 
 		// jj the line above breaks this:
 		//---
@@ -3265,6 +3305,7 @@ Attacklab.showdown.converter = function () {
 		var end = grafs.length;
 		for (i = 0; i < end; i++) {
 			var str = grafs[i];
+			var p_tag = '<p>';
 
 			// if this is an HTML marker, copy it
 			if (str.search(/~K(\d+)K/g) >= 0) {
@@ -3272,8 +3313,19 @@ Attacklab.showdown.converter = function () {
 			}
 			else if (str.search(/\S/) >= 0) {
 				str = _RunSpanGamut(str);
+				
+				if (str.substr(0,2)==='->') {
+					if (str.substr(-5)==='&lt;-') {
+						p_tag = '<p align="center">';
+						str = str.slice(2,-5);
+					} else {
+						p_tag = '<p align="right">';
+						str = str.substring(2);
+					}
+				}
+				
 				str = str.replace(/\n/g, "<br />"); // ** GFM **
-				str = str.replace(/^([ \t]*)/g, "<p>");
+				str = str.replace(/^([ \t]*)/g, p_tag);
 				str += "</p>";
 				grafsOut.push(str);
 			}
@@ -3307,13 +3359,35 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/<(?![a-z\/?\$!])/gi, "&lt;");
 
 		// Encode "smart" quotes
-		text = text.replace(/‘/g, "&lsquo;");
-		text = text.replace(/’/g, "&rsquo;");
-		text = text.replace(/“/g, "&ldquo;");
-		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&mdash;");
+		text = text.
+			replace( /\u2026/g	, '&hellip;').
+			replace( /\u00AB/g	, '&laquo;'	).
+			replace( /\u00BB/g	, '&raquo;'	).
+			replace( /\u201C/g	, '&ldquo;'	).
+			replace( /\u201D/g	, '&rdquo;'	).
+			replace( /\u2018/g	, '&lsquo;'	).
+			replace( /\u2019/g	, '&rsquo;'	).
+			replace( /\u2014/g	, '&mdash;'	).
+			replace( /\u2013/g	, '&ndash;'	).
+			replace( /\u2022/g	, '&bull;'	).
+			replace( /\u2122/g	, '&trade;'	).
+			replace( /\u00A9/g	, '&copy;'	).
+			replace( /\u00AE/g	, '&reg;'	);
 
-
+		return text;
+	};
+	
+	var _ConvertExtraSpecialCharacters = function (text) {
+		// Processing to change various special character combinations into
+		// common real characters.
+		
+		text = text.
+			replace( /\.\.\./g	, '&hellip;').
+			replace( /\(c\)/g	, '&copy;').
+			replace( /\(r\)/g	, '&reg;').
+			replace( /\(tm\)/g	, '&trade;').
+			replace( /\-\-/g, '&mdash;');
+	
 		return text;
 	};
 
