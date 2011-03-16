@@ -519,6 +519,10 @@ Attacklab.showdown.converter = function () {
 				if (g_titles[link_id] !== undefined) {
 					title = g_titles[link_id];
 				}
+				if (url[0]=="!") {
+					blank_target = true;
+					url = url.substr(1);
+				}
 			}
 			else {
 				if (whole_match.search(/\(\s*\)$/m) > -1) {
