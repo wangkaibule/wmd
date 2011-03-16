@@ -964,8 +964,6 @@ Attacklab.showdown.converter = function () {
 			return m1 + "<strike>" + c + "</strike>";
 		});
 		
-		console.log(text);
-
 		return text;
 	};
 
