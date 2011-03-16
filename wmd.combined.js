@@ -2362,19 +2362,19 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/~T/g, "~");
 
 		// ** GFM **  Auto-link URLs and emails
-	    text = text.replace(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g, function (wholeMatch, matchIndex){
-			var left = text.slice(0, matchIndex);
+	    text = text.replace(/https?\:\/\/[^"\s<>]*[^.,;'">\:\s<>\)\]\!]/g, function (wholeMatch, matchIndex){
+			var left = text.slice(text.lastIndexOf('\n',matchIndex), matchIndex);
 			var right = text.slice(matchIndex);
-			if (left.match(/<(a|img)[^>]+>?$/) && right.match(/^[^>]*>/)) {return wholeMatch;}
+			if (left.match(/<([a-z]+)\s[^>]+$/) && right.match(/^[^>]*>/)) {return wholeMatch;}
 			return "<a href='" + wholeMatch + "'>" + wholeMatch + "</a>";
 		});
-		text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9-]+)+/ig, function (wholeMatch) {
+		text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9\-]+)+/ig, function (wholeMatch) {
 			return "<a href='mailto:" + wholeMatch + "'>" + wholeMatch + "</a>";
 		});
 
 
 		return text;
-	}
+	};
 
 	var _StripLinkDefinitions = function (text) {
 		//
@@ -2403,7 +2403,7 @@ Attacklab.showdown.converter = function () {
 			  /gm,
 			  function(){...});
 	*/
-		var text = text.replace(/^[ ]{0,3}\[(.+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+)/gm, function (wholeMatch, m1, m2, m3, m4) {
+		text = text.replace(/^[ ]{0,3}\[(.+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+)/gm, function (wholeMatch, m1, m2, m3, m4) {
 			m1 = m1.toLowerCase();
 			g_urls[m1] = _EncodeAmpsAndAngles(m2); // Link IDs are case-insensitive
 			if (m3) {
@@ -2419,7 +2419,7 @@ Attacklab.showdown.converter = function () {
 		});
 
 		return text;
-	}
+	};
 
 	var _HashHTMLBlocks = function (text) {
 		// attacklab: Double up blank lines to reduce lookaround
@@ -2538,7 +2538,7 @@ Attacklab.showdown.converter = function () {
 		// attacklab: Undo double lines (see comment at top of this function)
 		text = text.replace(/\n\n/g, "\n");
 		return text;
-	}
+	};
 
 	var hashElement = function (wholeMatch, m1) {
 		var blockText = m1;
@@ -2581,7 +2581,7 @@ Attacklab.showdown.converter = function () {
 		text = _FormParagraphs(text);
 
 		return text;
-	}
+	};
 
 
 	var _RunSpanGamut = function (text) {
@@ -2606,10 +2606,10 @@ Attacklab.showdown.converter = function () {
 		text = _DoItalicsAndBold(text);
 
 		// Do hard breaks:
-		text = text.replace(/  +\n/g, " <br />\n");
+		text = text.replace(/ {2,}\n/g, " <br />\n");
 
 		return text;
-	}
+	};
 
 	var _EscapeSpecialCharsWithinTagAttributes = function (text) {
 		//
@@ -2627,7 +2627,7 @@ Attacklab.showdown.converter = function () {
 		});
 
 		return text;
-	}
+	};
 
 	var _DoAnchors = function (text) {
 		//
@@ -2709,7 +2709,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/(\[([^\[\]]+)\])()()()()()/g, writeAnchorTag);
 
 		return text;
-	}
+	};
 
 	var writeAnchorTag = function (wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
 		if (m7 === undefined) m7 = "";
@@ -2720,8 +2720,8 @@ Attacklab.showdown.converter = function () {
 		var title = m7;
 		var blank_target = false;
 
-		if (url == "") {
-			if (link_id == "") {
+		if (url === "") {
+			if (link_id === "") {
 				// lower-case and turn embedded newlines into spaces
 				link_id = link_text.toLowerCase().replace(/ ?\n/g, " ");
 			} else {
@@ -2736,6 +2736,10 @@ Attacklab.showdown.converter = function () {
 				url = g_urls[link_id];
 				if (g_titles[link_id] !== undefined) {
 					title = g_titles[link_id];
+				}
+				if (url[0]=="!") {
+					blank_target = true;
+					url = url.substr(1);
 				}
 			}
 			else {
@@ -2756,7 +2760,7 @@ Attacklab.showdown.converter = function () {
 		url = escapeCharacters(url, "*_");
 		var result = "<a href=\"" + url + "\"";
 
-		if (title != "") {
+		if (title !== "") {
 			title = title.replace(/"/g, "&quot;");
 			title = escapeCharacters(title, "*_");
 			result += " title=\"" + title + "\"";
@@ -2769,7 +2773,7 @@ Attacklab.showdown.converter = function () {
 		result += ">" + link_text + "</a>";
 
 		return result;
-	}
+	};
 
 
 	var _DoImages = function (text) {
@@ -2825,7 +2829,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/(!\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeImageTag);
 
 		return text;
-	}
+	};
 
 	var writeImageTag = function (wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
 		var whole_match = m1;
@@ -2836,8 +2840,8 @@ Attacklab.showdown.converter = function () {
 
 		if (!title) title = "";
 
-		if (url == "") {
-			if (link_id == "") {
+		if (url === "") {
+			if (link_id === "") {
 				// lower-case and turn embedded newlines into spaces
 				link_id = alt_text.toLowerCase().replace(/ ?\n/g, " ");
 			}
@@ -2868,7 +2872,7 @@ Attacklab.showdown.converter = function () {
 		result += " />";
 
 		return result;
-	}
+	};
 
 
 	var _DoHeaders = function (text) {
@@ -2912,7 +2916,7 @@ Attacklab.showdown.converter = function () {
 		});
 
 		return text;
-	}
+	};
 
 	// This declaration keeps Dojo compressor from outputting garbage:
 	var _ProcessListItems;
@@ -2947,12 +2951,12 @@ Attacklab.showdown.converter = function () {
 			)
 		)/g
 	*/
-		var whole_list = /^(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
+		var whole_list = /^(([ ]{0,3}([*+\-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+\-]|\d+[.])[ \t]+)))/gm;
 
 		if (g_list_level) {
 			text = text.replace(whole_list, function (wholeMatch, m1, m2) {
 				var list = m1;
-				var list_type = (m2.search(/[*+-]/g) > -1) ? "ul" : "ol";
+				var list_type = (m2.search(/[*+\-]/g) > -1) ? "ul" : "ol";
 
 				// Turn double returns into triple returns, so that we can make a
 				// paragraph for the last item in a list, if necessary:
@@ -2968,15 +2972,15 @@ Attacklab.showdown.converter = function () {
 				return result;
 			});
 		} else {
-			whole_list = /(\n\n|^\n?)(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/g;
+			whole_list = /(\n\n|^\n?)(([ ]{0,3}([*+\-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+\-]|\d+[.])[ \t]+)))/g;
 			text = text.replace(whole_list, function (wholeMatch, m1, m2, m3) {
 				var runup = m1;
 				var list = m2;
 
-				var list_type = (m3.search(/[*+-]/g) > -1) ? "ul" : "ol";
+				var list_type = (m3.search(/[*+\-]/g) > -1) ? "ul" : "ol";
 				// Turn double returns into triple returns, so that we can make a
 				// paragraph for the last item in a list, if necessary:
-				var list = list.replace(/\n{2,}/g, "\n\n\n");
+				list = list.replace(/\n{2,}/g, "\n\n\n");
 				var result = _ProcessListItems(list);
 				result = runup + "<" + list_type + ">\n" + result + "</" + list_type + ">\n";
 				return result;
@@ -2987,7 +2991,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/~0/, "");
 
 		return text;
-	}
+	};
 
 	_ProcessListItems = function (list_str) {
 		//
@@ -3032,7 +3036,7 @@ Attacklab.showdown.converter = function () {
 			(?= \n* (~0 | \2 ([*+-]|\d+[.]) [ \t]+))
 		/gm, function(){...});
 	*/
-		list_str = list_str.replace(/(\n)?(^[ \t]*)([*+-]|\d+[.])[ \t]+([^\r]+?(\n{1,2}))(?=\n*(~0|\2([*+-]|\d+[.])[ \t]+))/gm, function (wholeMatch, m1, m2, m3, m4) {
+		list_str = list_str.replace(/(\n)?(^[ \t]*)([*+\-]|\d+[.])[ \t]+([^\r]+?(\n{1,2}))(?=\n*(~0|\2([*+\-]|\d+[.])[ \t]+))/gm, function (wholeMatch, m1, m2, m3, m4) {
 			var item = m4;
 			var leading_line = m1;
 			var leading_space = m2;
@@ -3055,7 +3059,7 @@ Attacklab.showdown.converter = function () {
 
 		g_list_level--;
 		return list_str;
-	}
+	};
 
 
 	var _DoCodeBlocks = function (text) {
@@ -3095,12 +3099,12 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/~0/, "");
 
 		return text;
-	}
+	};
 
 	var hashBlock = function (text) {
 		text = text.replace(/(^\n+|\n+$)/g, "");
 		return "\n\n~K" + (g_html_blocks.push(text) - 1) + "K\n\n";
-	}
+	};
 
 
 	var _DoCodeSpans = function (text) {
@@ -3150,7 +3154,7 @@ Attacklab.showdown.converter = function () {
 		});
 
 		return text;
-	}
+	};
 
 
 	var _EncodeCode = function (text) {
@@ -3185,7 +3189,7 @@ Attacklab.showdown.converter = function () {
 		//            special char: *
 		//---
 		return text;
-	}
+	};
 
 
 	var _DoItalicsAndBold = function (text) {
@@ -3197,7 +3201,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g, "<em>$2</em>");
 
 		return text;
-	}
+	};
 
 
 	var _DoBlockQuotes = function (text) {
@@ -3231,7 +3235,7 @@ Attacklab.showdown.converter = function () {
 			bq = bq.replace(/(\s*<pre>[^\r]+?<\/pre>)/gm, function (wholeMatch, m1) {
 				var pre = m1;
 				// attacklab: hack around Konqueror 3.5.4 bug:
-				pre = pre.replace(/^  /mg, "~0");
+				pre = pre.replace(/^ {2}/mg, "~0");
 				pre = pre.replace(/~0/g, "");
 				return pre;
 			});
@@ -3239,7 +3243,7 @@ Attacklab.showdown.converter = function () {
 			return hashBlock("<blockquote>\n" + bq + "\n</blockquote>");
 		});
 		return text;
-	}
+	};
 
 
 	var _FormParagraphs = function (text) {
@@ -3251,14 +3255,15 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/^\n+/g, "");
 		text = text.replace(/\n+$/g, "");
 
+		var i;
 		var grafs = text.split(/\n{2,}/g);
-		var grafsOut = new Array();
+		var grafsOut = [];
 
 		//
 		// Wrap <p> tags.
 		//
 		var end = grafs.length;
-		for (var i = 0; i < end; i++) {
+		for (i = 0; i < end; i++) {
 			var str = grafs[i];
 
 			// if this is an HTML marker, copy it
@@ -3279,7 +3284,7 @@ Attacklab.showdown.converter = function () {
 		// Unhashify HTML blocks
 		//
 		end = grafsOut.length;
-		for (var i = 0; i < end; i++) {
+		for (i = 0; i < end; i++) {
 			// if this is a marker for an html block...
 			while (grafsOut[i].search(/~K(\d+)K/) >= 0) {
 				var blockText = g_html_blocks[RegExp.$1];
@@ -3289,7 +3294,7 @@ Attacklab.showdown.converter = function () {
 		}
 
 		return grafsOut.join("\n\n");
-	}
+	};
 
 
 	var _EncodeAmpsAndAngles = function (text) {
@@ -3310,7 +3315,7 @@ Attacklab.showdown.converter = function () {
 
 
 		return text;
-	}
+	};
 
 
 	var _EncodeBackslashEscapes = function (text) {
@@ -3322,15 +3327,15 @@ Attacklab.showdown.converter = function () {
 		// attacklab: The polite way to do this is with the new
 		// escapeCharacters() function:
 		//
-		// 	text = escapeCharacters(text,"\\",true);
-		// 	text = escapeCharacters(text,"`*_{}[]()>#+-.!",true);
+		// text = escapeCharacters(text,"\\",true);
+		// text = escapeCharacters(text,"`*_{}[]()>#+-.!",true);
 		//
 		// ...but we're sidestepping its use of the (slow) RegExp constructor
 		// as an optimization for Firefox.  This function gets called a LOT.
 		text = text.replace(/\\(\\)/g, escapeCharacters_callback);
 		text = text.replace(/\\([`*_{}\[\]()>#+-.!])/g, escapeCharacters_callback);
 		return text;
-	}
+	};
 
 
 	var _DoAutoLinks = function (text) {
@@ -3350,12 +3355,12 @@ Attacklab.showdown.converter = function () {
 			>
 		/gi, _DoAutoLinks_callback());
 	*/
-		text = text.replace(/<(?:mailto:)?([-.\w]+\@[-a-z0-9]+(\.[-a-z0-9]+)*\.[a-z]+)>/gi, function (wholeMatch, m1) {
+		text = text.replace(/<(?:mailto:)?([\-.\w]+\@[\-a-z0-9]+(\.[\-a-z0-9]+)*\.[a-z]+)>/gi, function (wholeMatch, m1) {
 			return _EncodeEmailAddress(_UnescapeSpecialChars(m1));
 		});
 
 		return text;
-	}
+	};
 
 
 	var _EncodeEmailAddress = function (addr) {
@@ -3402,7 +3407,7 @@ Attacklab.showdown.converter = function () {
 				var r = Math.random();
 				// roughly 10% raw, 45% hex, 45% dec
 				ch = (
-				r > .9 ? encode[2](ch) : r > .45 ? encode[1](ch) : encode[0](ch));
+				r > 0.9 ? encode[2](ch) : r > 0.45 ? encode[1](ch) : encode[0](ch));
 			}
 			return ch;
 		});
@@ -3410,7 +3415,7 @@ Attacklab.showdown.converter = function () {
 		addr = "<a href=\"" + addr + "\">" + addr + "</a>";
 		addr = addr.replace(/">.+:/g, "\">"); // strip the mailto: from the visible part
 		return addr;
-	}
+	};
 
 
 	var _UnescapeSpecialChars = function (text) {
@@ -3418,11 +3423,11 @@ Attacklab.showdown.converter = function () {
 		// Swap back in all the special characters we've hidden.
 		//
 		text = text.replace(/~E(\d+)E/g, function (wholeMatch, m1) {
-			var charCodeToReplace = parseInt(m1);
+			var charCodeToReplace = parseInt(m1,10);
 			return String.fromCharCode(charCodeToReplace);
 		});
 		return text;
-	}
+	};
 
 
 	var _Outdent = function (text) {
@@ -3433,10 +3438,10 @@ Attacklab.showdown.converter = function () {
 		// "----------bug".replace(/^-/g,"") == "bug"
 		text = text.replace(/^(\t|[ ]{1,4})/gm, "~0"); // attacklab: g_tab_width
 		// attacklab: clean up hack
-		text = text.replace(/~0/g, "")
+		text = text.replace(/~0/g, "");
 
 		return text;
-	}
+	};
 
 	var _Detab = function (text) {
 		// attacklab: Detab's completely rewritten for speed.
@@ -3462,7 +3467,7 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/~B/g, "");
 
 		return text;
-	}
+	};
 
 
 	//
@@ -3482,15 +3487,15 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(regex, escapeCharacters_callback);
 
 		return text;
-	}
+	};
 
 
 	var escapeCharacters_callback = function (wholeMatch, m1) {
 		var charCodeToEscape = m1.charCodeAt(0);
 		return "~E" + charCodeToEscape + "E";
-	}
+	};
 
-} // end of Attacklab.showdown.converter
+}; // end of Attacklab.showdown.converter
 
 // Version 0.9 used the Showdown namespace instead of Attacklab.showdown
 // The old namespace is deprecated, but we'll support it for now:
