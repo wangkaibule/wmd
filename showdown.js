@@ -385,6 +385,7 @@ Attacklab.showdown.converter = function () {
 		// delimiters in inline links like [this](<url>).
 		text = _DoAutoLinks(text);
 		text = _EncodeAmpsAndAngles(text);
+		text = _ConvertExtraSpecialCharacters(text);
 		text = _DoItalicsAndBold(text);
 
 		// Do hard breaks:
@@ -1125,6 +1126,20 @@ Attacklab.showdown.converter = function () {
 			replace( /\u00A9/g	, '&copy;'	).
 			replace( /\u00AE/g	, '&reg;'	);
 
+		return text;
+	};
+	
+	var _ConvertExtraSpecialCharacters = function (text) {
+		// Processing to change various special character combinations into
+		// common real characters.
+		
+		text = text.
+			replace( /\.\.\./g	, '&hellip;').
+			replace( /\(c\)/g	, '&copy;').
+			replace( /\(r\)/g	, '&reg;').
+			replace( /\(tm\)/g	, '&trade;').
+			replace( /\-\-/g, '&mdash;');
+	
 		return text;
 	};
 
