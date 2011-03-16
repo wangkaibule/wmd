@@ -2362,8 +2362,8 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/~T/g, "~");
 
 		// ** GFM **  Auto-link URLs and emails
-	    text = text.replace(/https?\:\/\/[^"\s<>]*[^.,;'">\:\s<>\)\]\!]/g, function (wholeMatch, matchIndex){
-			var left = text.slice(text.lastIndexOf('\n',matchIndex), matchIndex);
+		text = text.replace(/https?\:\/\/[^"\s<>]*[^.,;'">\:\s<>\)\]\!]/g, function (wholeMatch, matchIndex){
+			var left = text.slice(Math.max(0,text.lastIndexOf('\n',matchIndex)), matchIndex);
 			var right = text.slice(matchIndex);
 			if (left.match(/<([a-z]+)\s[^>]+$/) && right.match(/^[^>]*>/)) {return wholeMatch;}
 			return "<a href='" + wholeMatch + "'>" + wholeMatch + "</a>";
@@ -3182,8 +3182,6 @@ Attacklab.showdown.converter = function () {
 			return m1 + "<strike>" + c + "</strike>";
 		});
 		
-		console.log(text);
-
 		return text;
 	};
 
