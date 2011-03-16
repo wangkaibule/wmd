@@ -954,11 +954,20 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/>/g, "&gt;");
 
 		// Encode "smart" quotes
-		text = text.replace(/‘/g, "&lsquo;");
-		text = text.replace(/’/g, "&rsquo;");
-		text = text.replace(/“/g, "&ldquo;");
-		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&mdash;");
+		text = text.
+			replace( /\u2026/g	, '&hellip;').
+			replace( /\u00AB/g	, '&laquo;'	).
+			replace( /\u00BB/g	, '&raquo;'	).
+			replace( /\u201C/g	, '&ldquo;'	).
+			replace( /\u201D/g	, '&rdquo;'	).
+			replace( /\u2018/g	, '&lsquo;'	).
+			replace( /\u2019/g	, '&rsquo;'	).
+			replace( /\u2014/g	, '&mdash;'	).
+			replace( /\u2013/g	, '&ndash;'	).
+			replace( /\u2022/g	, '&bull;'	).
+			replace( /\u2122/g	, '&trade;'	).
+			replace( /\u00A9/g	, '&copy;'	).
+			replace( /\u00AE/g	, '&reg;'	);
 
 
 		// Now, escape characters that are magic in Markdown:
@@ -1101,12 +1110,20 @@ Attacklab.showdown.converter = function () {
 		text = text.replace(/<(?![a-z\/?\$!])/gi, "&lt;");
 
 		// Encode "smart" quotes
-		text = text.replace(/‘/g, "&lsquo;");
-		text = text.replace(/’/g, "&rsquo;");
-		text = text.replace(/“/g, "&ldquo;");
-		text = text.replace(/”/g, "&rdquo;");
-		text = text.replace(/–/g, "&mdash;");
-
+		text = text.
+			replace( /\u2026/g	, '&hellip;').
+			replace( /\u00AB/g	, '&laquo;'	).
+			replace( /\u00BB/g	, '&raquo;'	).
+			replace( /\u201C/g	, '&ldquo;'	).
+			replace( /\u201D/g	, '&rdquo;'	).
+			replace( /\u2018/g	, '&lsquo;'	).
+			replace( /\u2019/g	, '&rsquo;'	).
+			replace( /\u2014/g	, '&mdash;'	).
+			replace( /\u2013/g	, '&ndash;'	).
+			replace( /\u2022/g	, '&bull;'	).
+			replace( /\u2122/g	, '&trade;'	).
+			replace( /\u00A9/g	, '&copy;'	).
+			replace( /\u00AE/g	, '&reg;'	);
 
 		return text;
 	};
