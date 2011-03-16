@@ -1054,8 +1054,19 @@ Attacklab.showdown.converter = function () {
 			}
 			else if (str.search(/\S/) >= 0) {
 				str = _RunSpanGamut(str);
+				
+				if (str.substr(0,2)==='->') {
+					if (str.substr(-5)==='&lt;-') {
+						p_tag = '<p align="center">';
+						str = str.slice(2,-5);
+					} else {
+						p_tag = '<p align="right">';
+						str = str.substring(2);
+					}
+				}
+				
 				str = str.replace(/\n/g, "<br />"); // ** GFM **
-				str = str.replace(/^([ \t]*)/g, "<p>");
+				str = str.replace(/^([ \t]*)/g, p_tag);
 				str += "</p>";
 				grafsOut.push(str);
 			}
