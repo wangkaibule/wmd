@@ -1047,6 +1047,7 @@ Attacklab.showdown.converter = function () {
 		var end = grafs.length;
 		for (i = 0; i < end; i++) {
 			var str = grafs[i];
+			var p_tag = '<p>';
 
 			// if this is an HTML marker, copy it
 			if (str.search(/~K(\d+)K/g) >= 0) {
