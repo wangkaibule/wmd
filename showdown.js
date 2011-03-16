@@ -145,7 +145,7 @@ Attacklab.showdown.converter = function () {
 
 		// ** GFM **  Auto-link URLs and emails
 	    text = text.replace(/https?\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!]/g, function (wholeMatch, matchIndex){
-			var left = text.slice(0, matchIndex);
+			var left = text.slice(text.lastIndexOf('\n',matchIndex), matchIndex);
 			var right = text.slice(matchIndex);
 			if (left.match(/<(a|img)[^>]+>?$/) && right.match(/^[^>]*>/)) {return wholeMatch;}
 			return "<a href='" + wholeMatch + "'>" + wholeMatch + "</a>";
