@@ -117,9 +117,6 @@
 {
 	border: 1px solid #999999;
 	background-color: #F5F5F5;
-}
-
-.wmd-prompt-dialog > div {
 	font-size: 0.8em;
 	font-family: arial, helvetica, sans-serif;
 }
