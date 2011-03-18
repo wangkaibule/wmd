@@ -10,7 +10,7 @@
 	window.WMDEditor = WMDEditor;
 
 	WMDEditor.defaults = { // {{{
-		version: 2.0,
+		version: 2.1,
 		output_format: "markdown",
 		lineLength: 40,
 
