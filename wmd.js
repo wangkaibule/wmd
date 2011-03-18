@@ -21,8 +21,8 @@
 
 		// The text that appears on the upper part of the dialog box when
 		// entering links.
-		imageDialogText: "<p style='margin-top: 0px'><b>Enter the image URL.</b></p>" + "<p>You can also add a title, which will be displayed as a tool tip.</p>" + "<p>Example:<br />http://i.imgur.com/1cZl4.jpg   \"Optional title\"</p>",
-		linkDialogText: "<p style='margin-top: 0px'><b>Enter the web address.</b></p>" + "<p>You can also add a title, which will be displayed as a tool tip.</p>" + "<p>Example:<br />http://www.google.com/   \"Optional title\"</p>",
+		imageDialogText: "<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://i.imgur.com/1cZl4.jpg   \"Optional title\"</p>",
+		linkDialogText: "<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://www.google.com/   \"Optional title\"</p>",
 
 		// The default text that appears in the dialog input box when entering
 		// links.
