@@ -13,7 +13,7 @@ Major Changes from Open Library Revision
 
 * Extended showdown to support a series of Markdown extensions:
   - Link urls that start with ! are opened in a new window
-  - Text wrapped with carets is made superscript (ex: ^this text is superscripted^)
+  - Text wrapped with double carets is made superscript (ex: ^^this text is superscripted^\^)
   - Text wrapped with double commas is made subscript (ex: ,,this text is subscripted,,)
   - Text wrapped with double tildes is made strikethrough (ex: ~~this text is struck~~)
   - (c), (r), (tm), -- and ... are converted into their respective html entities.
