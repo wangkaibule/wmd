@@ -901,8 +901,8 @@ Showdown.converter = function () {
 		});
 
 
-		// Process ^superscript^ notation
-		text = text.replace(/(^|[^\\])(\^+)([^\r]*?[^\^])\2(?!\^)/gm, function (wholeMatch, m1, m2, m3, m4) {
+		// Process ^^superscript^^ notation
+		text = text.replace(/(^|[^\\])(\^{2})([^\r]*?[^\^]{2})\2(?!\^)/gm, function (wholeMatch, m1, m2, m3, m4) {
 			var c = m3;
 			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
 			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
