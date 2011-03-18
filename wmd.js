@@ -21,8 +21,8 @@
 
 		// The text that appears on the upper part of the dialog box when
 		// entering links.
-		imageDialogText: "<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://i.imgur.com/1cZl4.jpg   \"Optional title\"</p>",
-		linkDialogText: "<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://www.google.com/   \"Optional title\"</p>",
+		imageDialogText: "<p style='margin-top: 0px'><b>Enter the image URL.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://i.imgur.com/1cZl4.jpg</p>",
+		linkDialogText: "<p style='margin-top: 0px'><b>Enter the web address.</b></p><p>You can also add a title, which will be displayed as a tool tip.</p><p>Example:<br />http://www.google.com/</p>",
 
 		// The default text that appears in the dialog input box when entering
 		// links.
@@ -167,13 +167,15 @@
 		// text: The html for the input box.
 		// defaultInputText: The default value that appears in the input box.
 		// makeLinkMarkdown: The function which is executed when the prompt is dismissed, either via OK or Cancel
-		prompt: function (text, defaultInputText, makeLinkMarkdown) {
+		prompt: function (text, defaultInputText, makeLinkMarkdown, promptType) {
 
 			// These variables need to be declared at this level since they are used
 			// in multiple functions.
 			var dialog; // The dialog box.
 			var background; // The background beind the dialog box.
 			var input; // The text box where you enter the hyperlink.
+			var titleInput; // The text box for the image's title text
+			var newWinCheckbox; //The checkbox to choose if a link should be opened in a new window.
 			if (defaultInputText === undefined) {
 				defaultInputText = "";
 			}
@@ -192,7 +194,7 @@
 			// isCancel is false if we are going to keep the text.
 			var close = function (isCancel) {
 				util.removeEvent(document.body, "keydown", checkEscape);
-				var text = input.value;
+				var text = input.value+ (titleInput.value?' "'+titleInput.value+'"':'');
 
 				if (isCancel) {
 					text = null;
@@ -202,6 +204,7 @@
 					text = text.replace('http://http://', 'http://');
 					text = text.replace('http://https://', 'https://');
 					text = text.replace('http://ftp://', 'ftp://');
+					if (promptType=='link' && newWinCheckbox.checked) text = '!'+text;
 				}
 
 				dialog.parentNode.removeChild(dialog);
@@ -273,7 +276,7 @@
 				form.onsubmit = function () {
 					return close(false);
 				};
-				style = form.style;
+				var style = form.style;
 				style.padding = "0";
 				style.margin = "0";
 				style.cssFloat = "left";
@@ -281,17 +284,62 @@
 				style.textAlign = "center";
 				style.position = "relative";
 				dialog.appendChild(form);
-
-				// The input text box
-				input = document.createElement("input");
-				input.type = "text";
-				input.value = defaultInputText;
-				style = input.style;
+				
+				var label = document.createElement("label");
+				style = label.style;
 				style.display = "block";
 				style.width = "80%";
 				style.marginLeft = style.marginRight = "auto";
-				form.appendChild(input);
+				style.textAlign = "left";
+				form.appendChild(label);
 
+					label.appendChild(document.createTextNode(promptType+" URL:"));
+
+					// The input text box
+					input = document.createElement("input");
+					input.type = "text";
+					input.value = defaultInputText;
+					style = input.style;
+					style.display = "block";
+					style.width = "100%";
+					style.marginLeft = style.marginRight = "auto";
+					label.appendChild(input);
+
+				label = document.createElement("label");
+				style = label.style;
+				style.display = "block";
+				style.width = "80%";
+				style.marginLeft = style.marginRight = "auto";
+				style.textAlign = "left";
+				form.appendChild(label);
+				
+					label.appendChild(document.createTextNode(promptType+" Title (Hover Text):"));
+
+					// The input text box
+					titleInput = document.createElement("input");
+					titleInput.type = "text";
+					style = titleInput.style;
+					style.display = "block";
+					style.width = "100%";
+					style.marginLeft = style.marginRight = "auto";
+					label.appendChild(titleInput);
+					
+				
+				if (promptType=='link') {
+					label = document.createElement("label");
+					style = label.style;
+					style.display = "block";
+					style.textAlign = "center";
+					form.appendChild(label);
+				
+						newWinCheckbox = document.createElement("input");
+						newWinCheckbox.type = 'checkbox';
+						newWinCheckbox.value = '!';
+						label.appendChild(newWinCheckbox);
+			
+						label.appendChild(document.createTextNode(" Have this link open in a new window"));
+				}
+				
 				// The ok button
 				var okButton = document.createElement("input");
 				okButton.type = "button";
@@ -1843,7 +1891,7 @@
 				// The function to be executed when you enter a link and press OK or Cancel.
 				// Marks up the link and adds the ref.
 				var makeLinkMarkdown = function (link) {
-
+					console.log(link);
 					if (link !== null) {
 
 						chunk.startTag = chunk.endTag = "";
@@ -1866,10 +1914,10 @@
 				};
 
 				if (isImage) {
-					util.prompt(wmd_options.imageDialogText, wmd_options.imageDefaultText, makeLinkMarkdown);
+					util.prompt(wmd_options.imageDialogText, wmd_options.imageDefaultText, makeLinkMarkdown, 'Image');
 				}
 				else {
-					util.prompt(wmd_options.linkDialogText, wmd_options.linkDefaultText, makeLinkMarkdown);
+					util.prompt(wmd_options.linkDialogText, wmd_options.linkDefaultText, makeLinkMarkdown, 'Link');
 				}
 				return true;
 			}

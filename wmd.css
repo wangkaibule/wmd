@@ -121,6 +121,12 @@
 	font-family: arial, helvetica, sans-serif;
 }
 
+.wmd-prompt-dialog > form > label {
+	font-size: 0.6em;
+	font-weight:bold;
+	margin:4px 0;
+}
+
 
 .wmd-prompt-dialog > form > input[type="text"] {
 	border: 1px solid #999999;
