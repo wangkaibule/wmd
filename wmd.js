@@ -1323,7 +1323,7 @@
 		wmd.Global = {};
 		wmd.buttons = {};
 
-		wmd.showdown = window.Attacklab && window.Attacklab.showdown;
+		wmd.showdown = window.Showdown;
 
 		var util = WMDEditor.util;
 		var position = WMDEditor.position;

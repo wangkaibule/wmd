@@ -13,7 +13,7 @@
 //
 //   var text = "Markdown *rocks*.";
 //
-//   var converter = new Attacklab.showdown.converter();
+//   var converter = new Showdown.converter();
 //   var html = converter.makeHtml(text);
 //
 //   alert(html);
@@ -23,14 +23,9 @@
 //
 
 //
-// Attacklab namespace
-//
-var Attacklab = Attacklab || {};
-
-//
 // Showdown namespace
 //
-Attacklab.showdown = Attacklab.showdown || {};
+Showdown = {};
 
 //
 // converter
@@ -38,7 +33,7 @@ Attacklab.showdown = Attacklab.showdown || {};
 // Wraps all "globals" so that the only thing
 // exposed is makeHtml().
 //
-Attacklab.showdown.converter = function () {
+Showdown.converter = function () {
 
 	//
 	// Globals:
@@ -1319,12 +1314,3 @@ Attacklab.showdown.converter = function () {
 	};
 
 }; // end of Attacklab.showdown.converter
-
-// Version 0.9 used the Showdown namespace instead of Attacklab.showdown
-// The old namespace is deprecated, but we'll support it for now:
-var Showdown = Attacklab.showdown;
-
-// If anyone's interested, tell the world that this file's been loaded
-if (Attacklab.fileLoaded) {
-	Attacklab.fileLoaded("showdown.js");
-}
