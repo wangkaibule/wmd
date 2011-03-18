@@ -2368,7 +2368,9 @@ Attacklab.showdown.converter = function () {
 			if (left.match(/<([a-z]+)\s[^>]+$/) && right.match(/^[^>]*>/)) {return wholeMatch;}
 			return "<a href='" + wholeMatch + "'>" + wholeMatch + "</a>";
 		});
-		text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9\-]+)+/ig, function (wholeMatch) {
+		text = text.replace(/[a-z0-9_\-+=.]+@[a-z0-9\-]+(\.[a-z0-9\-]+)+/ig, function (wholeMatch, m1, matchIndex) {
+			var left = text.slice(Math.max(0,text.lastIndexOf('\n',matchIndex)), matchIndex);
+			if (left.match(/<([a-z]+)\s[^>]+>?$/) || left.match(/mailto\:$/)) {return wholeMatch;}
 			return "<a href='mailto:" + wholeMatch + "'>" + wholeMatch + "</a>";
 		});
 
