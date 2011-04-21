@@ -39,7 +39,7 @@
 		previewPollInterval: 500,
 		pastePollInterval: 100,
 
-		buttons: "bold italic link blockquote code image ol ul heading hr",
+		buttons: "bold italic  link blockquote code image  ol ul heading hr  undo redo",
 		
 		tagFilter: {
 			enabled: true,
@@ -1427,27 +1427,16 @@
 
 			var setUndoRedoButtonStates = function () {
 				if (undoMgr) {
-					setupButton(wmd.buttons["wmd-undo-button"], undoMgr.canUndo());
-					setupButton(wmd.buttons["wmd-redo-button"], undoMgr.canRedo());
+					if (wmd.buttons["wmd-undo-button"]) setupButton(wmd.buttons["wmd-undo-button"], undoMgr.canUndo());
+					if (wmd.buttons["wmd-redo-button"]) setupButton(wmd.buttons["wmd-redo-button"], undoMgr.canRedo());
 				}
 			};
 
 			var setupButton = function (button, isEnabled) {
 
-				var normalYShift = "0px";
-				var disabledYShift = "-20px";
-				var highlightYShift = "-40px";
-
 				if (isEnabled) {
-					button.style.backgroundPosition = button.XShift + " " + normalYShift;
-					button.onmouseover = function () {
-						this.style.backgroundPosition = this.XShift + " " + highlightYShift;
-					};
-
-					button.onmouseout = function () {
-						this.style.backgroundPosition = this.XShift + " " + normalYShift;
-					};
-
+					button.className = button.className.replace(new RegExp("(^|\\s+)disabled(\\s+|$)"), ' ');
+				
 					// IE tries to select the background image "button" text (it's
 					// implemented in a list item) so we have to cache the selection
 					// on mousedown.
@@ -1469,7 +1458,7 @@
 					}
 				}
 				else {
-					button.style.backgroundPosition = button.XShift + " " + disabledYShift;
+					button.className += (button.className ? ' ' : '') + 'disabled';
 					button.onmouseover = button.onmouseout = button.onclick = function () {};
 				}
 			};
@@ -1517,60 +1506,83 @@
 					return spacer;
 				}
 
-				var boldButton = addButton("wmd-bold-button", "Strong <strong> Ctrl+B", command.doBold);
-				var italicButton = addButton("wmd-italic-button", "Emphasis <em> Ctrl+I", command.doItalic);
-				var spacer1 = addSpacer();
+				var buttonlist = wmd_options.buttons.split(' ');
+				for (var i=0;i<buttonlist.length;i++) {
+					switch (buttonlist[i]) {
+					case "bold":
+						addButton("wmd-bold-button", "Strong <strong> Ctrl+B", command.doBold);
+						break;
+					case "italic":
+						addButton("wmd-italic-button", "Emphasis <em> Ctrl+I", command.doItalic);
+						break;
+					case 'link':
+						addButton("wmd-link-button", "Hyperlink <a> Ctrl+L", function (chunk, postProcessing, useDefaultText) {
+							return command.doLinkOrImage(chunk, postProcessing, false);
+						});
+						break;
+					case 'blockquote':
+						addButton("wmd-quote-button", "Blockquote <blockquote> Ctrl+Q", command.doBlockquote);
+						break;
+					case 'code':
+						addButton("wmd-code-button", "Code Sample <pre><code> Ctrl+K", command.doCode);
+						break;
+					case 'image':
+						addButton("wmd-image-button", "Image <img> Ctrl+G", function (chunk, postProcessing, useDefaultText) {
+							return command.doLinkOrImage(chunk, postProcessing, true);
+						});
+						break;
+					case 'ol':
+						addButton("wmd-olist-button", "Numbered List <ol> Ctrl+O", function (chunk, postProcessing, useDefaultText) {
+							command.doList(chunk, postProcessing, true, useDefaultText);
+						});
+						break;
+					case 'ul':
+						addButton("wmd-ulist-button", "Bulleted List <ul> Ctrl+U", function (chunk, postProcessing, useDefaultText) {
+							command.doList(chunk, postProcessing, false, useDefaultText);
+						});
+						break;
+					case 'heading':
+						addButton("wmd-heading-button", "Heading <h1>/<h2> Ctrl+H", command.doHeading);
+						break;
+					case 'hr':
+						addButton("wmd-hr-button", "Horizontal Rule <hr> Ctrl+R", command.doHorizontalRule);
+						break;
+					case 'undo':
+						var undoButton = addButton("wmd-undo-button", "Undo - Ctrl+Z");
+						undoButton.execute = function (manager) {
+							manager.undo();
+						};
+						break;
+					case 'redo':
+						var redoButton = addButton("wmd-redo-button", "Redo - Ctrl+Y");
+						if (/win/.test(nav.platform.toLowerCase())) {
+							redoButton.title = "Redo - Ctrl+Y";
+						}
+						else {
+							// mac and other non-Windows platforms
+							redoButton.title = "Redo - Ctrl+Shift+Z";
+						}
+						redoButton.execute = function (manager) {
+							manager.redo();
+						};
+						break;
+					case 'help':
+						var helpButton = createButton("wmd-help-button");
+						helpButton.isHelp = true;
+						setupButton(helpButton, true);
+						buttonRow.appendChild(helpButton);
 
-				var linkButton = addButton("wmd-link-button", "Hyperlink <a> Ctrl+L", function (chunk, postProcessing, useDefaultText) {
-					return command.doLinkOrImage(chunk, postProcessing, false);
-				});
-				var quoteButton = addButton("wmd-quote-button", "Blockquote <blockquote> Ctrl+Q", command.doBlockquote);
-				var codeButton = addButton("wmd-code-button", "Code Sample <pre><code> Ctrl+K", command.doCode);
-				var imageButton = addButton("wmd-image-button", "Image <img> Ctrl+G", function (chunk, postProcessing, useDefaultText) {
-					return command.doLinkOrImage(chunk, postProcessing, true);
-				});
-
-				var spacer2 = addSpacer();
-
-				var olistButton = addButton("wmd-olist-button", "Numbered List <ol> Ctrl+O", function (chunk, postProcessing, useDefaultText) {
-					command.doList(chunk, postProcessing, true, useDefaultText);
-				});
-				var ulistButton = addButton("wmd-ulist-button", "Bulleted List <ul> Ctrl+U", function (chunk, postProcessing, useDefaultText) {
-					command.doList(chunk, postProcessing, false, useDefaultText);
-				});
-				var headingButton = addButton("wmd-heading-button", "Heading <h1>/<h2> Ctrl+H", command.doHeading);
-				var hrButton = addButton("wmd-hr-button", "Horizontal Rule <hr> Ctrl+R", command.doHorizontalRule);
-				var spacer3 = addSpacer();
-
-				var undoButton = addButton("wmd-undo-button", "Undo - Ctrl+Z");
-				undoButton.execute = function (manager) {
-					manager.undo();
-				};
-
-				var redo_title = null;
-
-				var redoButton = addButton("wmd-redo-button", "Redo - Ctrl+Y");
-				if (/win/.test(nav.platform.toLowerCase())) {
-					redoButton.title = "Redo - Ctrl+Y";
+						var helpAnchor = document.createElement("a");
+						helpAnchor.href = wmd_options.helpLink;
+						helpAnchor.target = wmd_options.helpTarget;
+						helpAnchor.title = wmd_options.helpHoverTitle;
+						helpButton.appendChild(helpAnchor);
+						break;
+					case '':
+						addSpacer();
+						break;
+					}
 				}
-				else {
-					// mac and other non-Windows platforms
-					redoButton.title = "Redo - Ctrl+Shift+Z";
-				}
-				redoButton.execute = function (manager) {
-					manager.redo();
-				};
-
-				var helpButton = createButton("wmd-help-button");
-				helpButton.isHelp = true;
-				setupButton(helpButton, true);
-				buttonRow.appendChild(helpButton);
-
-				var helpAnchor = document.createElement("a");
-				helpAnchor.href = wmd_options.helpLink;
-				helpAnchor.target = wmd_options.helpTarget;
-				helpAnchor.title = wmd_options.helpHoverTitle;
-				helpButton.appendChild(helpAnchor);
 
 				setUndoRedoButtonStates();
 			};
