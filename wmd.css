@@ -41,8 +41,8 @@
 .wmd-button-row 
 {
 	position: relative;
-	margin:5px;
-	padding: 0px;  
+	margin:0px;
+	padding: 5px;  
 	height: 20px;
 }
 
@@ -55,7 +55,7 @@
 	
 	position: relative;
 	background-color: Silver;
-	display: inline-block; 
+	display: inline-block;  zoom:1; *display:inline;
 	list-style: none;
 }
 
@@ -70,7 +70,7 @@
 	background-image: url(wmd-buttons.png);
 	background-repeat: no-repeat;
 	background-position: 0px 0px;
-	display: inline-block; 
+	display: inline-block; zoom:1; *display:inline;
 	list-style: none;
 }
 
