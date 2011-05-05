@@ -41,6 +41,28 @@
 
 		buttons: "bold italic  link blockquote code image  ol ul heading hr  undo redo help",
 		
+		autoFormatting: {
+			list: true,
+			quote: true,
+			code: true,
+		},
+		
+		modifierKeys: {  //replace this with null or false to disable key-combos
+			bold: "b",
+			italic: "i",
+			link: "l",
+			quote: "q",
+			code: "k",
+			image: "g",
+			orderedList: "o",
+			unorderedList: "u",
+			heading: "h",
+			horizontalRule: "r",
+			redo: "y",
+			undo: "z"
+		},
+		
+		
 		tagFilter: {
 			enabled: true,
 			allowedTags: /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul)>|<(br|hr)\s?\/?>)$/i,
@@ -1612,57 +1634,57 @@
 				util.addEvent(inputBox, keyEvent, function (key) {
 
 					// Check to see if we have a button key and, if so execute the callback.
-					if (key.ctrlKey || key.metaKey) {
+					if (wmd.options.modifierKeys && (key.ctrlKey || key.metaKey)) {
 
 						var keyCode = key.charCode || key.keyCode;
 						var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
 
 						switch (keyCodeStr) {
-						case "b":
+						case wmd.options.modifierKeys.bold:
 							if (wmd.buttons["wmd-bold-button"]) doClick(wmd.buttons["wmd-bold-button"]);
 							else return;
 							break;
-						case "i":
+						case wmd.options.modifierKeys.italic:
 							if (wmd.buttons["wmd-italic-button"]) doClick(wmd.buttons["wmd-italic-button"]);
 							else return;
 							break;
-						case "l":
+						case wmd.options.modifierKeys.link:
 							if (wmd.buttons["wmd-link-button"]) doClick(wmd.buttons["wmd-link-button"]);
 							else return;
 							break;
-						case "q":
+						case wmd.options.modifierKeys.quote:
 							if (wmd.buttons["wmd-quote-button"]) doClick(wmd.buttons["wmd-quote-button"]);
 							else return;
 							break;
-						case "k":
+						case wmd.options.modifierKeys.code:
 							if (wmd.buttons["wmd-code-button"]) doClick(wmd.buttons["wmd-code-button"]);
 							else return;
 							break;
-						case "g":
+						case wmd.options.modifierKeys.image:
 							if (wmd.buttons["wmd-image-button"]) doClick(wmd.buttons["wmd-image-button"]);
 							else return;
 							break;
-						case "o":
+						case wmd.options.modifierKeys.orderedList:
 							if (wmd.buttons["wmd-olist-button"]) doClick(wmd.buttons["wmd-olist-button"]);
 							else return;
 							break;
-						case "u":
+						case wmd.options.modifierKeys.unorderedList:
 							if (wmd.buttons["wmd-ulist-button"]) doClick(wmd.buttons["wmd-ulist-button"]);
 							else return;
 							break;
-						case "h":
+						case wmd.options.modifierKeys.heading:
 							if (wmd.buttons["wmd-heading-button"]) doClick(wmd.buttons["wmd-heading-button"]);
 							else return;
 							break;
-						case "r":
+						case wmd.options.modifierKeys.horizontalRule:
 							if (wmd.buttons["wmd-hr-button"]) doClick(wmd.buttons["wmd-hr-button"]);
 							else return;
 							break;
-						case "y":
+						case wmd.options.modifierKeys.redo:
 							if (wmd.buttons["wmd-redo-button"]) doClick(wmd.buttons["wmd-redo-button"]);
 							else return;
 							break;
-						case "z":
+						case wmd.options.modifierKeys.undo:
 							if (key.shiftKey) {
 								if (wmd.buttons["wmd-redo-button"]) doClick(wmd.buttons["wmd-redo-button"]);
 								else return;
@@ -1950,30 +1972,31 @@
 
 		// Moves the cursor to the next line and continues lists, quotes and code.
 		command.doAutoindent = function (chunk, postProcessing, useDefaultText) {
+			if (!wmd.options.autoFormatting) return;
 
-			chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
-			chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
-			chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+			if (wmd.options.autoFormatting.list) chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
+			if (wmd.options.autoFormatting.quote) chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
+			if (wmd.options.autoFormatting.code) chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
 
 			useDefaultText = false;
 
 			if (/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(chunk.before)) {
-				if (command.doList) {
+				if (command.doList && wmd.options.autoFormatting.list) {
 					command.doList(chunk, postProcessing, false, true);
 				}
 			}
 			if (/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)) {
-				if (command.doList) {
+				if (command.doList && wmd.options.autoFormatting.list) {
 					command.doList(chunk, postProcessing, true, true);
 				}
 			}
 			if (/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)) {
-				if (command.doBlockquote) {
+				if (command.doBlockquote && wmd.options.autoFormatting.quote) {
 					command.doBlockquote(chunk, postProcessing, useDefaultText);
 				}
 			}
 			if (/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)) {
-				if (command.doCode) {
+				if (command.doCode && wmd.options.autoFormatting.code) {
 					command.doCode(chunk, postProcessing, useDefaultText);
 				}
 			}
