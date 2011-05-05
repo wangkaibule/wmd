@@ -28,12 +28,14 @@
 		</div>
 
 		<script type="text/javascript">
-			setup_wmd({
+			new WMDEditor({
 				input: "notes",
 				button_bar: "notes-button-bar",
 				preview: "notes-preview",
 				output: "copy_html",
-				buttons: "bold italic link  ol ul  heading"
+				buttons: "bold italic link  ol ul  heading",
+				modifierKeys: false,
+				autoFormatting: false
 			});
 		</script>
 	</body>
