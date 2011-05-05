@@ -1619,44 +1619,56 @@
 
 						switch (keyCodeStr) {
 						case "b":
-							doClick(wmd.buttons["wmd-bold-button"]);
+							if (wmd.buttons["wmd-bold-button"]) doClick(wmd.buttons["wmd-bold-button"]);
+							else return;
 							break;
 						case "i":
-							doClick(wmd.buttons["wmd-italic-button"]);
+							if (wmd.buttons["wmd-italic-button"]) doClick(wmd.buttons["wmd-italic-button"]);
+							else return;
 							break;
 						case "l":
-							doClick(wmd.buttons["wmd-link-button"]);
+							if (wmd.buttons["wmd-link-button"]) doClick(wmd.buttons["wmd-link-button"]);
+							else return;
 							break;
 						case "q":
-							doClick(wmd.buttons["wmd-quote-button"]);
+							if (wmd.buttons["wmd-quote-button"]) doClick(wmd.buttons["wmd-quote-button"]);
+							else return;
 							break;
 						case "k":
-							doClick(wmd.buttons["wmd-code-button"]);
+							if (wmd.buttons["wmd-code-button"]) doClick(wmd.buttons["wmd-code-button"]);
+							else return;
 							break;
 						case "g":
-							doClick(wmd.buttons["wmd-image-button"]);
+							if (wmd.buttons["wmd-image-button"]) doClick(wmd.buttons["wmd-image-button"]);
+							else return;
 							break;
 						case "o":
-							doClick(wmd.buttons["wmd-olist-button"]);
+							if (wmd.buttons["wmd-olist-button"]) doClick(wmd.buttons["wmd-olist-button"]);
+							else return;
 							break;
 						case "u":
-							doClick(wmd.buttons["wmd-ulist-button"]);
+							if (wmd.buttons["wmd-ulist-button"]) doClick(wmd.buttons["wmd-ulist-button"]);
+							else return;
 							break;
 						case "h":
-							doClick(wmd.buttons["wmd-heading-button"]);
+							if (wmd.buttons["wmd-heading-button"]) doClick(wmd.buttons["wmd-heading-button"]);
+							else return;
 							break;
 						case "r":
-							doClick(wmd.buttons["wmd-hr-button"]);
+							if (wmd.buttons["wmd-hr-button"]) doClick(wmd.buttons["wmd-hr-button"]);
+							else return;
 							break;
 						case "y":
-							doClick(wmd.buttons["wmd-redo-button"]);
+							if (wmd.buttons["wmd-redo-button"]) doClick(wmd.buttons["wmd-redo-button"]);
+							else return;
 							break;
 						case "z":
 							if (key.shiftKey) {
-								doClick(wmd.buttons["wmd-redo-button"]);
-							}
-							else {
-								doClick(wmd.buttons["wmd-undo-button"]);
+								if (wmd.buttons["wmd-redo-button"]) doClick(wmd.buttons["wmd-redo-button"]);
+								else return;
+							} else {
+								if (wmd.buttons["wmd-undo-button"]) doClick(wmd.buttons["wmd-undo-button"]);
+								else return;
 							}
 							break;
 						default:
