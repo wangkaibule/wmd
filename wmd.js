@@ -417,8 +417,9 @@
 
 		extend: function () {
 			function _update(a, b) {
-				for (var k in b) {
-					a[k] = b[k];
+				for (var k in b) if (b.hasOwnProperty(k)){
+					if (typeof a[k] === 'object' && typeof b[k] === 'object') _update(a[k], b[k]); //if property is an object or array, merge the contents instead of overwriting
+					else a[k] = b[k];
 				}
 				return a;
 			}
