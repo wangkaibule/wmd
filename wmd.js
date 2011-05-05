@@ -39,7 +39,7 @@
 		previewPollInterval: 500,
 		pastePollInterval: 100,
 
-		buttons: "bold italic  link blockquote code image  ol ul heading hr  undo redo",
+		buttons: "bold italic  link blockquote code image  ol ul heading hr  undo redo help",
 		
 		tagFilter: {
 			enabled: true,
