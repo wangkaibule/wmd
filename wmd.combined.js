@@ -64,7 +64,7 @@
 		
 		
 		tagFilter: {
-			enabled: true,
+			enabled: false,
 			allowedTags: /^(<\/?(b|blockquote|code|del|dd|dl|dt|em|h1|h2|h3|i|kbd|li|ol|p|pre|s|sup|sub|strong|strike|ul)>|<(br|hr)\s?\/?>)$/i,
 			patternLink: /^(<a\shref=("|')(\#\d+|(https?:\/\/|ftp:\/\/|mailto:)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)\2(\stitle="[^"<>]+")?\s?>|<\/a>)$/i,
 			patternImage: /^(<img\ssrc="https?:(\/\/[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)]+)"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i
@@ -3292,11 +3292,18 @@ Showdown.converter = function () {
 
 	var _DoItalicsAndBold = function (text) {
 
-		// <strong> must go first:
-		text = text.replace(/(\*\*|__)(?=\S)([^\r]*?\S[*_]*)\1/g, "<strong>$2</strong>");
+		if (true) { //eventually this will be replaced with a runtime option. But for now we're forcing it.
+			text = text.replace(/(\*\*)(?=\S)([^\r]*?\S[*]*)\1/g, "<strong>$2</strong>");
+			text = text.replace(/(\w)_(\w)/g, "$1~E95E$2"); // ** GFM **  "~E95E" == escaped "_"
+			text = text.replace(/(\*)(?=\S)([^\r]*?\S)\1/g, "<em>$2</em>");
+			text = text.replace(/(_)(?=\S)([^\r]*?\S)\1/g, "<u>$2</u>");
+		} else {
+			// <strong> must go first:
+			text = text.replace(/(\*\*|__)(?=\S)([^\r]*?\S[*_]*)\1/g, "<strong>$2</strong>");
 
-		text = text.replace(/(\w)_(\w)/g, "$1~E95E$2"); // ** GFM **  "~E95E" == escaped "_"
-		text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g, "<em>$2</em>");
+			text = text.replace(/(\w)_(\w)/g, "$1~E95E$2"); // ** GFM **  "~E95E" == escaped "_"
+			text = text.replace(/(\*|_)(?=\S)([^\r]*?\S)\1/g, "<em>$2</em>");
+		}
 
 		return text;
 	};
