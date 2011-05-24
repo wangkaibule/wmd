@@ -390,108 +390,123 @@ WMDEditor.Commands['code'] = {
 }
 
 
+(function () { //OL AND UL BUTTON SCOPE
+	
+	var doList = function (chunk, postProcessing, isNumberedList, useDefaultText) {
 
+		// These are identical except at the very beginning and end.
+		// Should probably use the regex extension function to make this clearer.
+		var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
+		var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
 
+		// The default bullet is a dash but others are possible.
+		// This has nothing to do with the particular HTML bullet,
+		// it's just a markdown bullet.
+		var bullet = "-";
 
-WMDEditor.Commands.doList = function (chunk, postProcessing, isNumberedList, useDefaultText) {
+		// The number in a numbered list.
+		var num = 1;
 
-	// These are identical except at the very beginning and end.
-	// Should probably use the regex extension function to make this clearer.
-	var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
-	var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
+		// Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
+		var getItemPrefix = function () {
+			var prefix;
+			if (isNumberedList) {
+				prefix = " " + num + ". ";
+				num++;
+			}
+			else {
+				prefix = " " + bullet + " ";
+			}
+			return prefix;
+		};
 
-	// The default bullet is a dash but others are possible.
-	// This has nothing to do with the particular HTML bullet,
-	// it's just a markdown bullet.
-	var bullet = "-";
+		// Fixes the prefixes of the other list items.
+		var getPrefixedItem = function (itemText) {
 
-	// The number in a numbered list.
-	var num = 1;
+			// The numbering flag is unset when called by autoindent.
+			if (isNumberedList === undefined) {
+				isNumberedList = /^\s*\d/.test(itemText);
+			}
 
-	// Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
-	var getItemPrefix = function () {
-		var prefix;
-		if (isNumberedList) {
-			prefix = " " + num + ". ";
-			num++;
+			// Renumber/bullet the list element.
+			itemText = itemText.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm, function (_) {
+				return getItemPrefix();
+			});
+
+			return itemText;
+		};
+
+		chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
+
+		if (chunk.before && !/\n$/.test(chunk.before) && !/^\n/.test(chunk.startTag)) {
+			chunk.before += chunk.startTag;
+			chunk.startTag = "";
 		}
-		else {
-			prefix = " " + bullet + " ";
+
+		if (chunk.startTag) {
+
+			var hasDigits = /\d+[.]/.test(chunk.startTag);
+			chunk.startTag = "";
+			chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
+			chunk.unwrap();
+			chunk.addBlankLines();
+
+			if (hasDigits) {
+				// Have to renumber the bullet points if this is a numbered list.
+				chunk.after = chunk.after.replace(nextItemsRegex, getPrefixedItem);
+			}
+			if (isNumberedList == hasDigits) {
+				return;
+			}
 		}
-		return prefix;
-	};
 
-	// Fixes the prefixes of the other list items.
-	var getPrefixedItem = function (itemText) {
+		var nLinesBefore = 1;
 
-		// The numbering flag is unset when called by autoindent.
-		if (isNumberedList === undefined) {
-			isNumberedList = /^\s*\d/.test(itemText);
-		}
-
-		// Renumber/bullet the list element.
-		itemText = itemText.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm, function (_) {
-			return getItemPrefix();
+		chunk.before = chunk.before.replace(previousItemsRegex, function (itemText) {
+			if (/^\s*([*+-])/.test(itemText)) {
+				bullet = re.$1;
+			}
+			nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+			return getPrefixedItem(itemText);
 		});
 
-		return itemText;
+		if (!chunk.selection) {
+			chunk.selection = useDefaultText ? "List item" : " ";
+		}
+
+		var prefix = getItemPrefix();
+
+		var nLinesAfter = 1;
+
+		chunk.after = chunk.after.replace(nextItemsRegex, function (itemText) {
+			nLinesAfter = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+			return getPrefixedItem(itemText);
+		});
+
+		chunk.trimWhitespace(true);
+		chunk.addBlankLines(nLinesBefore, nLinesAfter, true);
+		chunk.startTag = prefix;
+		var spaces = prefix.replace(/./g, " ");
+		chunk.wrap(wmd_options.lineLength - spaces.length);
+		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
+
 	};
-
-	chunk.findTags(/(\n|^)*[ ]{0,3}([*+-]|\d+[.])\s+/, null);
-
-	if (chunk.before && !/\n$/.test(chunk.before) && !/^\n/.test(chunk.startTag)) {
-		chunk.before += chunk.startTag;
-		chunk.startTag = "";
+	
+	WMDEditor.Commands['ol'] = {
+		buttonClass : 'wmd-olist-button',
+		buttonTitle : 'Numbered List <ol> Ctrl+O',
+		shortcut	: 'o',
+		action		: function (postProcessing, useDefaultText) {return doList(this, postProcessing, true, useDefaultText);}
 	}
 
-	if (chunk.startTag) {
-
-		var hasDigits = /\d+[.]/.test(chunk.startTag);
-		chunk.startTag = "";
-		chunk.selection = chunk.selection.replace(/\n[ ]{4}/g, "\n");
-		chunk.unwrap();
-		chunk.addBlankLines();
-
-		if (hasDigits) {
-			// Have to renumber the bullet points if this is a numbered list.
-			chunk.after = chunk.after.replace(nextItemsRegex, getPrefixedItem);
-		}
-		if (isNumberedList == hasDigits) {
-			return;
-		}
+	WMDEditor.Commands['ul'] = {
+		buttonClass : 'wmd-ulist-button',
+		buttonTitle : 'Bulleted List <ul> Ctrl+U',
+		shortcut	: 'u',
+		action		: function (postProcessing, useDefaultText) {return doList(this, postProcessing, false, useDefaultText);}
 	}
-
-	var nLinesBefore = 1;
-
-	chunk.before = chunk.before.replace(previousItemsRegex, function (itemText) {
-		if (/^\s*([*+-])/.test(itemText)) {
-			bullet = re.$1;
-		}
-		nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
-		return getPrefixedItem(itemText);
-	});
-
-	if (!chunk.selection) {
-		chunk.selection = useDefaultText ? "List item" : " ";
-	}
-
-	var prefix = getItemPrefix();
-
-	var nLinesAfter = 1;
-
-	chunk.after = chunk.after.replace(nextItemsRegex, function (itemText) {
-		nLinesAfter = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
-		return getPrefixedItem(itemText);
-	});
-
-	chunk.trimWhitespace(true);
-	chunk.addBlankLines(nLinesBefore, nLinesAfter, true);
-	chunk.startTag = prefix;
-	var spaces = prefix.replace(/./g, " ");
-	chunk.wrap(wmd_options.lineLength - spaces.length);
-	chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
-
-};
+	
+})();
 
 WMDEditor.Commands.doHeading = function (chunk, postProcessing, useDefaultText) {
 
