@@ -3,6 +3,7 @@
 // after: contains all the text in the input box AFTER the selection.
 var Chunks = function () {};
 
+
 // startRegex: a regular expression to find the start tag
 // endRegex: a regular expresssion to find the end tag
 Chunks.prototype.findTags = function (startRegex, endRegex) {
@@ -126,4 +127,27 @@ Chunks.prototype.addBlankLines = function (nLinesBefore, nLinesAfter, findExtraN
 
 		this.after = this.after.replace(new re(regexText, ""), replacementText);
 	}
+};
+
+Chunks.prototype.prefixes = "(?:\\s{4,}|\\s*>|\\s*-\\s+|\\s*\\d+\\.|=|\\+|-|_|\\*|#|\\s*\\[[^\n]]+\\]:)";
+
+Chunks.prototype.wrap = function (len) {
+	this.unwrap();
+	var regex = new re("(.{1," + len + "})( +|$\\n?)", "gm");
+	var prefixes = this.prefixes;
+
+	this.selection = this.selection.replace(regex, function (line, marked) {
+		if (new re("^" + prefixes, "").test(line)) {
+			return line;
+		}
+		return marked + "\n";
+	});
+
+	this.selection = this.selection.replace(/\s+$/, "");
+};
+
+Chunks.prototype.unwrap = function () {
+	var prefixes = this.prefixes;
+	var txt = new re("([^\\n])\\n(?!(\\n|" + prefixes + "))", "g");
+	this.selection = this.selection.replace(txt, "$1 $2");
 };

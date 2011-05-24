@@ -1,5 +1,5 @@
 
-WMD=src/header.js src/wmd.core.js src/wmd.defaults.js src/wmd.util.js src/wmd.InputPoller.js src/footer.js
+WMD=src/header.js src/wmd.core.js src/wmd.defaults.js src/wmd.util.js src/wmd.PreviewManager.js src/wmd.InputPoller.js src/wmd.Commands.js src/footer.js
 JSFILES=wmd.js showdown.js
 
 all: wmd.js wmd.combined.js wmd.combined.min.js
