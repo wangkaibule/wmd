@@ -1,58 +1,64 @@
 
-WMDEditor.Commands.doBold = function (chunk, postProcessing, useDefaultText) {
-	return WMDEditor.Commands.doBorI(chunk, 2, "strong text");
-};
+(function () {
+	// chunk: The selected region that will be enclosed with */**
+	// nStars: 1 for italics, 2 for bold
+	// insertText: If you just click the button without highlighting text, this gets inserted
+	var doBoldOrItalic = function (chunk, nStars, insertText) {
 
-WMDEditor.Commands.doItalic = function (chunk, postProcessing, useDefaultText) {
-	return WMDEditor.Commands.doBorI(chunk, 1, "emphasized text");
-};
+		// Get rid of whitespace and fixup newlines.
+		chunk.trimWhitespace();
+		chunk.selection = chunk.selection.replace(/\n{2,}/g, "\n");
 
-// chunk: The selected region that will be enclosed with */**
-// nStars: 1 for italics, 2 for bold
-// insertText: If you just click the button without highlighting text, this gets inserted
-WMDEditor.Commands.doBorI = function (chunk, nStars, insertText) {
+		// Look for stars before and after.  Is the chunk already marked up?
+		var starsBefore = chunk.before.match(/(\**$)/)[1];
+		var starsAfter = chunk.after.match(/(^\**)/)[1];
 
-	// Get rid of whitespace and fixup newlines.
-	chunk.trimWhitespace();
-	chunk.selection = chunk.selection.replace(/\n{2,}/g, "\n");
+		var prevStars = Math.min(starsBefore.length, starsAfter.length);
 
-	// Look for stars before and after.  Is the chunk already marked up?
-	chunk.before.search(/(\**$)/);
-	var starsBefore = re.$1;
+		// Remove stars if we have to since the button acts as a toggle.
+		if ((prevStars >= nStars) && (prevStars != 2 || nStars != 1)) {
+			chunk.before = chunk.before.replace(RegExp("[*]{" + nStars + "}$", ""), "");
+			chunk.after = chunk.after.replace(RegExp("^[*]{" + nStars + "}", ""), "");
+		}
+		else if (!chunk.selection && starsAfter) {
+			// It's not really clear why this code is necessary.  It just moves
+			// some arbitrary stuff around.
+			chunk.before = chunk.before.replace(/(\s?)$/, "");
+			var whitespace = RegExp.$1;
+			chunk.before = chunk.before + starsAfter + whitespace;
+		}
+		else {
 
-	chunk.after.search(/(^\**)/);
-	var starsAfter = re.$1;
+			// In most cases, if you don't have any selected text and click the button
+			// you'll get a selected, marked up region with the default text inserted.
+			if (!chunk.selection && !starsAfter) chunk.selection = insertText;
 
-	var prevStars = Math.min(starsBefore.length, starsAfter.length);
-
-	// Remove stars if we have to since the button acts as a toggle.
-	if ((prevStars >= nStars) && (prevStars != 2 || nStars != 1)) {
-		chunk.before = chunk.before.replace(re("[*]{" + nStars + "}$", ""), "");
-		chunk.after = chunk.after.replace(re("^[*]{" + nStars + "}", ""), "");
-	}
-	else if (!chunk.selection && starsAfter) {
-		// It's not really clear why this code is necessary.  It just moves
-		// some arbitrary stuff around.
-		chunk.before = chunk.before.replace(/(\s?)$/, "");
-		var whitespace = re.$1;
-		chunk.before = chunk.before + starsAfter + whitespace;
-	}
-	else {
-
-		// In most cases, if you don't have any selected text and click the button
-		// you'll get a selected, marked up region with the default text inserted.
-		if (!chunk.selection && !starsAfter) {
-			chunk.selection = insertText;
+			// Add the true markup.
+			var markup = nStars <= 1 ? "*" : "**"; // shouldn't the test be = ?
+			chunk.before = chunk.before + markup;
+			chunk.after = markup + chunk.after;
 		}
 
-		// Add the true markup.
-		var markup = nStars <= 1 ? "*" : "**"; // shouldn't the test be = ?
-		chunk.before = chunk.before + markup;
-		chunk.after = markup + chunk.after;
+		return;
+	};
+
+
+	WMDEditor.Commands['bold'] = {
+		buttonClass : 'wmd-bold-button',
+		buttonTitle : 'Strong <strong> Ctrl+B',
+		shortcut	: 'b',
+		action		: function () {doBoldOrItalic(this,2, 'Bold Text');}
 	}
 
-	return;
-};
+	WMDEditor.Commands['italic'] = {
+		buttonClass : 'wmd-italic-button',
+		buttonTitle : 'Emphasis <em> Ctrl+I',
+		shortcut	: 'i',
+		action		: function () {doBoldOrItalic(this,2, 'Italic Text');}
+	}
+
+})();
+
 
 WMDEditor.Commands.stripLinkDefs = function (text, defsToAdd) {
 
