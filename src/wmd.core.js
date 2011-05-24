@@ -1,32 +1,24 @@
 WMDEditor = function (options) {
 	this.options = util.extend({}, WMDEditor.defaults, options || {});
 	
-	
-	
+	this.panels = {
+		toolbar: (typeof this.options.toolbar == 'string') ? document.getElementById(this.options.toolbar) : this.options.toolbar,
+		preview: (typeof this.options.preview == 'string') ? document.getElementById(this.options.preview) : this.options.preview,
+		output: (typeof this.options.output == 'string') ? document.getElementById(this.options.output) : this.options.output,
+		input: (typeof this.options.input == 'string') ? document.getElementById(this.options.input) : this.options.input
+	};
+		
 	wmdBase(this, this.options);
 
-	this.startEditor();
+	var previewMgr = new PreviewManager(this);
+	var edit = new this.editor(this.previewMgr.refresh);
+		previewMgr.refresh(true);
+
 };
+
 window.WMDEditor = WMDEditor;
 
 
-WMDEditor.prototype = {
-	getPanels: function () {
-		return {
-			buttonBar: (typeof this.options.button_bar == 'string') ? document.getElementById(this.options.button_bar) : this.options.button_bar,
-			preview: (typeof this.options.preview == 'string') ? document.getElementById(this.options.preview) : this.options.preview,
-			output: (typeof this.options.output == 'string') ? document.getElementById(this.options.output) : this.options.output,
-			input: (typeof this.options.input == 'string') ? document.getElementById(this.options.input) : this.options.input
-		};
-	},
-
-	startEditor: function () {
-		this.panels = this.getPanels();
-		this.previewMgr = new PreviewManager(this);
-		edit = new this.editor(this.previewMgr.refresh);
-		this.previewMgr.refresh(true);
-	}
-};
 
 
 
