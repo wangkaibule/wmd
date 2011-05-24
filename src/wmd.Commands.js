@@ -33,7 +33,6 @@ WMDEditor.Commands.doBorI = function (chunk, nStars, insertText) {
 	else if (!chunk.selection && starsAfter) {
 		// It's not really clear why this code is necessary.  It just moves
 		// some arbitrary stuff around.
-		chunk.after = chunk.after.replace(/^([*_]*)/, "");
 		chunk.before = chunk.before.replace(/(\s?)$/, "");
 		var whitespace = re.$1;
 		chunk.before = chunk.before + starsAfter + whitespace;
