@@ -190,14 +190,14 @@
 		buttonClass : 'wmd-link-button',
 		buttonTitle : 'Hyperlink <a> Ctrl+L',
 		shortcut	: 'l',
-		action		: function (chunk, postProcessing, useDefaultText) {return doLinkOrImage(chunk, postProcessing, false);}
+		action		: function (postProcessing, useDefaultText) {return doLinkOrImage(this, postProcessing, false);}
 	}
 
 	WMDEditor.Commands['image'] = {
 		buttonClass : 'wmd-image-button',
 		buttonTitle : 'Image <img> Ctrl+G',
 		shortcut	: 'g',
-		action		: function (chunk, postProcessing, useDefaultText) {return doLinkOrImage(chunk, postProcessing, true);}
+		action		: function (postProcessing, useDefaultText) {return doLinkOrImage(this, postProcessing, true);}
 	}
 	
 
