@@ -20,7 +20,7 @@ var UndoManager = function (wmd, textarea, pastePollInterval, callback) { // {{{
 			}
 		}
 
-		if (!browser.isIE || mode != "moving") {
+		if (!util.isIE || mode != "moving") {
 			timer = window.setTimeout(refreshState, 1);
 		}
 		else {
@@ -206,7 +206,7 @@ var UndoManager = function (wmd, textarea, pastePollInterval, callback) { // {{{
 		});
 
 		var handlePaste = function () {
-			if (browser.isIE || (inputStateObj && inputStateObj.text != textarea.value)) {
+			if (util.isIE || (inputStateObj && inputStateObj.text != textarea.value)) {
 				if (timer == undefined) {
 					mode = "paste";
 					saveState();

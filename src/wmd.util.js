@@ -1,4 +1,9 @@
 var util = {
+	isIE : /msie/.test(nav.userAgent.toLowerCase()),
+	isIE_5or6 : /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase()),
+	isOpera : /opera/.test(nav.userAgent.toLowerCase()),
+	isKonqueror : /konqueror/.test(nav.userAgent.toLowerCase())
+
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
 	isVisible: function (elem) {
@@ -160,10 +165,10 @@ var util = {
 			// so we make the whole window transparent.
 			//
 			// Is this necessary on modern konqueror browsers?
-			if (browser.isKonqueror) {
+			if (util.isKonqueror) {
 				style.backgroundColor = "transparent";
 			}
-			else if (browser.isIE) {
+			else if (util.isIE) {
 				style.filter = "alpha(opacity=50)";
 			}
 			else {
@@ -173,7 +178,7 @@ var util = {
 			var pageSize = position.getPageSize();
 			style.height = pageSize[1] + "px";
 
-			if (browser.isIE) {
+			if (util.isIE) {
 				style.left = document.documentElement.scrollLeft;
 				style.width = document.documentElement.clientWidth;
 			}
@@ -310,7 +315,7 @@ var util = {
 			dialog.style.top = "50%";
 			dialog.style.left = "50%";
 			dialog.style.display = "block";
-			if (browser.isIE_5or6) {
+			if (util.isIE_5or6) {
 				dialog.style.position = "absolute";
 				dialog.style.top = document.documentElement.scrollTop + 200 + "px";
 				dialog.style.left = "50%";

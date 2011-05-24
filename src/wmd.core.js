@@ -34,18 +34,7 @@
 	var re = window.RegExp;
 	var nav = window.navigator;
 
-	function get_browser() {
-		var b = {};
-		b.isIE = /msie/.test(nav.userAgent.toLowerCase());
-		b.isIE_5or6 = /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase());
-		b.isIE_7plus = b.isIE && !b.isIE_5or6;
-		b.isOpera = /opera/.test(nav.userAgent.toLowerCase());
-		b.isKonqueror = /konqueror/.test(nav.userAgent.toLowerCase());
-		return b;
-	}
 
-	// Used to work around some browser bugs where we can't use feature testing.
-	var browser = get_browser();
 
 	var wmdBase = function (wmd, wmd_options) { // {{{
 		// Some namespaces.

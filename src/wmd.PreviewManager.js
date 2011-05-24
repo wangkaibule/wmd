@@ -185,7 +185,7 @@ var PreviewManager = function (wmd) { // {{{
 
 		var fullTop = position.getTop(wmd.panels.input) - getDocScrollTop();
 
-		if (browser.isIE) {
+		if (util.isIE) {
 			window.setTimeout(function () {
 				window.scrollBy(0, fullTop - emptyTop);
 			}, 0);

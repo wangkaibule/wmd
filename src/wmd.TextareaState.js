@@ -27,7 +27,7 @@ var TextareaState = function (textarea, wmd) {
 			return;
 		}
 
-		if (inputArea.selectionStart !== undefined && !browser.isOpera) {
+		if (inputArea.selectionStart !== undefined && !util.isOpera) {
 
 			inputArea.focus();
 			inputArea.selectionStart = stateObj.start;
@@ -131,7 +131,7 @@ var TextareaState = function (textarea, wmd) {
 		chunk.before = chunk.before + chunk.startTag;
 		chunk.after = chunk.endTag + chunk.after;
 
-		if (browser.isOpera) {
+		if (util.isOpera) {
 			chunk.before = chunk.before.replace(/\n/g, "\r\n");
 			chunk.selection = chunk.selection.replace(/\n/g, "\r\n");
 			chunk.after = chunk.after.replace(/\n/g, "\r\n");
