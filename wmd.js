@@ -124,7 +124,7 @@
 		},
 
 		// Converts \r\n and \r to \n.
-		fixEolChars: function (text) {
+		fixLineEndings: function (text) {
 			text = text.replace(/\r\n/g, "\n");
 			text = text.replace(/\r/g, "\n");
 			return text;
@@ -575,7 +575,7 @@
 			}
 			else if (document.selection) {
 
-				stateObj.text = util.fixEolChars(inputArea.value);
+				stateObj.text = util.fixLineEndings(inputArea.value);
 
 				// IE loses the selection in the textarea when buttons are
 				// clicked.  On IE we cache the selection and set a flag
@@ -589,11 +589,11 @@
 					range = document.selection.createRange();
 				}
 
-				var fixedRange = util.fixEolChars(range.text);
+				var fixedRange = util.fixLineEndings(range.text);
 				var marker = "\x07";
 				var markedRange = marker + fixedRange + marker;
 				range.text = markedRange;
-				var inputText = util.fixEolChars(inputArea.value);
+				var inputText = util.fixLineEndings(inputArea.value);
 
 				range.moveStart("character", -markedRange.length);
 				range.text = fixedRange;
@@ -601,7 +601,7 @@
 				stateObj.start = inputText.indexOf(marker);
 				stateObj.end = inputText.lastIndexOf(marker) - marker.length;
 
-				var len = stateObj.text.length - util.fixEolChars(inputArea.value).length;
+				var len = stateObj.text.length - util.fixLineEndings(inputArea.value).length;
 
 				if (len) {
 					range.moveStart("character", -fixedRange.length);
@@ -631,11 +631,11 @@
 
 			var chunk = new Chunks();
 
-			chunk.before = util.fixEolChars(stateObj.text.substring(0, stateObj.start));
+			chunk.before = util.fixLineEndings(stateObj.text.substring(0, stateObj.start));
 			chunk.startTag = "";
-			chunk.selection = util.fixEolChars(stateObj.text.substring(stateObj.start, stateObj.end));
+			chunk.selection = util.fixLineEndings(stateObj.text.substring(stateObj.start, stateObj.end));
 			chunk.endTag = "";
-			chunk.after = util.fixEolChars(stateObj.text.substring(stateObj.end));
+			chunk.after = util.fixLineEndings(stateObj.text.substring(stateObj.end));
 			chunk.scrollTop = stateObj.scrollTop;
 
 			return chunk;
