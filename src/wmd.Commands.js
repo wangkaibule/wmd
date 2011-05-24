@@ -237,144 +237,161 @@ WMDEditor.Commands.doAutoindent = function (chunk, postProcessing, useDefaultTex
 	}
 };
 
-WMDEditor.Commands.doBlockquote = function (chunk, postProcessing, useDefaultText) {
 
-	chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/, function (totalMatch, newlinesBefore, text, newlinesAfter) {
-		chunk.before += newlinesBefore;
-		chunk.after = newlinesAfter + chunk.after;
-		return text;
-	});
-
-	chunk.before = chunk.before.replace(/(>[ \t]*)$/, function (totalMatch, blankLine) {
-		chunk.selection = blankLine + chunk.selection;
-		return "";
-	});
-
-	var defaultText = useDefaultText ? "Blockquote" : "";
-	chunk.selection = chunk.selection.replace(/^(\s|>)+$/, "");
-	chunk.selection = chunk.selection || defaultText;
-
-	if (chunk.before) {
-		chunk.before = chunk.before.replace(/\n?$/, "\n");
-	}
-	if (chunk.after) {
-		chunk.after = chunk.after.replace(/^\n?/, "\n");
-	}
-
-	chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/, function (totalMatch) {
-		chunk.startTag = totalMatch;
-		return "";
-	});
-
-	chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/, function (totalMatch) {
-		chunk.endTag = totalMatch;
-		return "";
-	});
-
-	var replaceBlanksInTags = function (useBracket) {
-
-		var replacement = useBracket ? "> " : "";
-
-		if (chunk.startTag) {
-			chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/, function (totalMatch, markdown) {
-				return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
-			});
-		}
-		if (chunk.endTag) {
-			chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/, function (totalMatch, markdown) {
-				return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
-			});
-		}
-	};
-
-	if (/^(?![ ]{0,3}>)/m.test(chunk.selection)) {
-		chunk.wrap(wmd_options.lineLength - 2);
-		chunk.selection = chunk.selection.replace(/^/gm, "> ");
-		replaceBlanksInTags(true);
-		chunk.addBlankLines();
-	}
-	else {
-		chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
-		chunk.unwrap();
-		replaceBlanksInTags(false);
-
-		if (!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag) {
-			chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
-		}
-
-		if (!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag) {
-			chunk.endTag = chunk.endTag.replace(/^\n{0,2}/, "\n\n");
-		}
-	}
-
-	if (!/\n/.test(chunk.selection)) {
-		chunk.selection = chunk.selection.replace(/^(> *)/, function (wholeMatch, blanks) {
-			chunk.startTag += blanks;
-			return "";
+WMDEditor.Commands['blockquote'] = {
+	buttonClass : 'wmd-quote-button',
+	buttonTitle : 'Blockquote <blockquote> Ctrl+Q',
+	shortcut	: 'q',
+	action		: function (postProcessing, useDefaultText) {
+		var chunk = this;
+		chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/, function (totalMatch, newlinesBefore, text, newlinesAfter) {
+			chunk.before += newlinesBefore;
+			chunk.after = newlinesAfter + chunk.after;
+			return text;
 		});
-	}
-};
 
-WMDEditor.Commands.doCode = function (chunk, postProcessing, useDefaultText) {
-
-	var hasTextBefore = /\S[ ]*$/.test(chunk.before);
-	var hasTextAfter = /^[ ]*\S/.test(chunk.after);
-
-	// Use 'four space' markdown if the selection is on its own
-	// line or is multiline.
-	if ((!hasTextAfter && !hasTextBefore) || /\n/.test(chunk.selection)) {
-
-		chunk.before = chunk.before.replace(/[ ]{4}$/, function (totalMatch) {
-			chunk.selection = totalMatch + chunk.selection;
+		chunk.before = chunk.before.replace(/(>[ \t]*)$/, function (totalMatch, blankLine) {
+			chunk.selection = blankLine + chunk.selection;
 			return "";
 		});
 
-		var nLinesBefore = 1;
-		var nLinesAfter = 1;
+		var defaultText = useDefaultText ? "Blockquote" : "";
+		chunk.selection = chunk.selection.replace(/^(\s|>)+$/, "");
+		chunk.selection = chunk.selection || defaultText;
 
-
-		if (/\n(\t|[ ]{4,}).*\n$/.test(chunk.before) || chunk.after === "") {
-			nLinesBefore = 0;
+		if (chunk.before) {
+			chunk.before = chunk.before.replace(/\n?$/, "\n");
 		}
-		if (/^\n(\t|[ ]{4,})/.test(chunk.after)) {
-			nLinesAfter = 0; // This needs to happen on line 1
+		if (chunk.after) {
+			chunk.after = chunk.after.replace(/^\n?/, "\n");
 		}
 
-		chunk.addBlankLines(nLinesBefore, nLinesAfter);
+		chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/, function (totalMatch) {
+			chunk.startTag = totalMatch;
+			return "";
+		});
 
-		if (!chunk.selection) {
-			chunk.startTag = "    ";
-			chunk.selection = useDefaultText ? "enter code here" : "";
+		chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/, function (totalMatch) {
+			chunk.endTag = totalMatch;
+			return "";
+		});
+
+		var replaceBlanksInTags = function (useBracket) {
+
+			var replacement = useBracket ? "> " : "";
+
+			if (chunk.startTag) {
+				chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/, function (totalMatch, markdown) {
+					return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+				});
+			}
+			if (chunk.endTag) {
+				chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/, function (totalMatch, markdown) {
+					return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+				});
+			}
+		};
+
+		if (/^(?![ ]{0,3}>)/m.test(chunk.selection)) {
+			chunk.wrap(wmd_options.lineLength - 2);
+			chunk.selection = chunk.selection.replace(/^/gm, "> ");
+			replaceBlanksInTags(true);
+			chunk.addBlankLines();
 		}
 		else {
-			if (/^[ ]{0,3}\S/m.test(chunk.selection)) {
-				chunk.selection = chunk.selection.replace(/^/gm, "    ");
+			chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
+			chunk.unwrap();
+			replaceBlanksInTags(false);
+
+			if (!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag) {
+				chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
 			}
-			else {
-				chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+
+			if (!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag) {
+				chunk.endTag = chunk.endTag.replace(/^\n{0,2}/, "\n\n");
 			}
 		}
-	}
-	else {
-		// Use backticks (`) to delimit the code block.
-		chunk.trimWhitespace();
-		chunk.findTags(/`/, /`/);
 
-		if (!chunk.startTag && !chunk.endTag) {
-			chunk.startTag = chunk.endTag = "`";
+		if (!/\n/.test(chunk.selection)) {
+			chunk.selection = chunk.selection.replace(/^(> *)/, function (wholeMatch, blanks) {
+				chunk.startTag += blanks;
+				return "";
+			});
+		}
+	}
+}
+
+
+
+WMDEditor.Commands['code'] = {
+	buttonClass : 'wmd-code-button',
+	buttonTitle : 'Code Sample <pre><code> Ctrl+K',
+	shortcut	: 'k',
+	action		: function (postProcessing, useDefaultText) {
+		var chunk = this;
+		var hasTextBefore = /\S[ ]*$/.test(chunk.before);
+		var hasTextAfter = /^[ ]*\S/.test(chunk.after);
+
+		// Use 'four space' markdown if the selection is on its own
+		// line or is multiline.
+		if ((!hasTextAfter && !hasTextBefore) || /\n/.test(chunk.selection)) {
+
+			chunk.before = chunk.before.replace(/[ ]{4}$/, function (totalMatch) {
+				chunk.selection = totalMatch + chunk.selection;
+				return "";
+			});
+
+			var nLinesBefore = 1;
+			var nLinesAfter = 1;
+
+
+			if (/\n(\t|[ ]{4,}).*\n$/.test(chunk.before) || chunk.after === "") {
+				nLinesBefore = 0;
+			}
+			if (/^\n(\t|[ ]{4,})/.test(chunk.after)) {
+				nLinesAfter = 0; // This needs to happen on line 1
+			}
+
+			chunk.addBlankLines(nLinesBefore, nLinesAfter);
+
 			if (!chunk.selection) {
+				chunk.startTag = "    ";
 				chunk.selection = useDefaultText ? "enter code here" : "";
 			}
-		}
-		else if (chunk.endTag && !chunk.startTag) {
-			chunk.before += chunk.endTag;
-			chunk.endTag = "";
+			else {
+				if (/^[ ]{0,3}\S/m.test(chunk.selection)) {
+					chunk.selection = chunk.selection.replace(/^/gm, "    ");
+				}
+				else {
+					chunk.selection = chunk.selection.replace(/^[ ]{4}/gm, "");
+				}
+			}
 		}
 		else {
-			chunk.startTag = chunk.endTag = "";
+			// Use backticks (`) to delimit the code block.
+			chunk.trimWhitespace();
+			chunk.findTags(/`/, /`/);
+
+			if (!chunk.startTag && !chunk.endTag) {
+				chunk.startTag = chunk.endTag = "`";
+				if (!chunk.selection) {
+					chunk.selection = useDefaultText ? "enter code here" : "";
+				}
+			}
+			else if (chunk.endTag && !chunk.startTag) {
+				chunk.before += chunk.endTag;
+				chunk.endTag = "";
+			}
+			else {
+				chunk.startTag = chunk.endTag = "";
+			}
 		}
 	}
-};
+}
+
+
+
+
 
 WMDEditor.Commands.doList = function (chunk, postProcessing, isNumberedList, useDefaultText) {
 
