@@ -1,5 +1,6 @@
 
-(function () {
+(function () { //BOLD AND ITALIC BUTTON SCOPE
+	
 	// chunk: The selected region that will be enclosed with */**
 	// nStars: 1 for italics, 2 for bold
 	// insertText: If you just click the button without highlighting text, this gets inserted
@@ -60,127 +61,149 @@
 })();
 
 
-WMDEditor.Commands.stripLinkDefs = function (text, defsToAdd) {
+(function () { //LINK AND IMAGE BUTTON SCOPE
+	
 
-	text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm, function (totalMatch, id, link, newlines, title) {
-		defsToAdd[id] = totalMatch.replace(/\s*$/, "");
-		if (newlines) {
-			// Strip the title and return that separately.
-			defsToAdd[id] = totalMatch.replace(/["(](.+?)[")]$/, "");
-			return newlines + title;
-		}
-		return "";
-	});
+	var stripLinkDefs = function (text, defsToAdd) {
 
-	return text;
-};
-
-WMDEditor.Commands.addLinkDef = function (chunk, linkDef) {
-
-	var refNumber = 0; // The current reference number
-	var defsToAdd = {}; //
-	// Start with a clean slate by removing all previous link definitions.
-	chunk.before = WMDEditor.Commands.stripLinkDefs(chunk.before, defsToAdd);
-	chunk.selection = WMDEditor.Commands.stripLinkDefs(chunk.selection, defsToAdd);
-	chunk.after = WMDEditor.Commands.stripLinkDefs(chunk.after, defsToAdd);
-
-	var defs = "";
-	var regex = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
-
-	var addDefNumber = function (def) {
-		refNumber++;
-		def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  [" + refNumber + "]:");
-		defs += "\n" + def;
-	};
-
-	var getLink = function (wholeMatch, link, id, end) {
-
-		if (defsToAdd[id]) {
-			addDefNumber(defsToAdd[id]);
-			return link + refNumber + end;
-
-		}
-		return wholeMatch;
-	};
-
-	chunk.before = chunk.before.replace(regex, getLink);
-
-	if (linkDef) {
-		addDefNumber(linkDef);
-	}
-	else {
-		chunk.selection = chunk.selection.replace(regex, getLink);
-	}
-
-	var refOut = refNumber;
-
-	chunk.after = chunk.after.replace(regex, getLink);
-
-	if (chunk.after) {
-		chunk.after = chunk.after.replace(/\n*$/, "");
-	}
-	if (!chunk.after) {
-		chunk.selection = chunk.selection.replace(/\n*$/, "");
-	}
-
-	chunk.after += "\n\n" + defs;
-
-	return refOut;
-};
-
-WMDEditor.Commands.doLinkOrImage = function (chunk, postProcessing, isImage) {
-
-	chunk.trimWhitespace();
-	chunk.findTags(/\s*!?\[/, /\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
-
-	if (chunk.endTag.length > 1) {
-
-		chunk.startTag = chunk.startTag.replace(/!?\[/, "");
-		chunk.endTag = "";
-		WMDEditor.Commands.addLinkDef(chunk, null);
-
-	}
-	else {
-
-		if (/\n\n/.test(chunk.selection)) {
-			WMDEditor.Commands.addLinkDef(chunk, null);
-			return;
-		}
-
-		// The function to be executed when you enter a link and press OK or Cancel.
-		// Marks up the link and adds the ref.
-		var makeLinkMarkdown = function (link) {
-			console.log(link);
-			if (link !== null) {
-
-				chunk.startTag = chunk.endTag = "";
-				var linkDef = " [999]: " + link;
-
-				var num = WMDEditor.Commands.addLinkDef(chunk, linkDef);
-				chunk.startTag = isImage ? "![" : "[";
-				chunk.endTag = "][" + num + "]";
-
-				if (!chunk.selection) {
-					if (isImage) {
-						chunk.selection = "alt text";
-					}
-					else {
-						chunk.selection = "link text";
-					}
-				}
+		text = text.replace(/^[ ]{0,3}\[(\d+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?[ \t]*\n?[ \t]*(?:(\n*)["(](.+?)[")][ \t]*)?(?:\n+|$)/gm, function (totalMatch, id, link, newlines, title) {
+			defsToAdd[id] = totalMatch.replace(/\s*$/, "");
+			if (newlines) {
+				// Strip the title and return that separately.
+				defsToAdd[id] = totalMatch.replace(/["(](.+?)[")]$/, "");
+				return newlines + title;
 			}
-			postProcessing();
+			return "";
+		});
+
+		return text;
+	};
+
+	var addLinkDef = function (chunk, linkDef) {
+
+		var refNumber = 0; // The current reference number
+		var defsToAdd = {}; //
+		// Start with a clean slate by removing all previous link definitions.
+		chunk.before = stripLinkDefs(chunk.before, defsToAdd);
+		chunk.selection = stripLinkDefs(chunk.selection, defsToAdd);
+		chunk.after = stripLinkDefs(chunk.after, defsToAdd);
+
+		var defs = "";
+		var regex = /(\[(?:\[[^\]]*\]|[^\[\]])*\][ ]?(?:\n[ ]*)?\[)(\d+)(\])/g;
+
+		var addDefNumber = function (def) {
+			refNumber++;
+			def = def.replace(/^[ ]{0,3}\[(\d+)\]:/, "  [" + refNumber + "]:");
+			defs += "\n" + def;
 		};
 
-		if (isImage) {
-			util.prompt(wmd_options.imageDialogText, wmd_options.imageDefaultText, makeLinkMarkdown, 'Image');
+		var getLink = function (wholeMatch, link, id, end) {
+
+			if (defsToAdd[id]) {
+				addDefNumber(defsToAdd[id]);
+				return link + refNumber + end;
+
+			}
+			return wholeMatch;
+		};
+
+		chunk.before = chunk.before.replace(regex, getLink);
+
+		if (linkDef) {
+			addDefNumber(linkDef);
 		}
 		else {
-			util.prompt(wmd_options.linkDialogText, wmd_options.linkDefaultText, makeLinkMarkdown, 'Link');
+			chunk.selection = chunk.selection.replace(regex, getLink);
 		}
-		return true;
+
+		var refOut = refNumber;
+
+		chunk.after = chunk.after.replace(regex, getLink);
+
+		if (chunk.after) {
+			chunk.after = chunk.after.replace(/\n*$/, "");
+		}
+		if (!chunk.after) {
+			chunk.selection = chunk.selection.replace(/\n*$/, "");
+		}
+
+		chunk.after += "\n\n" + defs;
+
+		return refOut;
+	};
+
+	var doLinkOrImage = function (chunk, postProcessing, isImage) {
+
+		chunk.trimWhitespace();
+		chunk.findTags(/\s*!?\[/, /\][ ]?(?:\n[ ]*)?(\[.*?\])?/);
+
+		if (chunk.endTag.length > 1) {
+
+			chunk.startTag = chunk.startTag.replace(/!?\[/, "");
+			chunk.endTag = "";
+			WMDEditor.Commands.addLinkDef(chunk, null);
+
+		}
+		else {
+
+			if (/\n\n/.test(chunk.selection)) {
+				WMDEditor.Commands.addLinkDef(chunk, null);
+				return;
+			}
+
+			// The function to be executed when you enter a link and press OK or Cancel.
+			// Marks up the link and adds the ref.
+			var makeLinkMarkdown = function (link) {
+				console.log(link);
+				if (link !== null) {
+
+					chunk.startTag = chunk.endTag = "";
+					var linkDef = " [999]: " + link;
+
+					var num = WMDEditor.Commands.addLinkDef(chunk, linkDef);
+					chunk.startTag = isImage ? "![" : "[";
+					chunk.endTag = "][" + num + "]";
+
+					if (!chunk.selection) {
+						if (isImage) {
+							chunk.selection = "alt text";
+						}
+						else {
+							chunk.selection = "link text";
+						}
+					}
+				}
+				postProcessing();
+			};
+
+			if (isImage) {
+				util.prompt(wmd_options.imageDialogText, wmd_options.imageDefaultText, makeLinkMarkdown, 'Image');
+			}
+			else {
+				util.prompt(wmd_options.linkDialogText, wmd_options.linkDefaultText, makeLinkMarkdown, 'Link');
+			}
+			return true;
+		}
+	};
+	
+	WMDEditor.Commands['link'] = {
+		buttonClass : 'wmd-link-button',
+		buttonTitle : 'Hyperlink <a> Ctrl+L',
+		shortcut	: 'l',
+		action		: function (chunk, postProcessing, useDefaultText) {return doLinkOrImage(chunk, postProcessing, false);}
 	}
-};
+
+	WMDEditor.Commands['image'] = {
+		buttonClass : 'wmd-image-button',
+		buttonTitle : 'Image <img> Ctrl+G',
+		shortcut	: 'g',
+		action		: function (chunk, postProcessing, useDefaultText) {return doLinkOrImage(chunk, postProcessing, true);}
+	}
+	
+
+})();
+
+
 
 // Moves the cursor to the next line and continues lists, quotes and code.
 WMDEditor.Commands.doAutoindent = function (chunk, postProcessing, useDefaultText) {
