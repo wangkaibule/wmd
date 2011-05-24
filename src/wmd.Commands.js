@@ -61,6 +61,11 @@
 })();
 
 
+
+
+
+
+
 (function () { //LINK AND IMAGE BUTTON SCOPE
 	
 
@@ -205,6 +210,9 @@
 
 
 
+
+
+
 // Moves the cursor to the next line and continues lists, quotes and code.
 WMDEditor.Commands.doAutoindent = function (chunk, postProcessing, useDefaultText) {
 	if (!wmd.options.autoFormatting) return;
@@ -236,6 +244,11 @@ WMDEditor.Commands.doAutoindent = function (chunk, postProcessing, useDefaultTex
 		}
 	}
 };
+
+
+
+
+
 
 
 WMDEditor.Commands['blockquote'] = {
@@ -323,6 +336,9 @@ WMDEditor.Commands['blockquote'] = {
 
 
 
+
+
+
 WMDEditor.Commands['code'] = {
 	buttonClass : 'wmd-code-button',
 	buttonTitle : 'Code Sample <pre><code> Ctrl+K',
@@ -388,6 +404,9 @@ WMDEditor.Commands['code'] = {
 		}
 	}
 }
+
+
+
 
 
 (function () { //OL AND UL BUTTON SCOPE
@@ -508,67 +527,85 @@ WMDEditor.Commands['code'] = {
 	
 })();
 
-WMDEditor.Commands.doHeading = function (chunk, postProcessing, useDefaultText) {
 
-	// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
-	chunk.selection = chunk.selection.replace(/\s+/g, " ");
-	chunk.selection = chunk.selection.replace(/(^\s+|\s+$)/g, "");
 
-	// If we clicked the button with no selected text, we just
-	// make a level 2 hash header around some default text.
-	if (!chunk.selection) {
-		chunk.startTag = "## ";
-		chunk.selection = "Heading";
-		chunk.endTag = " ##";
-		return;
-	}
 
-	var headerLevel = 0; // The existing header level of the selected text.
-	// Remove any existing hash heading markdown and save the header level.
-	chunk.findTags(/#+[ ]*/, /[ ]*#+/);
-	if (/#+/.test(chunk.startTag)) {
-		headerLevel = re.lastMatch.length;
-	}
-	chunk.startTag = chunk.endTag = "";
 
-	// Try to get the current header level by looking for - and = in the line
-	// below the selection.
-	chunk.findTags(null, /\s?(-+|=+)/);
-	if (/=+/.test(chunk.endTag)) {
-		headerLevel = 1;
-	}
-	if (/-+/.test(chunk.endTag)) {
-		headerLevel = 2;
-	}
+WMDEditor.Commands['heading'] = {
+	buttonClass : 'wmd-heading-button',
+	buttonTitle : 'Heading <h1>/<h2> Ctrl+H',
+	shortcut	: 'h',
+	action		: function (postProcessing, useDefaultText) {
+		var chunk = this;
+		// Remove leading/trailing whitespace and reduce internal spaces to single spaces.
+		chunk.selection = chunk.selection.replace(/\s+/g, " ");
+		chunk.selection = chunk.selection.replace(/(^\s+|\s+$)/g, "");
 
-	// Skip to the next line so we can create the header markdown.
-	chunk.startTag = chunk.endTag = "";
-	chunk.addBlankLines(1, 1);
-
-	// We make a level 2 header if there is no current header.
-	// If there is a header level, we substract one from the header level.
-	// If it's already a level 1 header, it's removed.
-	var headerLevelToCreate = headerLevel == 0 ? 2 : headerLevel - 1;
-
-	if (headerLevelToCreate > 0) {
-
-		// The button only creates level 1 and 2 underline headers.
-		// Why not have it iterate over hash header levels?  Wouldn't that be easier and cleaner?
-		var headerChar = headerLevelToCreate >= 2 ? "-" : "=";
-		var len = chunk.selection.length;
-		if (len > wmd_options.lineLength) {
-			len = wmd_options.lineLength;
+		// If we clicked the button with no selected text, we just
+		// make a level 2 hash header around some default text.
+		if (!chunk.selection) {
+			chunk.startTag = "## ";
+			chunk.selection = "Heading";
+			chunk.endTag = " ##";
+			return;
 		}
-		chunk.endTag = "\n";
-		while (len--) {
-			chunk.endTag += headerChar;
+
+		var headerLevel = 0; // The existing header level of the selected text.
+		// Remove any existing hash heading markdown and save the header level.
+		chunk.findTags(/#+[ ]*/, /[ ]*#+/);
+		if (/#+/.test(chunk.startTag)) {
+			headerLevel = re.lastMatch.length;
+		}
+		chunk.startTag = chunk.endTag = "";
+
+		// Try to get the current header level by looking for - and = in the line
+		// below the selection.
+		chunk.findTags(null, /\s?(-+|=+)/);
+		if (/=+/.test(chunk.endTag)) {
+			headerLevel = 1;
+		}
+		if (/-+/.test(chunk.endTag)) {
+			headerLevel = 2;
+		}
+
+		// Skip to the next line so we can create the header markdown.
+		chunk.startTag = chunk.endTag = "";
+		chunk.addBlankLines(1, 1);
+
+		// We make a level 2 header if there is no current header.
+		// If there is a header level, we substract one from the header level.
+		// If it's already a level 1 header, it's removed.
+		var headerLevelToCreate = headerLevel == 0 ? 2 : headerLevel - 1;
+
+		if (headerLevelToCreate > 0) {
+
+			// The button only creates level 1 and 2 underline headers.
+			// Why not have it iterate over hash header levels?  Wouldn't that be easier and cleaner?
+			var headerChar = headerLevelToCreate >= 2 ? "-" : "=";
+			var len = chunk.selection.length;
+			if (len > wmd_options.lineLength) {
+				len = wmd_options.lineLength;
+			}
+			chunk.endTag = "\n";
+			while (len--) {
+				chunk.endTag += headerChar;
+			}
 		}
 	}
-};
+}
 
-WMDEditor.Commands.doHorizontalRule = function (chunk, postProcessing, useDefaultText) {
-	chunk.startTag = "----------\n";
-	chunk.selection = "";
-	chunk.addBlankLines(2, 1, true);
-};
+
+
+
+
+WMDEditor.Commands['hr'] = {
+	buttonClass : 'wmd-hr-button',
+	buttonTitle : 'Horizontal Rule <hr> Ctrl+R',
+	shortcut	: 'r',
+	action		: function (postProcessing, useDefaultText) {
+		this.startTag = "----------\n";
+		this.selection = "";
+		this.addBlankLines(2, 1, true);
+	}
+}
 
