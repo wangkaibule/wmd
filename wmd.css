@@ -139,7 +139,7 @@
 .wmd-help-button:hover      {background-position: -240px -40px;}
 .wmd-help-button.disabled   {background-position: -240px -20px;}
 
-.wmd-help-button    {position:absolute;right: 0px; background-position: -240px 0;}
+.wmd-help-button    {position:absolute;top:5px;right: 0px; background-position: -240px 0;}
 
 
 .wmd-prompt-background
