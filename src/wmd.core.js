@@ -1,5 +1,6 @@
 var WMD = function (options) {
 	var opts = this.options = util.extend(true, WMDEditor.defaults, options || {});
+	var self = this;
 	
 	this.panels = {
 		toolbar: util.$(opts.toolbar),
@@ -8,10 +9,24 @@ var WMD = function (options) {
 		input: util.$(opts.input)
 	};
 		
+
+	//IF TOOLBAR EXISTS, POPULATE IT
 	if (this.panels.toolbar) {
+		//create the toolbar row
 		var buttonRow = document.createElement("ul");
 			buttonRow.className = "wmd-button-row";
-			//INSERT CODE HERE FOR BUTTON EVENT LISTENER
+			
+			util.addEvent(buttonRow, 'click', function toolbarClickHandler(event, target) {
+				var buttonName;
+				if (target.tagName === 'LI') {
+					var buttonName = target.getAttribute('data-button-name');
+					if (buttonName) {
+						//is a button item and has a defined button name
+						WMD.publish('toolbar-button', self, [event, target]); //dispatch a click event for that button
+						WMD.publish('toolbar-button:'+buttonName, self, [event, target]);
+					}
+				}
+			});
 
 		this.panels.toolbar.appendChild(buttonRow);
 		
@@ -49,6 +64,8 @@ var WMD = function (options) {
 };
 
 window.WMDEditor = WMD;
+
+WMD.pluginDebug = true;
 
 WMD._buttons = {};
 WMD._shortcutKeys = {};
