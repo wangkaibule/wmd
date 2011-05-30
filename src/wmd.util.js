@@ -401,16 +401,25 @@ var util = {
 	},
 
 	extend: function () {
+		/* Combines multiple objects into one.
+		 * Syntax: util.extend([true], object1, object2, ... objectN)
+		 * If first argument is true, function will merge recursively.
+		 */
+		
+		var deep = (arguments[0]===true),
+			d = {},
+			i = deep?1:0;
+
 		function _update(a, b) {
 			for (var k in b) if (b.hasOwnProperty(k)){
-				if (typeof a[k] === 'object' && typeof b[k] === 'object') _update(a[k], b[k]); //if property is an object or array, merge the contents instead of overwriting
+				//if property is an object or array, merge the contents instead of overwriting, if extend() was called as such
+				if (deep && typeof a[k] === 'object' && typeof b[k] === 'object') _update(a[k], b[k]);
 				else a[k] = b[k];
 			}
 			return a;
 		}
 
-		var d = {};
-		for (var i = 0; i < arguments.length; i++) {
+		for (; i < arguments.length; i++) {
 			_update(d, arguments[i]);
 		}
 		return d;
