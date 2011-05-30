@@ -1,33 +1,28 @@
-// Watches the input textarea, polling at an interval and runs
+// Watches the input/textarea, polling at an interval and runs
 // a callback function if anything has changed.
-var InputPoller = function (textarea, callback, interval) { // {{{
-	var pollerObj = this;
-	var inputArea = textarea;
-
+var InputPoller = function (textarea, callback, interval) {
+	var self = this;
+	
 	// Stored start, end and text.  Used to see if there are changes to the input.
 	var lastStart;
 	var lastEnd;
-	var markdown;
+	var lastContents;
 
-	var killHandle; // Used to cancel monitoring on destruction.
-	// Checks to see if anything has changed in the textarea.
-	// If so, it runs the callback.
-	this.tick = function () {
-
-		if (!util.isVisible(inputArea)) {
-			return;
-		}
-
+	var timeoutHandle; // Used to cancel monitoring on destruction.	
+	
+	var hasChanged = function () {
 		// Update the selection start and end, text.
-		if (inputArea.selectionStart || inputArea.selectionStart === 0) {
-			var start = inputArea.selectionStart;
-			var end = inputArea.selectionEnd;
-			if (start != lastStart || end != lastEnd) {
+		if (textarea.selectionStart || textarea.selectionStart === 0) {
+			//first we test the text selection, since this is faster than a string comparison and it's unlikely the contents changed if the selection hasn't
+			var start = textarea.selectionStart;
+			var end = textarea.selectionEnd;
+			if (start != lastStart || end != lastEnd) {				
 				lastStart = start;
 				lastEnd = end;
-
-				if (markdown != inputArea.value) {
-					markdown = inputArea.value;
+				
+				//selection has changed, now verify the contents changed
+				if (lastContents != textarea.value) {
+					lastContents = textarea.value;
 					return true;
 				}
 			}
@@ -36,26 +31,13 @@ var InputPoller = function (textarea, callback, interval) { // {{{
 	};
 
 
-	var doTickCallback = function () {
+	var checkForUpdate = function () {
+		if (!util.isVisible(textarea)) return; //text area isn't visible, no need to update
 
-		if (!util.isVisible(inputArea)) {
-			return;
-		}
-
-		// If anything has changed, call the function.
-		if (pollerObj.tick()) {
-			callback();
-		}
+		if (hasChanged()) callback();
+		
+		timeoutHandle = window.setInterval(checkForUpdate, interval);
 	};
 
-	// Set how often we poll the textarea for changes.
-	var assignInterval = function () {
-		killHandle = window.setInterval(doTickCallback, interval);
-	};
-
-	this.destroy = function () {
-		window.clearInterval(killHandle);
-	};
-
-	assignInterval();
+	checkForUpdate();
 };
