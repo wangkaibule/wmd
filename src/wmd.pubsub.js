@@ -11,6 +11,7 @@
 	var cache = d.c_ || {}; //check for "c_" cache for unit testing
 	
 	d.publish = function(/* String */ topic, /* Object */ target, /* Array? */ args){
+		if (d.pluginDebug) console.log('Published Event: '+topic, target, args);
 		// summary: 
 		//		Publish some data on a named topic.
 		// topic: String
