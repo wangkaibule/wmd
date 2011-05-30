@@ -65,6 +65,7 @@ var WMD = function (options) {
 
 window.WMDEditor = WMD;
 
+WMD.Version = 3.0;
 WMD.pluginDebug = true;
 
 WMD._buttons = {};
