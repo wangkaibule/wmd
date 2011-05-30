@@ -1,5 +1,5 @@
 WMDEditor = function (options) {
-	this.options = util.extend({}, WMDEditor.defaults, options || {});
+	this.options = util.extend(true, WMDEditor.defaults, options || {});
 	
 	this.panels = {
 		toolbar: util.$(this.options.toolbar),
