@@ -33,8 +33,15 @@ Showdown = {};
 // Wraps all "globals" so that the only thing
 // exposed is makeHtml().
 //
-Showdown.converter = function () {
+Showdown.converter = function (options) {
 
+	var opts = {
+		markright: true,
+		specialChars: true
+		
+	};
+	if (options) for (var k in options) if (options.hasOwnProperty(k)) opts[k] = options[k]; //merge options
+	
 	//
 	// Globals:
 	//
@@ -349,7 +356,7 @@ Showdown.converter = function () {
 		// delimiters in inline links like [this](<url>).
 		text = _DoAutoLinks(text);
 		text = _EncodeAmpsAndAngles(text);
-		text = _ConvertExtraSpecialCharacters(text);
+		if (opts.specialChars) text = _ConvertExtraSpecialCharacters(text);
 		text = _DoItalicsAndBold(text);
 
 		// Do hard breaks:
@@ -900,33 +907,34 @@ Showdown.converter = function () {
 			return m1 + "<code>" + c + "</code>";
 		});
 
+		if (opts.markright) {
+			// Process ^^superscript^^ notation
+			text = text.replace(/(^|[^\\])(\^{2})([^\r]*?[^\^]{2})\2(?!\^)/gm, function (wholeMatch, m1, m2, m3, m4) {
+				var c = m3;
+				c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+				c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+				c = _EncodeCode(c);
+				return m1 + "<sup>" + c + "</sup>";
+			});
 
-		// Process ^^superscript^^ notation
-		text = text.replace(/(^|[^\\])(\^{2})([^\r]*?[^\^]{2})\2(?!\^)/gm, function (wholeMatch, m1, m2, m3, m4) {
-			var c = m3;
-			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
-			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
-			c = _EncodeCode(c);
-			return m1 + "<sup>" + c + "</sup>";
-		});
+			// Process ,,subscript,, notation
+			text = text.replace(/(^|[^\\])(,{2})([^\r]*?[^,]{2})\2(?!,)/gm, function (wholeMatch, m1, m2, m3, m4) {
+				var c = m3;
+				c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+				c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+				c = _EncodeCode(c);
+				return m1 + "<sub>" + c + "</sub>";
+			});
 
-		// Process ,,subscript,, notation
-		text = text.replace(/(^|[^\\])(,{2})([^\r]*?[^,]{2})\2(?!,)/gm, function (wholeMatch, m1, m2, m3, m4) {
-			var c = m3;
-			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
-			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
-			c = _EncodeCode(c);
-			return m1 + "<sub>" + c + "</sub>";
-		});
-
-		// Process ~~strike~~ notation
-		text = text.replace(/(^|[^\\])(~T~T)([^\r]*?[^~]{2})\2(?!~)/gm, function (wholeMatch, m1, m2, m3, m4) {
-			var c = m3;
-			c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
-			c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
-			c = _EncodeCode(c);
-			return m1 + "<strike>" + c + "</strike>";
-		});
+			// Process ~~strike~~ notation
+			text = text.replace(/(^|[^\\])(~T~T)([^\r]*?[^~]{2})\2(?!~)/gm, function (wholeMatch, m1, m2, m3, m4) {
+				var c = m3;
+				c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+				c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+				c = _EncodeCode(c);
+				return m1 + "<strike>" + c + "</strike>";
+			});
+		}
 		
 		return text;
 	};
@@ -978,7 +986,7 @@ Showdown.converter = function () {
 
 	var _DoItalicsAndBold = function (text) {
 
-		if (true) { //eventually this will be replaced with a runtime option. But for now we're forcing it.
+		if (opts.markright) { //Markright replaces _italic_ with _underline_
 			text = text.replace(/(\*\*)(?=\S)([^\r]*?\S[*]*)\1/g, "<strong>$2</strong>");
 			text = text.replace(/(\w)_(\w)/g, "$1~E95E$2"); // ** GFM **  "~E95E" == escaped "_"
 			text = text.replace(/(\*)(?=\S)([^\r]*?\S)\1/g, "<em>$2</em>");
@@ -1063,18 +1071,20 @@ Showdown.converter = function () {
 				grafsOut.push(str);
 			}
 			else if (str.search(/\S/) >= 0) {
-				str = _RunSpanGamut(str);
-				
-				if (str.substr(0,2)==='->') {
-					if (str.substr(-5)==='&lt;-') {
-						p_tag = '<p align="center">';
-						str = str.slice(2,-5);
-					} else {
-						p_tag = '<p align="right">';
-						str = str.substring(2);
+				if (opts.markright) {
+					if (str.substr(0,2)==='->') {
+						if (str.substr(-5)==='&lt;-') {
+							p_tag = '<p align="center">';
+							str = str.slice(2,-5);
+						} else {
+							p_tag = '<p align="right">';
+							str = str.substring(2);
+						}
 					}
 				}
-				
+
+				str = _RunSpanGamut(str);
+								
 				str = str.replace(/\n/g, "<br />"); // ** GFM **
 				str = str.replace(/^([ \t]*)/g, p_tag);
 				str += "</p>";
