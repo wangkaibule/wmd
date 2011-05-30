@@ -1,3 +1,4 @@
+
 WMD.defaults = {
 	version: 3.0,
 	lineLength: 40,

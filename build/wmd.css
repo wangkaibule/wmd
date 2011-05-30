@@ -87,59 +87,58 @@
 
 
 /* sprite button slicing style information */
-.wmd-bold-button            {background-position: 0px   0px;}
-.wmd-bold-button:hover      {background-position: 0px -40px;}
-.wmd-bold-button.disabled   {background-position: 0px -20px;}
+.wmd-button-bold            {background-position: 0px   0px;}
+.wmd-button-bold:hover      {background-position: 0px -40px;}
+.wmd-button-bold.disabled   {background-position: 0px -20px;}
 
-.wmd-italic-button            {background-position: -20px   0px;}
-.wmd-italic-button:hover      {background-position: -20px -40px;}
-.wmd-italic-button.disabled   {background-position: -20px -20px;}
+.wmd-button-italic            {background-position: -20px   0px;}
+.wmd-button-italic:hover      {background-position: -20px -40px;}
+.wmd-button-italic.disabled   {background-position: -20px -20px;}
 
-.wmd-link-button            {background-position: -40px   0px;}
-.wmd-link-button:hover      {background-position: -40px -40px;}
-.wmd-link-button.disabled   {background-position: -40px -20px;}
+.wmd-button-link            {background-position: -40px   0px;}
+.wmd-button-link:hover      {background-position: -40px -40px;}
+.wmd-button-link.disabled   {background-position: -40px -20px;}
 
-.wmd-quote-button            {background-position: -60px   0px;}
-.wmd-quote-button:hover      {background-position: -60px -40px;}
-.wmd-quote-button.disabled   {background-position: -60px -20px;}
+.wmd-button-quote            {background-position: -60px   0px;}
+.wmd-button-quote:hover      {background-position: -60px -40px;}
+.wmd-button-quote.disabled   {background-position: -60px -20px;}
 
-.wmd-code-button            {background-position: -80px   0px;}
-.wmd-code-button:hover      {background-position: -80px -40px;}
-.wmd-code-button.disabled   {background-position: -80px -20px;}
+.wmd-button-code            {background-position: -80px   0px;}
+.wmd-button-code:hover      {background-position: -80px -40px;}
+.wmd-button-code.disabled   {background-position: -80px -20px;}
 
-.wmd-image-button            {background-position: -100px   0px;}
-.wmd-image-button:hover      {background-position: -100px -40px;}
-.wmd-image-button.disabled   {background-position: -100px -20px;}
+.wmd-button-image            {background-position: -100px   0px;}
+.wmd-button-image:hover      {background-position: -100px -40px;}
+.wmd-button-image.disabled   {background-position: -100px -20px;}
 
-.wmd-olist-button            {background-position: -120px   0px;}
-.wmd-olist-button:hover      {background-position: -120px -40px;}
-.wmd-olist-button.disabled   {background-position: -120px -20px;}
+.wmd-button-ol            {background-position: -120px   0px;}
+.wmd-button-ol:hover      {background-position: -120px -40px;}
+.wmd-button-ol.disabled   {background-position: -120px -20px;}
 
-.wmd-ulist-button            {background-position: -140px   0px;}
-.wmd-ulist-button:hover      {background-position: -140px -40px;}
-.wmd-ulist-button.disabled   {background-position: -140px -20px;}
+.wmd-button-ul            {background-position: -140px   0px;}
+.wmd-button-ul:hover      {background-position: -140px -40px;}
+.wmd-button-ul.disabled   {background-position: -140px -20px;}
 
-.wmd-heading-button            {background-position: -160px   0px;}
-.wmd-heading-button:hover      {background-position: -160px -40px;}
-.wmd-heading-button.disabled   {background-position: -160px -20px;}
+.wmd-button-heading            {background-position: -160px   0px;}
+.wmd-button-heading:hover      {background-position: -160px -40px;}
+.wmd-button-heading.disabled   {background-position: -160px -20px;}
 
-.wmd-hr-button            {background-position: -180px   0px;}
-.wmd-hr-button:hover      {background-position: -180px -40px;}
-.wmd-hr-button.disabled   {background-position: -180px -20px;}
+.wmd-button-hr            {background-position: -180px   0px;}
+.wmd-button-hr:hover      {background-position: -180px -40px;}
+.wmd-button-hr.disabled   {background-position: -180px -20px;}
 
-.wmd-undo-button            {background-position: -200px   0px;}
-.wmd-undo-button:hover      {background-position: -200px -40px;}
-.wmd-undo-button.disabled   {background-position: -200px -20px;}
+.wmd-button-undo            {background-position: -200px   0px;}
+.wmd-button-undo:hover      {background-position: -200px -40px;}
+.wmd-button-undo.disabled   {background-position: -200px -20px;}
 
-.wmd-redo-button            {background-position: -220px   0px;}
-.wmd-redo-button:hover      {background-position: -220px -40px;}
-.wmd-redo-button.disabled   {background-position: -220px -20px;}
+.wmd-button-redo            {background-position: -220px   0px;}
+.wmd-button-redo:hover      {background-position: -220px -40px;}
+.wmd-button-redo.disabled   {background-position: -220px -20px;}
 
-.wmd-help-button            {background-position: -240px   0px;}
-.wmd-help-button:hover      {background-position: -240px -40px;}
-.wmd-help-button.disabled   {background-position: -240px -20px;}
-
-.wmd-help-button    {position:absolute;right: 0px; background-position: -240px 0;}
+.wmd-button-help            {background-position: -240px   0px;}
+.wmd-button-help:hover      {background-position: -240px -40px;}
+.wmd-button-help.disabled   {background-position: -240px -20px;}
+.wmd-button-help    {position:absolute;right: 0px; background-position: -240px 0;}
 
 
 .wmd-prompt-background

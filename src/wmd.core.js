@@ -1,14 +1,44 @@
 var WMD = function (options) {
-	this.options = util.extend(true, WMDEditor.defaults, options || {});
+	var opts = this.options = util.extend(true, WMDEditor.defaults, options || {});
 	
 	this.panels = {
-		toolbar: util.$(this.options.toolbar),
-		preview: util.$(this.options.preview),
-		output: util.$(this.options.output),
-		input: util.$(this.options.input)
+		toolbar: util.$(opts.toolbar),
+		preview: util.$(opts.preview),
+		output: util.$(opts.output),
+		input: util.$(opts.input)
 	};
 		
+	if (this.panels.toolbar) {
+		var buttonRow = document.createElement("ul");
+			buttonRow.className = "wmd-button-row";
+			//INSERT CODE HERE FOR BUTTON EVENT LISTENER
 
+		this.panels.toolbar.appendChild(buttonRow);
+		
+		var buttonList = opts.buttons.split(' '),
+			buttonNode;
+		for (var i=0;i<buttonList.length;i++) {
+			var buttonName = buttonList[i],
+				buttonObj;
+			if (!buttonName) {
+				//config string contained a double space, marking a divider
+				buttonNode = document.createElement("li");
+				buttonNode.className = "wmd-spacer";
+
+				buttonRow.appendChild(buttonNode);
+				
+			} else if (buttonObj = WMD._buttons[buttonName]) {
+				//button name exists, add button to button bar
+				buttonNode = document.createElement("li");
+				buttonNode.className = "wmd-button "+buttonObj.className;
+				if (buttonObj.title) buttonNode.setAttribute('title', buttonObj.title);
+				buttonNode.setAttribute('data-button-name', buttonName);
+				
+				buttonRow.appendChild(buttonNode);
+			}
+		
+		}
+	}
 
 
 
@@ -18,8 +48,24 @@ var WMD = function (options) {
 
 };
 
-window.WMDEditor = WMDEditor;
+window.WMDEditor = WMD;
 
+WMD._buttons = {};
+WMD._shortcutKeys = {};
+
+
+WMD.registerButton = function (name, options) {
+	if (WMD._buttons[name]) throw "WMDEditor: A button named "+name+" is already defined.";
+	
+	var btn = util.extend({
+				className:'wmd-button-'+name,
+				titleText:'',
+				shortcut:''
+			}, options);
+	
+	WMD._buttons[name] = btn;
+	if (btn.shortcut) WMD._shortcutKeys[btn.shortcut] = name;
+}
 
 /*
 
@@ -460,4 +506,5 @@ var wmdBase = function (wmd, wmd_options) {
 	
 };
 
-/*
+*/
+
