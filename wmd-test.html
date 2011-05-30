@@ -4,9 +4,9 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>WMD Example</title>
 
-		<link rel="stylesheet" type="text/css" href="wmd.css"/>
-		<script src="wmd.js"></script>
-		<script src="showdown.js"></script>
+		<link rel="stylesheet" type="text/css" href="build/wmd.css"/>
+		<script src="build/wmd.js"></script>
+		<script src="build/showdown.js"></script>
 		<style type="text/css" media="screen">
 			textarea {width:100%;margin:0;}
 			textarea, #notes-preview {border:1px solid gray;height:100px;}
@@ -30,7 +30,7 @@
 		<script type="text/javascript">
 			new WMDEditor({
 				input: "notes",
-				button_bar: "notes-button-bar",
+				toolbar: "notes-button-bar",
 				preview: "notes-preview",
 				output: "copy_html",
 				buttons: "bold italic link  ol ul  heading",
