@@ -20,27 +20,26 @@ var util = {
 
 	// Adds a listener callback to a DOM element which is fired on a specified
 	// event.
-	addEvent: function (elem, event, listener) {
-		
-		if (elem.attachEvent) {
-			// IE only.  The "on" is mandatory.
+	addEvent: function (elem, event, callback) {
+		var listener = function (event) {
+			event = event || window.event;
+			var target = event.target || event.srcElement; 
+			callback.apply(elem, [event, target]);
+		};
+		if (elem.attachEvent) { // IE only.  The "on" is mandatory.
 			elem.attachEvent("on" + event, listener);
-		}
-		else {
-			// Other browsers.
+		} else { // Other browsers.
 			elem.addEventListener(event, listener, false);
 		}
+		return listener;
 	},
 
 	// Removes a listener callback from a DOM element which is fired on a specified
 	// event.
 	removeEvent: function (elem, event, listener) {
-		if (elem.detachEvent) {
-			// IE only.  The "on" is mandatory.
+		if (elem.detachEvent) {	// IE only.  The "on" is mandatory.
 			elem.detachEvent("on" + event, listener);
-		}
-		else {
-			// Other browsers.
+		} else { // Other browsers.
 			elem.removeEventListener(event, listener, false);
 		}
 	},
