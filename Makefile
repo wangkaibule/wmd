@@ -1,14 +1,14 @@
 
-WMD=src/header.js src/wmd.core.js src/wmd.defaults.js src/wmd.util.js src/wmd.PreviewManager.js src/wmd.InputPoller.js src/wmd.Commands.js src/footer.js
-JSFILES=wmd.js showdown.js
+WMD=src/header.js src/wmd.core.js src/wmd.defaults.js src/wmd.util.js src/wmd.pubsub.js src/wmd.plugin.bold.js src/footer.js
+JSFILES=build/wmd.js build/showdown.js
 
-all: wmd.js wmd.combined.js wmd.combined.min.js
+all: build/wmd.js build/wmd.combined.js build/wmd.combined.min.js
 
-wmd.js: $(WMD)
+build/wmd.js: $(WMD)
 	cat $(WMD) > $@
 
-wmd.combined.js: $(JSFILES)
+build/wmd.combined.js: $(JSFILES)
 	cat $(JSFILES) > $@
 
-wmd.combined.min.js: $(JSFILES)
+build/wmd.combined.min.js: $(JSFILES)
 	cat $(JSFILES) | python jsmin.py > $@
