@@ -6,6 +6,11 @@ WMD.defaults = {
 	preview: "wmd-preview",
 	output: "wmd-output",
 	input: "wmd-input",
+	
+	markdown: {
+		markright: true,
+		specialChars: true
+	},
 
 	// Some intervals in ms.  These can be adjusted to reduce the control's load.
 	previewPollInterval: 500,

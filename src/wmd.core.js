@@ -8,7 +8,9 @@ var WMD = function (options) {
 		output: util.$(opts.output),
 		input: util.$(opts.input)
 	};
-		
+	
+	if (!this.panels.input) throw "WMDEditor: You must define an input textarea for WMD to work on.";
+
 
 	//IF TOOLBAR EXISTS, POPULATE IT
 	if (this.panels.toolbar) {
@@ -55,7 +57,32 @@ var WMD = function (options) {
 		}
 	}
 
+	//IF AN OUTPUT SOURCE IS DEFINED, SETUP THE SHOWDOWN CONVERTER
+	if (this.panels.output || this.panels.preview) {
+		var converter = new Showdown.converter(opts.markdown);
+		var updateOutput = function buildHTMLFromMarkdown() {
+			var html = converter.makeHtml(self.panels.input.value);
+			
+			//write to output field
+			if (self.panels.output) {
+				// The value property is only defined if the output is a textarea/input.
+				// If value is not defined, then we're treating output as a DOMElement
+				if (self.panels.output.value !== undefined) {
+					self.panels.output.value = html;
+				} else {
+					self.panels.output.innerHTML = html;
+				}
+			}
 
+			//write to preview container
+			if (self.panels.preview) {
+				self.panels.preview.innerHTML = html;
+			}
+		}
+		
+		new InputPoller(self.panels.input, updateOutput, opts.previewPollInterval);
+	}
+		
 
 	// var previewMgr = new PreviewManager(this);
 	// var edit = new this.editor(this.previewMgr.refresh);
