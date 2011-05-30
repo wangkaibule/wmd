@@ -13,3 +13,5 @@ WMD.registerButton('quote', {titleText:'Blockquote <blockquote> Ctrl+Q', shortcu
 
 WMD.registerButton('heading', {titleText:'Heading <h1>/<h2> Ctrl+H', shortcut:'h'});
 WMD.registerButton('hr', {titleText:'Horizontal Rule <hr> Ctrl+R', shortcut:'r'});
+
+WMD.registerButton('help', {titleText:'Markdown Quickhelp'});
