@@ -37,6 +37,24 @@ var util = {
 		}
 	},
 
+	getTop: function (elem, isInner) {
+		var result = elem.offsetTop;
+		if (!isInner) {
+			while ((elem = elem.offsetParent)) {
+				result += elem.offsetTop;
+			}
+		}
+		return result;
+	},
+
+	getHeight: function (elem) {
+		return elem.offsetHeight || elem.scrollHeight;
+	},
+
+	getWidth: function (elem) {
+		return elem.offsetWidth || elem.scrollWidth;
+	},
+	
 	// Converts \r\n and \r to \n.
 	fixLineEndings: function (text) {
 		text = text.replace(/\r\n/g, "\n");
@@ -365,27 +383,6 @@ var util = {
 			_update(d, arguments[i]);
 		}
 		return d;
-	},
-
-	// UNFINISHED
-	// The assignment in the while loop makes jslint cranky.
-	// I'll change it to a better loop later.
-	getTop: function (elem, isInner) {
-		var result = elem.offsetTop;
-		if (!isInner) {
-			while ((elem = elem.offsetParent)) {
-				result += elem.offsetTop;
-			}
-		}
-		return result;
-	},
-
-	getHeight: function (elem) {
-		return elem.offsetHeight || elem.scrollHeight;
-	},
-
-	getWidth: function (elem) {
-		return elem.offsetWidth || elem.scrollWidth;
 	},
 
 	getPageSize: function () {
