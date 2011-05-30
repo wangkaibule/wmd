@@ -1,6 +1,5 @@
-WMDEditor.defaults = {
-	version: 2.1,
-	output_format: "markdown",
+WMD.defaults = {
+	version: 3.0,
 	lineLength: 40,
 
 	button_bar: "wmd-button-bar",

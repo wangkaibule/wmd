@@ -1,4 +1,4 @@
-WMDEditor = function (options) {
+var WMD = function (options) {
 	this.options = util.extend(true, WMDEditor.defaults, options || {});
 	
 	this.panels = {
