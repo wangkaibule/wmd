@@ -8,21 +8,20 @@ WMDEditor = function (options) {
 		input: util.$(this.options.input)
 	};
 		
-	wmdBase(this, this.options);
 
-	var previewMgr = new PreviewManager(this);
-	var edit = new this.editor(this.previewMgr.refresh);
-		previewMgr.refresh(true);
+
+
+
+	// var previewMgr = new PreviewManager(this);
+	// var edit = new this.editor(this.previewMgr.refresh);
+	// previewMgr.refresh(true);
 
 };
-
-WMDEditor.Commands = {}
-
 
 window.WMDEditor = WMDEditor;
 
 
-
+/*
 
 
 // A few handy aliases for readability.
@@ -30,11 +29,10 @@ var doc = window.document;
 var re = window.RegExp;
 var nav = window.navigator;
 
-var wmdBase = function (wmd, wmd_options) { // {{{
+var wmdBase = function (wmd, wmd_options) {
 	// Some namespaces.
 	//wmd.Util = {};
 	//wmd.Position = {};
-	wmd.Command = {};
 	wmd.buttons = {};
 
 	wmd.showdown = window.Showdown;
@@ -460,3 +458,6 @@ var wmdBase = function (wmd, wmd_options) { // {{{
 		init();
 	}; // }}}
 	
+};
+
+/*
