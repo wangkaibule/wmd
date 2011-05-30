@@ -2,10 +2,10 @@ WMDEditor = function (options) {
 	this.options = util.extend({}, WMDEditor.defaults, options || {});
 	
 	this.panels = {
-		toolbar: (typeof this.options.toolbar == 'string') ? document.getElementById(this.options.toolbar) : this.options.toolbar,
-		preview: (typeof this.options.preview == 'string') ? document.getElementById(this.options.preview) : this.options.preview,
-		output: (typeof this.options.output == 'string') ? document.getElementById(this.options.output) : this.options.output,
-		input: (typeof this.options.input == 'string') ? document.getElementById(this.options.input) : this.options.input
+		toolbar: util.$(this.options.toolbar),
+		preview: util.$(this.options.preview),
+		output: util.$(this.options.output),
+		input: util.$(this.options.input)
 	};
 		
 	wmdBase(this, this.options);
