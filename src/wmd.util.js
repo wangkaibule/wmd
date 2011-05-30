@@ -2,7 +2,14 @@ var util = {
 	isIE : /msie/.test(nav.userAgent.toLowerCase()),
 	isIE_5or6 : /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase()),
 	isOpera : /opera/.test(nav.userAgent.toLowerCase()),
-	isKonqueror : /konqueror/.test(nav.userAgent.toLowerCase())
+	isKonqueror : /konqueror/.test(nav.userAgent.toLowerCase()),
+
+
+// ELEMENT FUNCTIONS
+
+	$: function (elem) {
+		return (typeof elem == 'string') ? document.getElementById(elem) : elem;
+	},
 
 	// Returns true if the DOM element is visible, false if it's hidden.
 	// Checks if display is anything other than none.
@@ -14,6 +21,7 @@ var util = {
 	// Adds a listener callback to a DOM element which is fired on a specified
 	// event.
 	addEvent: function (elem, event, listener) {
+		
 		if (elem.attachEvent) {
 			// IE only.  The "on" is mandatory.
 			elem.attachEvent("on" + event, listener);
@@ -36,6 +44,22 @@ var util = {
 			elem.removeEventListener(event, listener, false);
 		}
 	},
+	
+	hasClassName: function(elem, className) { //copied and modified from Prototype.js
+		if (!(elem = util.$(elem))) return;
+		var eClassName = elem.className;
+		return (eClassName.length > 0 && (eClassName == className || new RegExp("(^|\\s)" + className + "(\\s|$)").test(eClassName)));
+	},
+
+	addClassName: function(elem, className) { //copied and modified from Prototype.js
+		if (!(elem = util.$(elem))) return;
+		if (!util.hasClassName(elem, className)) elem.className += (elem.className ? ' ' : '') + className;
+	},
+
+	removeClassName: function(eleme, className) { //copied and modified from Prototype.js
+		if (!(elem = util.$(elem))) return;
+		elem.className = util.trimString(elem.className.replace(new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
+	},
 
 	getTop: function (elem, isInner) {
 		var result = elem.offsetTop;
@@ -53,6 +77,13 @@ var util = {
 
 	getWidth: function (elem) {
 		return elem.offsetWidth || elem.scrollWidth;
+	},
+	
+	
+// TEXT FUNCTIONS	
+	
+	trimString: function (input) {
+		return input.replace(/^\s+/, '').replace(/\s+$/, '');
 	},
 	
 	// Converts \r\n and \r to \n.
