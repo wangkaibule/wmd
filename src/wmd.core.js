@@ -88,14 +88,25 @@ var WMD = function (options) {
 		}
 		
 		var ip = new InputPoller(self.panels.input, updateOutput, opts.previewPollInterval);
+		WMD.subscribe('content-changed', function (event, chunk) {
+			if (this == self) updateOutput();
+		});
 	}
 
 };
 
 window.WMDEditor = WMD;
 
+WMD.prototype = {
+	pushUpdate : function (chunk) {
+		this.panels.input.value = [chunk.before,chunk.content,chunk.after].join('');
+		this.selection.set(chunk);
+		WMD.publish('content-changed', this, [event, chunk]); //dispatch a content change event containing the new chunk
+	}
+}
+
 WMD.Version = 3.0;
-WMD.pluginDebug = true;
+WMD.pluginDebug = false;
 
 WMD._buttons = {};
 WMD._shortcutKeys = {};
