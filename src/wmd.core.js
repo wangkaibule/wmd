@@ -62,7 +62,7 @@ var WMD = function (options) {
 
 	//IF AN OUTPUT SOURCE IS DEFINED, SETUP THE SHOWDOWN CONVERTER
 	if (this.panels.output || this.panels.preview) {
-		var converter = new Showdown.converter(opts.markdown);
+		var converter = new Showdown(opts.markdown);
 		var updateOutput = function buildHTMLFromMarkdown() {
 			var html = converter.makeHtml(self.panels.input.value);
 			
