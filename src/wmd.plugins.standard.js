@@ -20,8 +20,11 @@ WMD.registerButton('help', {titleText:'Markdown Quickhelp'});
 		sel.content = sel.content.replace(/^(\s*)/, "");
 		if (!remove) sel.before += RegExp.$1;
 
-		this.content = sel.content.replace(/(\s*)$/, "");
-		if (!remove) sel.after = RegExp.$1 + sel.after;
+		sel.content = sel.content.replace(/(\s*)$/, "");
+		if (!remove) {
+			sel.after = RegExp.$1 + sel.after;
+			sel.end -= (RegExp.$1).length;
+		}
 	};
 	
 	// chunk: The selected region that will be enclosed with */**
