@@ -15,20 +15,9 @@ var InputPoller = function (textarea, callback, interval) {
 	
 	this.hasChanged = function () {
 		// Update the selection start and end, text.
-		if (textarea.selectionStart || textarea.selectionStart === 0) {
-			//first we test the text selection, since this is faster than a string comparison and it's unlikely the contents changed if the selection hasn't
-			var start = textarea.selectionStart;
-			var end = textarea.selectionEnd;
-			if (start != lastStart || end != lastEnd) {				
-				lastStart = start;
-				lastEnd = end;
-				
-				//selection has changed, now verify the contents changed
-				if (lastContents != textarea.value) {
-					lastContents = textarea.value;
-					return true;
-				}
-			}
+		if (lastContents != textarea.value) {
+			lastContents = textarea.value;
+			return true;
 		}
 		return false;
 	};
@@ -53,5 +42,6 @@ var InputPoller = function (textarea, callback, interval) {
 	util.addEvent(textarea, "keyup",  this.checkForUpdate);
 	util.addEvent(textarea, "change", this.checkForUpdate);
 	
-	self.checkForUpdate();
+	this.checkForUpdate();
+
 };
