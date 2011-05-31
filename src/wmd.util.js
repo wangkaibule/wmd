@@ -1,8 +1,6 @@
 
 var util = {
 	isIE : /msie/.test(navigator.userAgent.toLowerCase()),
-	isOpera : /opera/.test(navigator.userAgent.toLowerCase()),
-
 
 // ELEMENT FUNCTIONS
 

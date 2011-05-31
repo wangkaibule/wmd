@@ -1,5 +1,5 @@
 var WMD = function (options) {
-	var opts = this.options = util.extend(true, WMDEditor.defaults, options || {});
+	var opts = this.options = util.extend(true, WMD.defaults, options || {});
 	var self = this;
 	
 	this.panels = {

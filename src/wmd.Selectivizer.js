@@ -1,27 +1,3 @@
-
-(function (context) {
-
-	// Adds a listener callback to a DOM element which is fired on a specified event.
-	var addEvent = function (elem, event, callback) {
-		var listener = function (event) {
-			event = event || window.event;
-			var target = event.target || event.srcElement; 
-			callback.apply(elem, [event, target]);
-		};
-		if (elem.attachEvent) { // IE only.  The "on" is mandatory.
-			elem.attachEvent("on" + event, listener);
-		} else { // Other browsers.
-			elem.addEventListener(event, listener, false);
-		}
-		return listener;
-	};
-
-	var fixLineEndings = function (text) {
-		text = text.replace(/\r\n/g, "\n");
-		text = text.replace(/\r/g, "\n");
-		return text;
-	};
-
 	var Selectivizer = function (element) {
 		this.element = element;
 	
@@ -31,7 +7,7 @@
 		var isIESelection = (typeof element.selectionStart === 'undefined' && !!document.selection);
 		if (isIESelection) {
 			self.IECachedSelection = null;
-			addEvent(document, 'mousedown', function (event, element) {
+			util.addEvent(document, 'mousedown', function (event, element) {
 				if (document.activeElement === self.element && element != self.element) {
 					//the user clicked outside of this textarea while this textarea was active.
 					//save the current selection for when focus returns
@@ -44,12 +20,12 @@
 			};
 		
 			//focus has returned to the element, so we can use it's own selection.
-			addEvent(element, 'focus',    clearCached);
+			util.addEvent(element, 'focus',    clearCached);
 
 			//even if we are focused, we sometimes set this value on gets to save processing time
 			//a click or key press is a guarenteed selection change
-			addEvent(element, 'click',    clearCached);
-			addEvent(element, 'keypress', clearCached);
+			util.addEvent(element, 'click',    clearCached);
+			util.addEvent(element, 'keypress', clearCached);
 		}
 	
 	
@@ -88,11 +64,11 @@
 				var range = this.IECachedSelection || document.selection.createRange();
 			
 				//wrap the current selection in our marker.
-				var rangeText = fixLineEndings(range.text);
+				var rangeText = util.fixLineEndings(range.text);
 				range.text = marker + rangeText + marker;
 			
 				//get the full text, containing our marker
-				var markedText = fixLineEndings(this.element.value);
+				var markedText = util.fixLineEndings(this.element.value);
 			
 				//reset the selection back to what it was.
 				range.moveStart("character", -(rangeText.length+2));
@@ -153,14 +129,3 @@
 		}
 	
 	};
-	
-	var oldSelectivizer = context.Selectivizer;
-	Selectivizer.noConflict = function () {
-		var self = Selectivizer;
-		context.Selectivizer = oldSelectivizer;
-		return self;
-	};
-	context.Selectivizer = Selectivizer;
-	
-	
-})(this);
