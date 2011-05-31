@@ -59,13 +59,18 @@
 
 	Selectivizer.prototype = {
 		get : function () {
+			var start, end;
 			if (typeof this.element.selectionStart != 'undefined') {
 				//W3C Method.  Firefox, Safari, Chrome, IE8+
+				start = this.element.selectionStart;
+				end = this.element.selectionEnd;
 				return {
-					start   : this.element.selectionStart, 
-					end     : this.element.selectionEnd,
-					length  : this.element.selectionEnd - this.element.selectionStart,
-					content : this.element.value.substring(this.element.selectionStart,this.element.selectionEnd)
+					start   : start, 
+					end     : end,
+					length  : end - start,
+					content : this.element.value.substring(start,end),
+					before  : this.element.value.substring(0, start),
+					after	: this.element.value.substring(end)
 				};
 			
 			} else if (!!document.selection) {
@@ -95,12 +100,16 @@
 			
 				//return the selection location by searching our marked text for the markers
 				// yes, we seriously have to do it this way, I wish I was joking.
+				start = markedText.indexOf(marker);
+				end = markedText.lastIndexOf(marker) - 1;
 				var ret = {
-					start   : markedText.indexOf(marker),
-					end     : markedText.lastIndexOf(marker) - 1,
-					length  : markedText.length - 2,
-					content : rangeText
-				};
+						start   : start,
+						end     : end,
+						length  : start - end,
+						content : rangeText,
+						before  : this.element.value.substring(0, start),
+						after	: this.element.value.substring(end)
+					};
 				
 				range.SECache = ret;
 				this.IECachedSelection = range;
