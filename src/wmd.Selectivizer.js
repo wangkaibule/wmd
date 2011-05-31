@@ -32,7 +32,7 @@
 		if (isIESelection) {
 			self.IECachedSelection = null;
 			addEvent(document, 'mousedown', function (event, element) {
-				if (document.activeElement === element && element != document.activeElement) {
+				if (document.activeElement === self.element && element != self.element) {
 					//the user clicked outside of this textarea while this textarea was active.
 					//save the current selection for when focus returns
 					self.IECachedSelection = document.selection.createRange();
