@@ -84,7 +84,7 @@ var WMD = function (options) {
 		}
 		
 		var ip = new InputPoller(self.panels.input, updateOutput, opts.previewPollInterval);
-		WMD.subscribe('content-changed', function (event, chunk) {
+		WMD.subscribe('content-changed', function (chunk) {
 			if (this == self) updateOutput();
 		});
 	}
@@ -97,7 +97,7 @@ WMD.prototype = {
 	pushUpdate : function (chunk) {
 		this.panels.input.value = [chunk.before,chunk.content,chunk.after].join('');
 		this.selection.set(chunk);
-		WMD.publish('content-changed', this, [event, chunk]); //dispatch a content change event containing the new chunk
+		WMD.publish('content-changed', this, [chunk]); //dispatch a content change event containing the new chunk
 	}
 }
 
