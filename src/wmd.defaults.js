@@ -21,7 +21,7 @@ WMD.defaults = {
 	autoFormatting: {
 		list: true,
 		quote: true,
-		code: true,
+		code: true
 	}
 
 };
