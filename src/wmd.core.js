@@ -11,6 +11,8 @@ var WMD = function (options) {
 	
 	if (!this.panels.input) throw "WMDEditor: You must define an input textarea for WMD to work on.";
 
+	this.selection = new SelectionEngine(this.panels.input);
+	
 
 	//IF TOOLBAR EXISTS, POPULATE IT
 	if (this.panels.toolbar) {
@@ -21,13 +23,18 @@ var WMD = function (options) {
 			util.addEvent(buttonRow, 'click', function toolbarClickHandler(event, target) {
 				var buttonName;
 				if (target.tagName === 'LI') {
-					var buttonName = target.getAttribute('data-button-name');
+					buttonName = target.getAttribute('data-button-name');
 					if (buttonName) {
 						//is a button item and has a defined button name
 						WMD.publish('toolbar-button', self, [event, target]); //dispatch a click event for that button
 						WMD.publish('toolbar-button:'+buttonName, self, [event, target]);
 					}
 				}
+				
+				
+				//because of microsoft's fucked up text selection scheme pre-IE8, 
+				//we have to cache the text selection for the input element any time we click the toolbar
+				if (WMD.isIESelection) self.IECachedSelection = document.selection.createRange();
 			});
 
 		this.panels.toolbar.appendChild(buttonRow);
@@ -44,7 +51,7 @@ var WMD = function (options) {
 
 				buttonRow.appendChild(buttonNode);
 				
-			} else if (buttonObj = WMD._buttons[buttonName]) {
+			} else if ((buttonObj = WMD._buttons[buttonName])) {
 				//button name exists, add button to button bar
 				buttonNode = document.createElement("li");
 				buttonNode.className = "wmd-button "+buttonObj.className;
@@ -80,13 +87,8 @@ var WMD = function (options) {
 			}
 		}
 		
-		new InputPoller(self.panels.input, updateOutput, opts.previewPollInterval);
+		var ip = new InputPoller(self.panels.input, updateOutput, opts.previewPollInterval);
 	}
-		
-
-	// var previewMgr = new PreviewManager(this);
-	// var edit = new this.editor(this.previewMgr.refresh);
-	// previewMgr.refresh(true);
 
 };
 
