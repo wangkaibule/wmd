@@ -3,5 +3,3 @@
  * Copyright (c) 2011 Jarvis Badgley < chipersoft at gmail >
  */
 
-(function () {
-	
