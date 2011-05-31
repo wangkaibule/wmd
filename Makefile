@@ -1,16 +1,16 @@
 
-WMD=src/closure.open.js \
-	src/wmd.core.js \
-	src/wmd.defaults.js \
-	src/wmd.util.js \
-	src/wmd.pubsub.js \
-	src/wmd.InputPoller.js \
-	src/wmd.Selectivizer.js \
-	src/wmd.plugins.standard.js \
-	src/wmd.plugins.markright.js \
-	src/closure.close.js
+WMD=src/01_closure.open.js \
+	src/05_core.js \
+	src/10_util.js \
+	src/20_MinPubSub.js \
+	src/21_InputPoller.js \
+	src/22_Selectivizer.js \
+	src/50_plugins.standard.js \
+	src/51_plugins.markright.js \
+	src/55_plugins.undo.js \
+	src/99_closure.close.js
 
-JSFILES=src/header.js build/wmd.js build/showdown.js
+JSFILES=src/00_header.js build/wmd.js build/showdown.js
 
 all: build/wmd.js build/wmd.combined.js build/wmd.combined.min.js
 
