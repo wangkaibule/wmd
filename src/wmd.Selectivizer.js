@@ -1,7 +1,28 @@
 
 (function (context) {
 
-	var SelectionEngine = function (element) {
+	// Adds a listener callback to a DOM element which is fired on a specified event.
+	var addEvent = function (elem, event, callback) {
+		var listener = function (event) {
+			event = event || window.event;
+			var target = event.target || event.srcElement; 
+			callback.apply(elem, [event, target]);
+		};
+		if (elem.attachEvent) { // IE only.  The "on" is mandatory.
+			elem.attachEvent("on" + event, listener);
+		} else { // Other browsers.
+			elem.addEventListener(event, listener, false);
+		}
+		return listener;
+	};
+
+	var fixLineEndings = function (text) {
+		text = text.replace(/\r\n/g, "\n");
+		text = text.replace(/\r/g, "\n");
+		return text;
+	};
+
+	var Selectivizer = function (element) {
 		this.element = element;
 	
 		var self = this;
@@ -10,7 +31,7 @@
 		var isIESelection = (typeof element.selectionStart === 'undefined' && !!document.selection);
 		if (isIESelection) {
 			self.IECachedSelection = null;
-			util.addEvent(document, 'mousedown', function (event, element) {
+			addEvent(document, 'mousedown', function (event, element) {
 				if (document.activeElement === element && element != document.activeElement) {
 					//the user clicked outside of this textarea while this textarea was active.
 					//save the current selection for when focus returns
@@ -18,24 +39,25 @@
 				}
 			});
 		
-			util.addEvent(element, 'focus', function (event, element) {
-				//focus has returned to the element, so we can use it's own selection.
+			var clearCached = function (event, element) {
 				self.IECachedSelection = null;
-			});
+			};
+		
+			//focus has returned to the element, so we can use it's own selection.
+			addEvent(element, 'focus',    clearCached);
+
+			//even if we are focused, we sometimes set this value on gets to save processing time
+			//a click or key press is a guarenteed selection change
+			addEvent(element, 'click',    clearCached);
+			addEvent(element, 'keypress', clearCached);
 		}
 	
 	
 	
 	};
 
-	SelectionEngine.fixLineEndings = function (text) {
-		text = text.replace(/\r\n/g, "\n");
-		text = text.replace(/\r/g, "\n");
-		return text;
-	};
 
-
-	SelectionEngine.prototype = {
+	Selectivizer.prototype = {
 		get : function () {
 			if (typeof this.element.selectionStart != 'undefined') {
 				//W3C Method.  Firefox, Safari, Chrome, IE8+
@@ -49,6 +71,11 @@
 			} else if (!!document.selection) {
 				//Microsoft Method. IE7 and below
 
+				//Because this process is so intensive, we save the results with the cached selection
+				//If the results are still there, return them instead of running the computation again
+				if (!!this.IECachedSelection && !!this.IECachedSelection.SECache) return this.IECachedSelection.SECache;
+				
+
 				//Invisible character used to locate selection position
 				var marker = "\x07";
 			
@@ -56,11 +83,11 @@
 				var range = this.IECachedSelection || document.selection.createRange();
 			
 				//wrap the current selection in our marker.
-				var rangeText = SelectionEngine.fixLineEndings(range.text);
+				var rangeText = fixLineEndings(range.text);
 				range.text = marker + rangeText + marker;
 			
 				//get the full text, containing our marker
-				var markedText = SelectionEngine.fixLineEndings(this.element.value);
+				var markedText = fixLineEndings(this.element.value);
 			
 				//reset the selection back to what it was.
 				range.moveStart("character", -(rangeText.length+2));
@@ -68,13 +95,17 @@
 			
 				//return the selection location by searching our marked text for the markers
 				// yes, we seriously have to do it this way, I wish I was joking.
-				return {
+				var ret = {
 					start   : markedText.indexOf(marker),
 					end     : markedText.lastIndexOf(marker) - 1,
 					length  : markedText.length - 2,
 					content : rangeText
 				};
+				
+				range.SECache = ret;
+				this.IECachedSelection = range;
 
+				return ret;
 			}
 		},
 	
@@ -97,19 +128,30 @@
 				range.moveEnd("character",   sel.end);
 				range.moveStart("character", sel.start);
 				range.select();
+				
+				this.IECachedSelection = range;
 
 			}		
+		},
+		
+		textReplace : function (newText) {
+			var sel = this.get();
+			this.element.value = this.element.value.substring(0,sel.start) + newText + this.element.value.substring(sel.end);
+			sel.end = sel.start + newText.length;
+			sel.content = newText;
+			this.set(sel);
+			return sel;
 		}
 	
 	};
 	
-	var oldSelectionEngine = context.SelectionEngine;
-	SelectionEngine.noConflict = function () {
-		var self = SelectionEngine;
-		context.SelectionEngine = oldSelectionEngine;
+	var oldSelectivizer = context.Selectivizer;
+	Selectivizer.noConflict = function () {
+		var self = Selectivizer;
+		context.Selectivizer = oldSelectivizer;
 		return self;
 	};
-	context.SelectionEngine = SelectionEngine;
+	context.Selectivizer = Selectivizer;
 	
 	
 })(this);

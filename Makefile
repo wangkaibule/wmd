@@ -5,7 +5,7 @@ WMD=src/header.js \
 	src/wmd.util.js \
 	src/wmd.pubsub.js \
 	src/wmd.InputPoller.js \
-	src/wmd.SelectionEngine.js \
+	src/wmd.Selectivizer.js \
 	src/wmd.plugins.standard.js \
 	src/wmd.plugins.markright.js \
 	src/footer.js

@@ -11,7 +11,7 @@ var WMD = function (options) {
 	
 	if (!this.panels.input) throw "WMDEditor: You must define an input textarea for WMD to work on.";
 
-	this.selection = new SelectionEngine(this.panels.input);
+	this.selection = new Selectivizer(this.panels.input);
 	
 
 	//IF TOOLBAR EXISTS, POPULATE IT
