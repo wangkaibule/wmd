@@ -10,17 +10,13 @@ WMD is a JavaScript based code editor for the [Markdown](http://daringfireball.n
 
 Coming soon. See wmd-test.html
 
-###Building WMDEditor From Source
-
-From the terminal, CD to the root project directory and run the `make` command.  This performs the following actions:
-
-1. Collates all source files into a single closure wrapped file: `build/wmd.js`
-2. Combines wmd.js with showdown.js into `build/wmd.combined.js`
-3. Runs the combined file through Google Closure Compile to produce the minified `build/wmd.combined.min.js`
-
 ###Plugin Authoring
 
-Plugins may register their own toolbar buttons by calling `WMD.registerButton(name, options)`.  Name must be a unique string for the button containing only alpha numeric characters.  The following options are allowed:
+Plugins may register their own toolbar buttons by calling:
+
+     WMD.registerButton(name, options)
+
+Name must be a unique string for the button containing only alpha numeric characters.  The following options are allowed:
 
 - **className**: The css class that will be added to your button's LI element.  Use this to apply your button styling.  Defaults to `wmd-button-BUTTON_NAME`
 - **titleText**: The hover tooltip text for your button. Default to an empty string
@@ -52,6 +48,90 @@ All plugin creation code should be performed at load time, before the DOMReadySt
 
 Authors may submit plugins for inclusion in the default WMDEditor project via a GitHub pull request, but the decision for inclusion is entirely at the active project manager's whim.  All submitted plugins *MUST* be wrapped in a closure function.
 
+###WMDEditor.util
+
+The `util` object contains a collection of useful functions for interacting with the DOM which we encourage plugin authors to use rather than implement their own solutions.
+
+- `util.$(elementID)`
+  Shortcut for document.getElementById().
+
+- `util.addEvent(element, eventName, callback)`
+
+  This is a cross-browser method of attaching DOM event listeners.  **This differs from WMD.subscribe which listens for WMD internal events.**  `element` is the DOMElement to bind the listener to, `eventName` is the event to listen for.  The passed callback receives the element it was bound to as the `this` context. The following arguments are passed to the callback:
+
+  - `event` - The DOMEvent
+  - `target` - The element that triggered the event (used for event delegation)
+
+  addEvent returns the event listener that wraps your callback.
+
+- `util.removeEvent(eventName, listener)`
+
+  Detaches a bound event listener from a DOM element.  `listener` must be the function returned by `addEvent`.
+
+- `util.hasClassName(element, className)`
+
+  Tests for the presence of a CSS class on a DOMElement. Returns a boolean.
+
+- `util.addClassName(element, className)`
+
+  Adds a CSS class to a DOMElement.
+
+- `util.removeClassName(element, className)`
+
+  Removes a CSS class from a DOMElement if it is present.
+
+- `util.isVisible(element)`
+
+  Returns a boolean true or false depending on if the passed element is visible.
+
+- `util.getTop(element)`
+
+  `util.getWidth(element)`
+
+  `util.getHeight(element)`
+
+  Functions for getting the positioning and dimensions of DOMElements.
+
+- `util.trimString(inputString)`
+
+  Returns the inputString with any whitespace removed from the beginning and end.
+
+- `util.fixLineEndings(inputString)`
+
+  Standardizes line endings within inputString as \n
+
+- `util.extend([true], object1, object2, ... objectN)`
+
+  Returns a new object containing the merged contents of all objects passed.  If the first argument is `true`, objects will be merged recursively.
+
+###Building WMDEditor From Source
+
+From the terminal, CD to the root project directory and run the `make` command.  This performs the following actions:
+
+1. Collates all source files into a single closure wrapped file: `build/wmd.js`
+2. Combines wmd.js with showdown.js into `build/wmd.combined.js`
+3. Runs the combined file through Google Closure Compile to produce the minified `build/wmd.combined.min.js`
+
+
+###Source Code Instructions
+
+The `src` directory contains all the contents of the WMD editor library itself (showdown is one file and lives in the `build` directory), broken down into functional modules.  Each file-module is numbered according to the order of which they are all concatenated together during the build process.
+
+Number Range | Title | Description
+:----:|:------------|:--------------------------
+`00`|Header Comment|Contains library description, url, and copyright information.
+`01`|Closure Opening|The entire WMD library is wrapped in a closure. This protects against global scope pollution and allows us to use Google Closure Compiler to minify the source.
+`05`|WMD Core|This contains the WMDEditor constructor, default settings, and main operational code.
+`10`-`19`|Utility functions|The majority of utility functions should go on the `util` object (`WMDEditor.util` from outside the closure).  These include functions for DOM handling, string manipulation, etc.
+`20`-`29`|Internal|Classes & Libraries used in the operation of WMDEditor
+`50`-`59`|Built-In Plugins|These are the toolbar items and textarea behavior code.  See below.
+`50`|Markdown 1.0|All plugins defined at the 50 level relate to default Markdown 1.0 syntax.
+`55`|Markright|All plugins defined at the 55 level relate to the Markright syntax extensions present in Showdown.js
+`59`|WMDEditor Actions|All plugins defined at the 59 level control the behavior of WMDEditor itself.
+`99`|Closure Ending|
+
+Any files contained in the `src/` directory that are not numbered are old code still present for development reference, and are not included in the build process.
+
 ###History
 
 1. The original WMDEditor was written by John Fraser of [AttackLabs](http://www.attacklabs.com/), who handed over control of the project to StackOverflow.
@@ -70,12 +150,13 @@ Authors may submit plugins for inclusion in the default WMDEditor project via a 
 	* Removed top level frame pollution, forcing WMD to run only in its own document.
 	* Removed the automatic conversion from Markdown to HTML when the form is submitted.
 	* Removed the automatic addition of http:// to image urls, preventing the entry of relative addresses.
+	* Added dynamic toolbar layouts
 	* Numerous bug fixes.
 6. On May 29th, 2011, ChiperSoft began a total rewrite of the WMD editor for version 3.0.  The vast majority of the old code was replaced, and the editor architecture was redesigned around a plugin based editor platform.
 
 ###License
 
-WMDEditor 3 is Copyright (c) 2011, Jarvis Badgley and is licensed under an [MIT License](http://github.com/chipersoft/wmd/raw/master/LICENSE).
+WMDEditor 3 is Copyright (c) 2011, Jarvis Badgley and is licensed under an [MIT License](http://github.com/chipersoft/wmd/raw/master/LICENSE).
 
 
 
