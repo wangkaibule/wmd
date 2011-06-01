@@ -145,45 +145,6 @@
 
 
 
-
-// Moves the cursor to the next line and continues lists, quotes and code.
-WMDEditor.Commands.doAutoindent = function (chunk, postProcessing, useDefaultText) {
-	if (!wmd.options.autoFormatting) return;
-
-	if (wmd.options.autoFormatting.list) chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
-	if (wmd.options.autoFormatting.quote) chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
-	if (wmd.options.autoFormatting.code) chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
-
-	useDefaultText = false;
-
-	if (/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(chunk.before)) {
-		if (WMDEditor.Commands.doList && wmd.options.autoFormatting.list) {
-			WMDEditor.Commands.doList(chunk, postProcessing, false, true);
-		}
-	}
-	if (/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)) {
-		if (WMDEditor.Commands.doList && wmd.options.autoFormatting.list) {
-			WMDEditor.Commands.doList(chunk, postProcessing, true, true);
-		}
-	}
-	if (/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)) {
-		if (WMDEditor.Commands.doBlockquote && wmd.options.autoFormatting.quote) {
-			WMDEditor.Commands.doBlockquote(chunk, postProcessing, useDefaultText);
-		}
-	}
-	if (/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)) {
-		if (WMDEditor.Commands.doCode && wmd.options.autoFormatting.code) {
-			WMDEditor.Commands.doCode(chunk, postProcessing, useDefaultText);
-		}
-	}
-};
-
-
-
-
-
-
-
 WMDEditor.Commands['blockquote'] = {
 	buttonClass : 'wmd-quote-button',
 	buttonTitle : 'Blockquote <blockquote> Ctrl+Q',
