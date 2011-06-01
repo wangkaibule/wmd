@@ -117,6 +117,8 @@ var WMD = function (options) {
 		});
 	}
 
+
+	WMD.publish('editor-created', self);
 };
 
 window.WMDEditor = WMD;
