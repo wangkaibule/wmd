@@ -13,6 +13,34 @@ var WMD = function (options) {
 
 	this.selection = new Selectivizer(this.panels.input);
 	
+	
+	util.addEvent(this.panels.input, 'keydown', function (event) {
+		// Check to see if we have a button key and, if so execute the callback.
+		if (!self.options.disableKeyShortcuts && event.ctrlKey) {
+
+			var keyCode = event.charCode || event.keyCode,
+				keyCodeStr = String.fromCharCode(keyCode).toLowerCase(),
+				buttonName;
+			
+			if ((buttonName = WMD._shortcutKeys[keyCodeStr])) {
+				WMD.publish('toolbar-shortcut', self, [event, keyCodeStr]); //dispatch a click event for that button
+				WMD.publish('toolbar-button:'+buttonName, self, [event, 'shortcut']);
+				if (!!event.preventDefault) event.preventDefault();
+				if (typeof event.returnValue !== 'undefined') event.returnValue = false;
+			}
+						
+		}
+	});
+
+
+	// Disable ESC clearing the input textarea on IE
+	if (util.isIE) {
+		util.addEvent(this.panels.input, "keydown", function (key) {
+			var code = key.keyCode;
+			if (code === 27) return false; //ESC Key
+		});
+	}
+		
 
 	//IF TOOLBAR EXISTS, POPULATE IT
 	if (this.panels.toolbar) {
@@ -111,6 +139,7 @@ WMD.defaults = {
 	pastePollInterval: 100,
 
 	buttons: "bold italic  link blockquote code image  ol ul heading hr  undo redo help",
+	disableKeyShortcuts: false,
 	
 	autoFormatting: {
 		list: true,
