@@ -23,7 +23,7 @@ var WMD = function (options) {
 				buttonName;
 			
 			if ((buttonName = WMD._shortcutKeys[keyCodeStr])) {
-				WMD.publish('toolbar-shortcut', self, [event, keyCodeStr]); //dispatch a click event for that button
+				WMD.publish('toolbar-button-shortcut', self, [event, keyCodeStr]); //dispatch a click event for that button
 				WMD.publish('toolbar-button:'+buttonName, self, [event, 'shortcut']);
 				if (!!event.preventDefault) event.preventDefault();
 				if (typeof event.returnValue !== 'undefined') event.returnValue = false;
@@ -54,7 +54,7 @@ var WMD = function (options) {
 					buttonName = target.getAttribute('data-button-name');
 					if (buttonName) {
 						//is a button item and has a defined button name
-						WMD.publish('toolbar-button', self, [event, target]); //dispatch a click event for that button
+						WMD.publish('toolbar-button-clicked', self, [event, target]); //dispatch a click event for that button
 						WMD.publish('toolbar-button:'+buttonName, self, [event, target]);
 					}
 				}				
@@ -75,7 +75,7 @@ var WMD = function (options) {
 
 				buttonRow.appendChild(buttonNode);
 				
-			} else if ((buttonObj = WMD._buttons[buttonName])) {
+			} else if ((buttonObj = WMD._buttons[buttonName]) && !!buttonObj.className) {
 				//button name exists, add button to button bar
 				buttonNode = document.createElement("li");
 				buttonNode.className = "wmd-button "+buttonObj.className;
@@ -119,6 +119,7 @@ var WMD = function (options) {
 
 
 	WMD.publish('editor-created', self);
+	WMD.publish('editor-ready', self);
 };
 
 window.WMDEditor = WMD;
@@ -173,10 +174,10 @@ WMD.registerButton = function (name, options) {
 				className:'wmd-button-'+name,
 				titleText:'',
 				shortcut:''
-			}, options);
+			}, options || {});
 	
 	WMD._buttons[name] = btn;
-	if (btn.shortcut) WMD._shortcutKeys[btn.shortcut] = name;
+	if (btn.shortcut && !WMD._shortcutKeys[btn.shortcut]) WMD._shortcutKeys[btn.shortcut] = name;
 }
 
 /*
