@@ -21,7 +21,7 @@ var util = {
 		var listener = function (event) {
 			event = event || window.event;
 			var target = event.target || event.srcElement; 
-			callback.apply(elem, [event, target]);
+			return callback.apply(elem, [event, target]);
 		};
 		if (elem.attachEvent) { // IE only.  The "on" is mandatory.
 			elem.attachEvent("on" + event, listener);
