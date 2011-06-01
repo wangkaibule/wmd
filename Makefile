@@ -12,9 +12,9 @@ WMD=src/01_closure.open.js \
 	src/50_plugins.image.js \
 	src/50_plugins.heading.js \
 	src/50_plugins.hr.js \
-	src/55_plugins.help.js \
-	src/55_plugins.undo.js \
-	src/60_plugins.markright.js \
+	src/55_plugins.markright.js \
+	src/59_plugins.help.js \
+	src/59_plugins.undo.js \
 	src/99_closure.close.js
 
 JSFILES=src/00_header.js build/wmd.js build/showdown.js
