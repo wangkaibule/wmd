@@ -1,3 +1,4 @@
+
 	var Selectivizer = function (element) {
 		this.element = element;
 	
@@ -40,21 +41,21 @@
 				//W3C Method.  Firefox, Safari, Chrome, IE8+
 				start = this.element.selectionStart;
 				end = this.element.selectionEnd;
-				return {
+				return new Selectivizer.Selection({
 					start   : start, 
 					end     : end,
 					length  : end - start,
 					content : this.element.value.substring(start,end),
 					before  : this.element.value.substring(0, start),
 					after	: this.element.value.substring(end)
-				};
+				});
 			
 			} else if (!!document.selection) {
 				//Microsoft Method. IE7 and below
 
 				//Because this process is so intensive, we save the results with the cached selection
 				//If the results are still there, return them instead of running the computation again
-				if (!!this.IECachedSelection && !!this.IECachedSelection.SECache) return this.IECachedSelection.SECache;
+				if (!!this.IECachedSelection && !!this.IECachedSelection.SECache) return new Selectivizer.Selection(this.IECachedSelection.SECache);
 				
 
 				//Invisible character used to locate selection position
@@ -90,7 +91,7 @@
 				range.SECache = ret;
 				this.IECachedSelection = range;
 
-				return ret;
+				return new Selectivizer.Selection(ret);
 			}
 		},
 	
@@ -129,3 +130,25 @@
 		}
 	
 	};
+	
+	
+	Selectivizer.Selection = function (sel) {
+		if (!!sel) { //we're cloning from another selection
+			this.start   = sel.start;
+			this.end     = sel.end;
+			this.length  = sel.length;
+			this.content = sel.content;
+			this.before  = sel.before;
+			this.after	 = sel.after;
+		} else {
+			this.start   = 0;
+			this.end     = 0;
+			this.length  = 0;
+			this.content = '';
+			this.before  = '';
+			this.after	 = '';
+		}
+	};
+	
+	
+	
