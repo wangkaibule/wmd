@@ -87,9 +87,6 @@ The `util` object contains a collection of useful functions for interacting with
 - `util.fixLineEndings(inputString)`  
    Standardizes line endings within inputString as \n
 
-- `util.extend([true], object1, object2, ... objectN)`  
-   Returns a new object containing the merged contents of all objects passed.  If the first argument is `true`, objects will be merged recursively.
-
 ###Building WMDEditor From Source
 
 From the terminal, CD to the root project directory and run the `make` command.  This performs the following actions:
