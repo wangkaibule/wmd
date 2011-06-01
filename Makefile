@@ -5,9 +5,16 @@ WMD=src/01_closure.open.js \
 	src/20_MinPubSub.js \
 	src/21_InputPoller.js \
 	src/22_Selectivizer.js \
-	src/50_plugins.standard.js \
-	src/60_plugins.markright.js \
+	src/50_plugins.bold_italic.js \
+	src/50_plugins.code_quote.js \
+	src/50_plugins.lists.js \
+	src/50_plugins.link.js \
+	src/50_plugins.image.js \
+	src/50_plugins.heading.js \
+	src/50_plugins.hr.js \
+	src/55_plugins.help.js \
 	src/55_plugins.undo.js \
+	src/60_plugins.markright.js \
 	src/99_closure.close.js
 
 JSFILES=src/00_header.js build/wmd.js build/showdown.js
@@ -15,9 +22,11 @@ JSFILES=src/00_header.js build/wmd.js build/showdown.js
 all: build/wmd.js build/wmd.combined.js build/wmd.combined.min.js
 
 build/wmd.js: $(WMD)
+	rm -f $@
 	cat $(WMD) > $@
 
 build/wmd.combined.js: $(JSFILES)
+	rm -f $@
 	cat $(JSFILES) > $@
 
 build/wmd.combined.min.js: build/wmd.combined.js
