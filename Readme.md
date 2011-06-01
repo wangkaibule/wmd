@@ -52,57 +52,45 @@ Authors may submit plugins for inclusion in the default WMDEditor project via a 
 
 The `util` object contains a collection of useful functions for interacting with the DOM which we encourage plugin authors to use rather than implement their own solutions.
 
-- `util.$(elementID)`
+- `util.$(elementID)`  
   Shortcut for document.getElementById().
 
-- `util.addEvent(element, eventName, callback)`
+- `util.addEvent(element, eventName, callback)`  
+   This is a cross-browser method of attaching DOM event listeners.  **This differs from WMD.subscribe which listens for WMD internal events.**  `element` is the DOMElement to bind the listener to, `eventName` is the event to listen for.  The passed callback receives the element it was bound to as the `this` context. The following arguments are passed to the callback:
 
-  This is a cross-browser method of attaching DOM event listeners.  **This differs from WMD.subscribe which listens for WMD internal events.**  `element` is the DOMElement to bind the listener to, `eventName` is the event to listen for.  The passed callback receives the element it was bound to as the `this` context. The following arguments are passed to the callback:
+   - `event` - The DOMEvent
+   - `target` - The element that triggered the event (used for event delegation)
 
-  - `event` - The DOMEvent
-  - `target` - The element that triggered the event (used for event delegation)
+   addEvent returns the event listener that wraps your callback.
 
-  addEvent returns the event listener that wraps your callback.
+- `util.removeEvent(eventName, listener)`  
+   Detaches a bound event listener from a DOM element.  `listener` must be the function returned by `addEvent`.
 
-- `util.removeEvent(eventName, listener)`
+- `util.hasClassName(element, className)`  
+   Tests for the presence of a CSS class on a DOMElement. Returns a boolean.
 
-  Detaches a bound event listener from a DOM element.  `listener` must be the function returned by `addEvent`.
+- `util.addClassName(element, className)`  
+   Adds a CSS class to a DOMElement.
 
-- `util.hasClassName(element, className)`
+- `util.removeClassName(element, className)`  
+   Removes a CSS class from a DOMElement if it is present.
 
-  Tests for the presence of a CSS class on a DOMElement. Returns a boolean.
+- `util.isVisible(element)`  
+   Returns a boolean true or false depending on if the passed element is visible.
 
-- `util.addClassName(element, className)`
+- `util.getTop(element)`  
+  `util.getWidth(element)`  
+  `util.getHeight(element)`  
+   Functions for getting the positioning and dimensions of DOMElements.
 
-  Adds a CSS class to a DOMElement.
+- `util.trimString(inputString)`  
+   Returns the inputString with any whitespace removed from the beginning and end.
 
-- `util.removeClassName(element, className)`
+- `util.fixLineEndings(inputString)`  
+   Standardizes line endings within inputString as \n
 
-  Removes a CSS class from a DOMElement if it is present.
-
-- `util.isVisible(element)`
-
-  Returns a boolean true or false depending on if the passed element is visible.
-
-- `util.getTop(element)`
-
-  `util.getWidth(element)`
-
-  `util.getHeight(element)`
-
-  Functions for getting the positioning and dimensions of DOMElements.
-
-- `util.trimString(inputString)`
-
-  Returns the inputString with any whitespace removed from the beginning and end.
-
-- `util.fixLineEndings(inputString)`
-
-  Standardizes line endings within inputString as \n
-
-- `util.extend([true], object1, object2, ... objectN)`
-
-  Returns a new object containing the merged contents of all objects passed.  If the first argument is `true`, objects will be merged recursively.
+- `util.extend([true], object1, object2, ... objectN)`  
+   Returns a new object containing the merged contents of all objects passed.  If the first argument is `true`, objects will be merged recursively.
 
 ###Building WMDEditor From Source
 
