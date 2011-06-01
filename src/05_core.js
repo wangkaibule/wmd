@@ -79,7 +79,7 @@ var WMD = function (options) {
 				//button name exists, add button to button bar
 				buttonNode = document.createElement("li");
 				buttonNode.className = "wmd-button "+buttonObj.className;
-				if (buttonObj.title) buttonNode.setAttribute('title', buttonObj.title);
+				if (buttonObj.titleText) buttonNode.setAttribute('title', buttonObj.titleText);
 				buttonNode.setAttribute('data-button-name', buttonName);
 				
 				buttonRow.appendChild(buttonNode);
