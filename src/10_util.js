@@ -42,7 +42,7 @@ var util = {
 	},
 	
 	hasClassName: function(elem, className) { //copied and modified from Prototype.js
-		if (!(elem = util.$(elem))) return;
+		if (!(elem = util.$(elem))) return false;
 		var eClassName = elem.className;
 		return (eClassName.length > 0 && (eClassName == className || new RegExp("(^|\\s)" + className + "(\\s|$)").test(eClassName)));
 	},
@@ -52,7 +52,7 @@ var util = {
 		if (!util.hasClassName(elem, className)) elem.className += (elem.className ? ' ' : '') + className;
 	},
 
-	removeClassName: function(eleme, className) { //copied and modified from Prototype.js
+	removeClassName: function(elem, className) { //copied and modified from Prototype.js
 		if (!(elem = util.$(elem))) return;
 		elem.className = util.trimString(elem.className.replace(new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' '));
 	},
@@ -137,7 +137,7 @@ var util = {
 			i = deep?1:0;
 
 		function _update(a, b) {
-			for (var k in b) if (b.hasOwnProperty(k)){
+			for (var k in b) if (b.hasOwnProperty(k)) {
 				//if property is an object or array, merge the contents instead of overwriting, if extend() was called as such
 				if (deep && typeof a[k] === 'object' && typeof b[k] === 'object') _update(a[k], b[k]);
 				else a[k] = b[k];
