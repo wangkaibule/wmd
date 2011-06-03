@@ -14,10 +14,10 @@
 		
 		// Auto-continue lists, code blocks and block quotes when
 		// the enter key is pressed.
-		if (!!that.options.autoFormatting) util.addEvent(that.panels.input, "keyup", function (key) {
+		if (!!that.options.autoFormatting) util.addEvent(that.panels.input, "keyup", function (event, target) {
 			
-			if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
-				var keyCode = key.charCode || key.keyCode;
+			if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
+				var keyCode = event.charCode || event.keyCode;
 				// Key code 13 is Enter
 				if (keyCode === 13) {// ENTER KEY
 
