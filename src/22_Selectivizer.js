@@ -36,26 +36,29 @@
 
 	Selectivizer.prototype = {
 		get : function () {
-			var start, end;
+			var start, end, ret;
 			if (typeof this.element.selectionStart != 'undefined') {
 				//W3C Method.  Firefox, Safari, Chrome, IE8+
 				start = this.element.selectionStart;
 				end = this.element.selectionEnd;
-				return new Selectivizer.Selection({
-					start   : start, 
-					end     : end,
-					length  : end - start,
-					content : this.element.value.substring(start,end),
-					before  : this.element.value.substring(0, start),
-					after	: this.element.value.substring(end)
+				ret = new Selectivizer.Selection({
+					start       : start, 
+					end         : end,
+					content     : this.element.value
 				});
+				ret.reset();
+				return ret;
 			
 			} else if (!!document.selection) {
 				//Microsoft Method. IE7 and below
 
 				//Because this process is so intensive, we save the results with the cached selection
 				//If the results are still there, return them instead of running the computation again
-				if (!!this.IECachedSelection && !!this.IECachedSelection.SECache) return new Selectivizer.Selection(this.IECachedSelection.SECache);
+				if (!!this.IECachedSelection && !!this.IECachedSelection.SECache) {
+					ret = new Selectivizer.Selection(this.IECachedSelection.SECache);
+					ret.reset();
+					return ret;
+				}
 				
 
 				//Invisible character used to locate selection position
@@ -79,19 +82,18 @@
 				// yes, we seriously have to do it this way, I wish I was joking.
 				start = markedText.indexOf(marker);
 				end = markedText.lastIndexOf(marker) - 1;
-				var ret = {
-						start   : start,
-						end     : end,
-						length  : start - end,
-						content : rangeText,
-						before  : this.element.value.substring(0, start),
-						after	: this.element.value.substring(end)
-					};
+				ret = {
+					content  : util.fixLineEndings(this.element.value),
+					start    : start,
+					end      : end
+				};
 				
 				range.SECache = ret;
 				this.IECachedSelection = range;
-
-				return new Selectivizer.Selection(ret);
+				
+				ret = new Selectivizer.Selection(ret);
+				ret.reset();
+				return ret;
 			}
 		},
 	
@@ -134,21 +136,78 @@
 	
 	Selectivizer.Selection = function (sel) {
 		if (!!sel) { //we're cloning from another selection
-			this.start   = sel.start;
-			this.end     = sel.end;
-			this.length  = sel.length;
-			this.content = sel.content;
-			this.before  = sel.before;
-			this.after	 = sel.after;
+			this.start    = sel.start;
+			this.end      = sel.end;
+			this.length   = sel.length;
+			this.selected = sel.selected;
+			this.content  = sel.content;
+			this.before   = sel.before;
+			this.after	  = sel.after;
 		} else {
-			this.start   = 0;
-			this.end     = 0;
-			this.length  = 0;
-			this.content = '';
-			this.before  = '';
-			this.after	 = '';
+			this.start    = 0;
+			this.end      = 0;
+			this.length   = 0;
+			this.selected = '';
+			this.content  = '';
+			this.before   = '';
+			this.after	  = '';
 		}
 	};
 	
+	Selectivizer.Selection.prototype = {
+		prefixes : "(?:\\s{4,}|\\s*>|\\s*-\\s+|\\s*\\d+\\.|=|\\+|-|_|\\*|#|\\s*\\[[^\n]]+\\]:)",
+		tabSize : '    ',
+		
+		trimWhitespace : function (remove) {
+			this.selected = this.selected.replace(/^(\s*)/, "");
+			if (!remove) this.before += RegExp.$1;
+
+			this.selected = this.selected.replace(/(\s*)$/, "");
+			if (!remove) this.after = RegExp.$1 + this.after;
+
+			this.recount();
+			
+			return this;
+		},
+		
+		
+		reset : function () {
+			var start = this.start,
+				end = this.end;
+				
+			this.length   = end - start;
+			this.selected = this.content.substring(start,end);
+			this.before   = this.content.substring(0, start);
+			this.after    = this.content.substring(end);
+			
+			return this;
+		},
+		
+		recount : function () {
+			this.start = this.before.length;
+			this.end = this.start + this.selected.length;
+			
+			return this;		
+		},
+		
+		refill : function () {
+			this.content = [this.before,this.selected,this.after].join('');
+			
+			return this;
+		},
+		
+		expandToWholeLine : function (nondestructive) {
+			var that = nondestructive?this:new Selectivizer.Selection(this), 
+				newStart = that.before.lastIndexOf('\n'),
+				newEnd = that.after.indexOf('\n');
+			
+			that.start = (~newStart) ? newStart : 0;
+			that.end = (~newEnd)?that.end + newEnd:that.all.length;
+			that.reset();
+			return that;
+		}
+
+	};
+		
 	
 	
