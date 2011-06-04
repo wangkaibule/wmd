@@ -9,13 +9,19 @@
 		// Get rid of whitespace and fixup newlines.
 		chunk.trimWhitespace();
 		chunk.selected = chunk.selected.replace(/\n{2,}/g, "\n");
+		chunk.refill();
+
+		if (!chunk.selected) {
+			chunk.expandTo('word');
+			chunk.reset();
+		}
 
 		// Look for stars before and after.  Is the chunk already marked up?
 		var starsBefore = chunk.before.match(/(\**$)/)[1];
 		var starsAfter = chunk.after.match(/(^\**)/)[1];
 
 		var prevStars = Math.min(starsBefore.length, starsAfter.length);
-
+		
 		// Remove stars if we have to since the button acts as a toggle.
 		if ((prevStars >= nStars) && (prevStars != 2 || nStars != 1)) {
 			chunk.before = chunk.before.replace(RegExp("[*]{" + nStars + "}$", ""), "");
@@ -31,7 +37,7 @@
 		else {
 			// In most cases, if you don't have any selected text and click the button
 			// you'll get a selected, marked up region with the default text inserted.
-			if (!chunk.selected && !starsAfter) chunk.selected = insertText;
+			if (!chunk.length && !starsAfter) chunk.selected = insertText;
 
 			// Add the true markup.
 			var markup = nStars <= 1 ? "*" : "**"; // shouldn't the test be = ?
