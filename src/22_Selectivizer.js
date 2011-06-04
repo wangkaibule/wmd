@@ -163,9 +163,11 @@
 		
 		
 		reset : function () {
+			if (this.end < this.start) this.end = this.start();
+			
 			var start = this.start,
 				end = this.end;
-				
+			
 			this.length   = end - start;
 			this.selected = this.content.substring(start,end);
 			this.before   = this.content.substring(0, start);
@@ -177,6 +179,7 @@
 		recount : function () {
 			this.start = this.before.length;
 			this.end = this.start + this.selected.length;
+			this.length = this.end - this.start;
 			
 			return this;		
 		},
@@ -188,7 +191,7 @@
 		},
 		
 		expandTo : function (size, nondestructive) {
-			var that = nondestructive?this:new Selectivizer.Selection(this), 
+			var that = nondestructive?new Selectivizer.Selection(this):this, 
 				newStart = 0,
 				newEnd = that.after.length;
 				
