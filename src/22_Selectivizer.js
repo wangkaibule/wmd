@@ -200,5 +200,133 @@
 
 	};
 		
-	
+/*
+		addBlankLines : function (nLinesBefore, nLinesAfter, findExtraNewlines) {
+
+			if (nLinesBefore === undefined) {
+				nLinesBefore = 1;
+			}
+
+			if (nLinesAfter === undefined) {
+				nLinesAfter = 1;
+			}
+
+			nLinesBefore++;
+			nLinesAfter++;
+
+			var regexText;
+			var replacementText;
+
+		    // New bug discovered in Chrome, which appears to be related to use of RegExp.$1
+		    // Hack it to hold the match results. Sucks because we're double matching...
+			var match = /(^\n*)/.exec(this.selected);
+
+			this.selected = this.selected.replace(/(^\n*)/, "");
+			this.startTag = this.startTag + (match ? match[1] : "");
+			match = /(\n*$)/.exec(this.selected);
+			this.selected = this.selected.replace(/(\n*$)/, "");
+			this.endTag = this.endTag + (match ? match[1] : "");
+			match = /(^\n*)/.exec(this.startTag);
+			this.startTag = this.startTag.replace(/(^\n*)/, "");
+			this.before = this.before + (match ? match[1] : "");
+			match = /(\n*$)/.exec(this.endTag);
+			this.endTag = this.endTag.replace(/(\n*$)/, "");
+			this.after = this.after + (match ? match[1] : "");
+
+			if (this.before) {
+
+				regexText = replacementText = "";
+
+				while (nLinesBefore--) {
+					regexText += "\\n?";
+					replacementText += "\n";
+				}
+
+				if (findExtraNewlines) {
+					regexText = "\\n*";
+				}
+				this.before = this.before.replace(new RegExp(regexText + "$", ""), replacementText);
+			}
+
+			if (this.after) {
+
+				regexText = replacementText = "";
+
+				while (nLinesAfter--) {
+					regexText += "\\n?";
+					replacementText += "\n";
+				}
+				if (findExtraNewlines) {
+					regexText = "\\n*";
+				}
+
+				this.after = this.after.replace(new RegExp(regexText, ""), replacementText);
+			}
+		},
+		
+		wrap : function (len) {
+			this.unwrap();
+			var regex = new re("(.{1," + len + "})( +|$\\n?)", "gm");
+			var prefixes = this.prefixes;
+
+			this.selected = this.selected.replace(regex, function (line, marked) {
+				if (new re("^" + prefixes, "").test(line)) {
+					return line;
+				}
+				return marked + "\n";
+			});
+
+			this.selected = this.selected.replace(/\s+$/, "");
+		},
+
+		unwrap : function () {
+			var prefixes = this.prefixes;
+			var txt = new re("([^\\n])\\n(?!(\\n|" + prefixes + "))", "g");
+			this.selected = this.selected.replace(txt, "$1 $2");
+		},
+		
+		// startRegex: a regular expression to find the start tag
+		// endRegex: a regular expresssion to find the end tag
+		findTags : function (startRegex, endRegex) {
+
+			var chunkObj = this;
+			var regex;
+
+			if (startRegex) {
+
+				regex = util.extendRegExp(startRegex, "", "$");
+
+				this.before = this.before.replace(regex, function (match) {
+					chunkObj.startTag = chunkObj.startTag + match;
+					return "";
+				});
+
+				regex = util.extendRegExp(startRegex, "^", "");
+
+				this.selected = this.selected.replace(regex, function (match) {
+					chunkObj.startTag = chunkObj.startTag + match;
+					return "";
+				});
+			}
+
+			if (endRegex) {
+
+				regex = util.extendRegExp(endRegex, "", "$");
+
+				this.selected = this.selected.replace(regex, function (match) {
+					chunkObj.endTag = match + chunkObj.endTag;
+					return "";
+				});
+
+				regex = util.extendRegExp(endRegex, "^", "");
+
+				this.after = this.after.replace(regex, function (match) {
+					chunkObj.endTag = match + chunkObj.endTag;
+					return "";
+				});
+			}
+		}
+		
+		
+*/	
 	
