@@ -120,15 +120,6 @@
 				this.IECachedSelection = range;
 
 			}		
-		},
-		
-		textReplace : function (newText) {
-			var sel = this.get();
-			this.element.value = this.element.value.substring(0,sel.start) + newText + this.element.value.substring(sel.end);
-			sel.end = sel.start + newText.length;
-			sel.content = newText;
-			this.set(sel);
-			return sel;
 		}
 	
 	};
