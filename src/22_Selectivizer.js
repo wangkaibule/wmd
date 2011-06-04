@@ -187,13 +187,23 @@
 			return this;
 		},
 		
-		expandToWholeLine : function (nondestructive) {
+		expandTo : function (size, nondestructive) {
 			var that = nondestructive?this:new Selectivizer.Selection(this), 
-				newStart = that.before.lastIndexOf('\n'),
-				newEnd = that.after.indexOf('\n');
+				newStart = 0,
+				newEnd = that.after.length;
+				
+			switch (size) {
+			case 'word':
+				newStart = that.before.lastIndexOf(' ');
+				newEnd = that.after.indexOf(' ');
+			case 'line':
+				newStart = Math.max(newStart, that.before.lastIndexOf('\n'));
+				newEnd = Math.min(newEnd, that.after.indexOf('\n'));
+				break;
+			}
 			
-			that.start = (~newStart) ? newStart : 0;
-			that.end = (~newEnd)?that.end + newEnd:that.all.length;
+			that.start = (~newStart) ? newStart+1 : 0;
+			that.end = (~newEnd)?that.end + newEnd:that.content.length;
 			that.reset();
 			return that;
 		}
