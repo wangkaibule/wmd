@@ -1,16 +1,5 @@
 
 (function () {
-
-	var trimSelectionWhitespace = function (sel, remove) {
-		sel.content = sel.content.replace(/^(\s*)/, "");
-		if (!remove) sel.before += RegExp.$1;
-
-		sel.content = sel.content.replace(/(\s*)$/, "");
-		if (!remove) {
-			sel.after = RegExp.$1 + sel.after;
-			sel.end -= (RegExp.$1).length;
-		}
-	};
 	
 	// chunk: The selected region that will be enclosed with */**
 	// nStars: 1 for italics, 2 for bold
@@ -18,8 +7,8 @@
 	var doBoldOrItalic = function (chunk, nStars, insertText) {
 
 		// Get rid of whitespace and fixup newlines.
-		trimSelectionWhitespace(chunk);
-		chunk.content = chunk.content.replace(/\n{2,}/g, "\n");
+		chunk.trimWhitespace();
+		chunk.selected = chunk.selected.replace(/\n{2,}/g, "\n");
 
 		// Look for stars before and after.  Is the chunk already marked up?
 		var starsBefore = chunk.before.match(/(\**$)/)[1];
@@ -32,34 +21,24 @@
 			chunk.before = chunk.before.replace(RegExp("[*]{" + nStars + "}$", ""), "");
 			chunk.after = chunk.after.replace(RegExp("^[*]{" + nStars + "}", ""), "");
 
-			chunk.start = chunk.before.length;
-			chunk.end = chunk.start + chunk.length;
-
 		}
-		else if (!chunk.content && starsAfter) {
+		else if (!chunk.selected && starsAfter) {
 			// It's not really clear why this code is necessary.  It just moves
 			// some arbitrary stuff around.
 			chunk.before = chunk.before.replace(/(\s?)$/, "");
-			var whitespace = RegExp.$1;
-			chunk.before = chunk.before + starsAfter + whitespace;
-			chunk.start += (starsAfter + whitespace).length;
-			chunk.end += (starsAfter + whitespace).length;
+			chunk.before = chunk.before + starsAfter + RegExp.$1;
 		}
 		else {
-
 			// In most cases, if you don't have any selected text and click the button
 			// you'll get a selected, marked up region with the default text inserted.
-			if (!chunk.content && !starsAfter) chunk.content = insertText;
+			if (!chunk.selected && !starsAfter) chunk.selected = insertText;
 
 			// Add the true markup.
 			var markup = nStars <= 1 ? "*" : "**"; // shouldn't the test be = ?
 			chunk.before = chunk.before + markup;
-			chunk.start += markup.length;
-			
 			chunk.after = markup + chunk.after;
-			chunk.end += markup.length;
 		}
-
+		chunk.recount().refill();
 	};
 
 
