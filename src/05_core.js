@@ -154,7 +154,7 @@ WMD.defaults = {
 
 WMD.prototype = {
 	pushUpdate : function (chunk) {
-		this.panels.input.value = [chunk.before,chunk.content,chunk.after].join('');
+		this.panels.input.value = chunk.content;
 		this.selection.set(chunk);
 		WMD.publish('content-changed', this, [chunk]); //dispatch a content change event containing the new chunk
 	}
