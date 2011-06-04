@@ -16,37 +16,24 @@
 		// the enter key is pressed.
 		if (!!that.options.autoFormatting) util.addEvent(that.panels.input, "keyup", function (event, target) {
 			
-			if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
-				var keyCode = event.charCode || event.keyCode;
-				// Key code 13 is Enter
-				if (keyCode === 13) {// ENTER KEY
+			if (!event.shiftKey && !event.ctrlKey && !event.metaKey && (event.charCode || event.keyCode) === 13) {
 
-					var chunk = this.selection.get();
-					if (that.options.autoFormatting.list) chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+\-]|\d+[.])[ \t]*\n$/, "\n\n");
-					if (that.options.autoFormatting.quote) chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
-					if (that.options.autoFormatting.code) chunk.before = chunk.before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+				var chunk = this.selection.get();
 
-					if (that.options.autoFormatting.list) {
-						if (/(\n|^)[ ]{0,3}([*+\-])[ \t]+.*\n$/.test(chunk.before)) {
-							WMD.publish('toolbar-button:ul', self, [event, 'autoformatting']);
-						}
-						if (/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)) {
-							WMD.publish('toolbar-button:ol', self, [event, 'autoformatting']);
-						}
+				if (that.options.autoFormatting.list) {
+					chunk.before = chunk.before.replace(/(\n|^)[ ]{0,3}([*+\-]|\d+[.])[ \t]*\n$/, "\n\n"); //appears to empty the previous line if no body?
+					
+					//both of the below regexps need to be updated for nested uls
+					
+					if (/(\n|^)[ ]{0,3}([*+\-])[ \t]+.*\n$/.test(chunk.before)) {
+						//trigger a new ul line if the previous line contained a ul
+						WMD.publish('toolbar-button:ul', self, [event, 'autoformatting']);
 					}
-
-					if (that.options.autoFormatting.quote) {
-						if (/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(chunk.before)) {
-							WMD.publish('toolbar-button:quote', self, [event, 'autoformatting']);
-						}
+					
+					if (/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(chunk.before)) {
+						//trigger a new ol line if the previous line contain an ol
+						WMD.publish('toolbar-button:ol', self, [event, 'autoformatting']);
 					}
-
-					if (that.options.autoFormatting.code) {
-						if (/(\n|^)(\t|[ ]{4,}).*\n$/.test(chunk.before)) {
-							WMD.publish('toolbar-button:code', self, [event, 'autoformatting']);
-						}
-					}
-
 				}
 			}
 			
