@@ -19,7 +19,7 @@ WMD=src/01_closure.open.js \
 
 JSFILES=src/00_header.js build/wmd.js build/showdown.js
 
-all: build/wmd.js build/wmd.combined.js build/wmd.combined.min.js
+all: build/wmd.js build/wmd.combined.js 
 
 build/wmd.js: $(WMD)
 	rm -f $@
@@ -35,3 +35,5 @@ build/wmd.combined.min.js: build/wmd.combined.js
 	curl -s --data-urlencode 'js_code@build/wmd.combined.js' --data-urlencode 'output_format=text' \
 		--data-urlencode 'output_info=compiled_code' http://closure-compiler.appspot.com/compile \
 		>> $@
+
+minified: build/wmd.combined.min.js
