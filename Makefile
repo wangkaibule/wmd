@@ -5,6 +5,7 @@ WMD=src/01_closure.open.js \
 	src/20_MinPubSub.js \
 	src/21_InputPoller.js \
 	src/22_Selectivizer.js \
+	src/23_Dialog.js \
 	src/50_plugins.bold_italic.js \
 	src/50_plugins.code_quote.js \
 	src/50_plugins.lists.js \
