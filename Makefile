@@ -9,7 +9,6 @@ WMD=src/01_closure.open.js \
 	src/50_plugins.code_quote.js \
 	src/50_plugins.lists.js \
 	src/50_plugins.link.js \
-	src/50_plugins.image.js \
 	src/50_plugins.heading.js \
 	src/50_plugins.hr.js \
 	src/55_plugins.markright.js \
