@@ -12,30 +12,22 @@
 
 		var startTag = '', endTag = '';
 
-		chunk.before = chunk.before.replace(/!?\[$/, function (match) {
-			startTag = startTag + match;
+		chunk.before = chunk.before.replace(/!?\[([^\]]*)$/, function (match, extra) {
+			chunk.selected = extra + chunk.selected;
+			startTag = match.replace(extra,'');
 			return "";
 		});
 		
-		chunk.selected = chunk.selected.replace(/^!?\[/, function (match) {
-			startTag = startTag + match;
+		chunk.after = chunk.after.replace(/^([^\[]*)\][ ]?(?:\n[ ]*)?(\[.*?\])?/, function (match, extra) {
+			chunk.selected = chunk.selected + extra;
+			endTag = match.replace(extra,'');
 			return "";
 		});
-
-		chunk.selected = chunk.selected.replace(/\][ ]?(?:\n[ ]*)?(\[.*?\])?$/, function (match) {
-			endTag = match + endTag;
-			return "";
-		});
-
-		chunk.after = chunk.after.replace(/^\][ ]?(?:\n[ ]*)?(\[.*?\])?/, function (match) {
-			endTag = match + endTag;
-			return "";
-		});
+		
+		chunk.recount();
 		
 		if (endTag.length > 1) { //removing a link
 			resequenceLinks(chunk);
-			chunk.start--;
-			chunk.end--;
 			chunk.reset();
 			editor.pushUpdate(chunk);
 		} else {		
