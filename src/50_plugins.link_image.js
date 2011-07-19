@@ -109,7 +109,24 @@
 	};
 
 	var promptForLink = function (defaultLink, callback) {
-		callback("http://www.apple.com");
+		
+		var dialog = new Dialog({
+			title: 'Add Link',
+			content: '<p>Enter the website URL to be linked:</p><div class="wmd-prompt-input-wrapper"><b><input type="text" class="wmd-prompt-input" id="wmd-url-input"></b></div><label><input type="checkbox" id="wmd-url-openblank"> Open this link in a new window.',
+			focus: 'wmd-url-input',
+			buttons: {
+				'OK': function() {
+					var inputText = util.$('wmd-url-input').value;
+					var inputCheck = util.$('wmd-url-openblank').checked;
+					if (inputText.length > 0) {
+						callback((inputCheck?"!":'') + inputText);
+					}
+					this.close();
+				},
+				'Cancel': Dialog.prototype.close
+			}
+		});
+		
 	};
 
 })();
