@@ -189,7 +189,7 @@
 		// text: The html for the input box.
 		// defaultInputText: The default value that appears in the input box.
 		// makeLinkMarkdown: The function which is executed when the prompt is dismissed, either via OK or Cancel
-		prompt: function (text, defaultInputText, makeLinkMarkdown, promptType) {
+		prompt: function (text, defaultInputText, makeLinkMarkdown, promptType,fileInputAjax) {
 
 			// These variables need to be declared at this level since they are used
 			// in multiple functions.
@@ -198,6 +198,8 @@
 			var input; // The text box where you enter the hyperlink.
 			var titleInput; // The text box for the image's title text
 			var newWinCheckbox; //The checkbox to choose if a link should be opened in a new window.
+			var theForm; // The form element object
+			var promptLable; // The error prompt label element object
 			if (defaultInputText === undefined) {
 				defaultInputText = "";
 			}
@@ -215,23 +217,57 @@
 			// isCancel is true if we don't care about the input text.
 			// isCancel is false if we are going to keep the text.
 			var close = function (isCancel) {
-				util.removeEvent(document.body, "keydown", checkEscape);
 				var text = input.value+ (titleInput.value?' "'+titleInput.value+'"':'');
+				var clean = function(){
+					if (!!theForm && theForm.firstElementChild != null) {
+						util.removeEvent(document.body, "keydown", checkEscape);
+						dialog.parentNode.removeChild(dialog);
+						background.parentNode.removeChild(background);
+						makeLinkMarkdown(text);
+					}
+				}
 
 				if (isCancel) {
 					text = null;
+					clean();
 				}
-				else {
-					// Fixes common pasting errors.
-					text = text.replace('http://http://', 'http://');
-					text = text.replace('http://https://', 'https://');
-					text = text.replace('http://ftp://', 'ftp://');
-					if (promptType=='link' && newWinCheckbox.checked) text = '!'+text;
+  				else {
+					if (!!fileInputAjax) {
+						// TODO invoke the fileInputAjax to submit file ,then
+						// return the filename to text
+						// FIXME :text=fileInputAjax();
+						var callback = function(data) {
+							if (!data)
+								return;
+							if (typeof data == "string") {
+								text = data;
+								isSuccess = true;
+								clean();
+							} else {
+								isSuccess = false;
+								switch (data.error) {
+								case "wrongType":
+									text = "wrong filetype or file is over sized";
+									break;
+								default:
+									text = "unknown error";
+									break;
+								}
+								promptLable.appendChild(document .createTextNode(text));
+								promptLable.style.display = "block";
+							}
+						}
+						fileInputAjax(theForm, callback);
+					} else {
+						// Fixes common pasting errors.
+						text = text.replace('http://http://', 'http://');
+						text = text.replace('http://https://', 'https://');
+						text = text.replace('http://ftp://', 'ftp://');
+						if (promptType == 'link' && newWinCheckbox.checked)
+							text = '!' + text;
+						clean();
+					}
 				}
-
-				dialog.parentNode.removeChild(dialog);
-				background.parentNode.removeChild(background);
-				makeLinkMarkdown(text);
 				return false;
 			};
 
@@ -295,6 +331,7 @@
 
 				// The web form container for the text box and buttons.
 				var form = document.createElement("form");
+				theForm = form;
 				form.onsubmit = function () {
 					return close(false);
 				};
@@ -306,7 +343,6 @@
 				style.textAlign = "center";
 				style.position = "relative";
 				dialog.appendChild(form);
-				
 				var label = document.createElement("label");
 				style = label.style;
 				style.display = "block";
@@ -319,8 +355,15 @@
 
 					// The input text box
 					input = document.createElement("input");
-					input.type = "text";
+					var inputType;
+					if(!!fileInputAjax){
+						inputType = "file";
+						input.setAttribute("name", "file");
+					}else{
+						inputType = "text";
 					input.value = defaultInputText;
+					}
+					input.type = inputType;
 					style = input.style;
 					style.display = "block";
 					style.width = "100%";
@@ -362,6 +405,17 @@
 						label.appendChild(document.createTextNode(" Have this link open in a new window"));
 				}
 				
+				//error prompt for ajax file input
+				if(!!fileInputAjax){
+					label = document.createElement("label");
+					promptLable = label;
+					promptLable.appendChild(document.createTextNode("Here I go"));//FIXME: test operation, should be deleted when done
+					style = label.style;
+					style.display = "block";//none
+					style.textAlign = "center";
+					style.color = "red";
+					form.appendChild(label);
+				}
 				// The ok button
 				var okButton = document.createElement("input");
 				okButton.type = "button";
@@ -911,7 +965,7 @@
 			var prevTime = new Date().getTime();
 
 			if (!converter && wmd.showdown) {
-				converter = new wmd.showdown.converter();
+				converter = new wmd.showdown.Converter();
 			}
 
 			if (converter) {
@@ -1346,7 +1400,7 @@
 		wmd.Global = {};
 		wmd.buttons = {};
 
-		wmd.showdown = window.Showdown;
+		wmd.showdown = window.showdown;
 
 		var util = WMDEditor.util;
 		var position = WMDEditor.position;
@@ -1964,7 +2018,42 @@
 				};
 
 				if (isImage) {
-					util.prompt(wmd_options.imageDialogText, wmd_options.imageDefaultText, makeLinkMarkdown, 'Image');
+					if(!!wmd_options.isFileInput){
+						if(!!jQuery){
+							/***
+							 * callback(data)
+							 * return the request result information
+							 * */
+							var fileInputAjax = function(form, callback) {
+								form = new FormData(form);
+								var result;
+								
+								jQuery.ajax({
+									url : "upload",
+									method : "POST",
+									data : form,
+									contentType : false,
+									resultType : "text",
+									statusCode : {
+										400 : function() {
+											callback({ error : "wrongType" });
+										}
+									},
+									success : callback,
+									error : function() {
+										if (!result) {
+											callback({ error : "unknown" });
+										}
+									},
+									processData : false,
+								});
+								return result;
+							}
+							util.prompt(wmd_options.imageDialogText, wmd_options.imageDefaultText, makeLinkMarkdown, 'Image', fileInputAjax)
+						};
+					}else{
+						util.prompt(wmd_options.imageDialogText, wmd_options.imageDefaultText, makeLinkMarkdown, 'Image');
+					}
 				}
 				else {
 					util.prompt(wmd_options.linkDialogText, wmd_options.linkDefaultText, makeLinkMarkdown, 'Link');
